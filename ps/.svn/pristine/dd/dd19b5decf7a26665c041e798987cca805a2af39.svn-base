@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!-- 检查表 -->
+<mapper namespace="com.linkonworks.df.busi.dao.CheckDao">
+	<select id="getPageCheck" parameterType="page" resultType="check">
+		select 
+		to_char(tc.apply_date,'yyyy-MM-dd') "inspectDate",
+		tc.exam_sub_class "examItem",
+		tc.description "description"
+		from tb_check tc left join tb_check_items tci on tc.exam_no=tci.exam_no
+		where 1=1
+		and tc.result_status='确认报告'
+		<if test="params.patiSerial!=null and params.patiSerial!=''">
+			and tc.pati_serial=#{params.patiSerial}
+		 </if>
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and tc.inpati_number=#{params.inpatiNumber}
+		 </if>
+		<if test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+			and tc.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+	</select>
+</mapper>

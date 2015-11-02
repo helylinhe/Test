@@ -1,0 +1,289 @@
+$(function() {
+	
+	searchInfo();
+
+});
+
+
+
+function searchInfo(){
+	
+	$('#manager_list_tab').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		idField : 'flupGroupId',
+		rownumbers : true,
+		singleSelect : true,
+		title : '随访信息',
+		pagination : true,
+		pageSize : 10,
+		fitColumns : true,
+		pageList : [ 10, 20],
+        toolbar : [
+					{
+						text : '新增',
+						iconCls : 'icon-add',
+						handler : function() {
+						$("#add_preable_html").window("open");
+						}
+					},
+					'-',
+					{
+						text : '修改',
+						iconCls : 'icon-edit',
+						handler : function() {
+						var rows = $('#manager_list_tab').datagrid('getSelections');
+						if (rows == null || rows.length == 0) {
+							$.messager.alert('提示', '请选中需要修改的项!', 'info');
+							return false;	
+						}else{
+							$("#update_preable_html").window("open");
+							var rows = $("#manager_list_tab").datagrid("getSelections");
+							$("#updatemachine").val(rows[0].machine);
+							$("#updateipAddress").val(rows[0].ipAddress);
+							$("#updateport").val(rows[0].port);
+							if(rows[0].state==1){
+								$("#updatestate1").val(rows[0].state);
+								$("#updatestate1").eq(0).attr("checked",true); 
+							}else{
+								$("#updatestate2").val(rows[0].state);
+								$('#updatestate2').eq(0).attr("checked",true); 
+							}
+							$("#updateid").val(rows[0].id);
+							
+						}
+						}
+					},
+					'-',
+					{
+						text : '删除',
+						iconCls : 'icon-cut',
+						handler : function() {
+						var rows = $('#manager_list_tab').datagrid('getSelections');
+						if (rows == null || rows.length == 0) {
+							$.messager.alert('提示', '请选中需要删除的项!', 'info');
+							return false;
+						} else {
+							$.messager.confirm('提示', '您确定要进行删除操作吗?', function(r) {
+								if (r) {
+									deleteItem(rows[0].id);
+								}
+							});
+						  }
+						}
+					},'-',{
+						 text:'停用',
+						 iconCls:'icon-remove',
+						 handler : function() {
+								var rows = $('#manager_list_tab').datagrid('getSelections');
+								if (rows == null || rows.length == 0) {
+									$.messager.alert('提示', '请选中需要停用的项!', 'info');
+									return false;
+								} else {
+									$.messager.confirm('提示', '您确定要停用吗?', function(r) {
+										if (r) {
+											disable(rows[0].id);
+										}
+									});
+								  }
+								}
+					}
+					]
+        ,
+		columns : [ [ 
+             {
+            	 hidden:true,
+            	 field : 'id',
+            	 title : '编号',
+            	 width : 120,
+            	 align : 'center',
+            	 formatter : function(val, rec) {
+            	 return val;
+             }
+             },
+		    {
+			field : 'machine',
+			title : '前置机名称',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'ipAddress',
+			title : '前置机地址',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				
+				return val;
+			}
+		}, {
+			field : 'port',
+			title : '端口号',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'state',
+			title : '前置机状态',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'networkIp',
+			title : '外网地址',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				
+				return val;
+			}
+		}]],
+		});
+	$('#manager_list_tab').datagrid('unselectAll');
+	var param = {
+			'map.machine':$("#machine").val(),
+		    'map.ipAddress':$("#ipAddress").val(),
+		    'map.state':$("input[name='state']:checked").val(),
+			
+	}
+	loadData(path + '/premachineManageAction!execute.action',
+			'manager_list_tab', param);	
+}
+
+function updatepre(){
+	var upmachine=$("#updatemachine").val();
+	var upipAddress=$("#updateipAddress").val();
+	var upport=$("#updateport").val();
+	var upstate=$("input[name='updatestate']:checked").val();
+	if(upmachine == null || upmachine==""){
+		 $.messager.alert('警告！','前置机名称不能为空','error');
+			return;
+	}
+	if(upipAddress == null || upipAddress==""){
+		 $.messager.alert('警告！','前置机地址不能为空','error');
+			return;
+	}
+	if(upport == null || upport==""){
+		 $.messager.alert('警告！','前置机端口不能为空','error');
+			return;
+	}
+	if(upstate == null || upstate==""){
+		 $.messager.alert('警告！','前置机状态为必选','error');
+			return;
+	}
+	
+	var param = {
+			'manage.machine':$("#updatemachine").val(),
+		    'manage.ipAddress':$("#updateipAddress").val(),
+		    'manage.port':$("#updateport").val(),
+		    'manage.state':$("input[name='updatestate']:checked").val(),
+		    'manage.id':$("#updateid").val(),
+	}
+	$.post(path + '/premachineManageAction!updatepre.action', param,function(data){
+		if(data=="1"){
+			$('#update_preable_html').window('close');
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '修改成功', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);	
+		}else{
+			$('#update_preable_html').window('close');
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '修改失败', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+		}
+	},'text');	
+}
+
+function add(){
+	var tomachine=$("#addmachine").val();
+	var toipAddress=$("#addipAddress").val();
+	var toport=$("#addport").val();
+	var tostate=$("input[name='addstate']:checked").val();
+	if(tomachine == null || tomachine==""){
+		 $.messager.alert('警告！','前置机名称不能为空','error');
+			return;
+	}
+	if(toipAddress == null || toipAddress==""){
+		 $.messager.alert('警告！','前置机地址不能为空','error');
+			return;
+	}
+	if(toport == null || toport==""){
+		 $.messager.alert('警告！','前置机端口不能为空','error');
+			return;
+	}
+	if(tostate == null || tostate==""){
+		 $.messager.alert('警告！','前置机状态为必选','error');
+			return;
+	}
+	
+	var param = {
+			'manage.machine':$("#addmachine").val(),
+		    'manage.ipAddress':$("#addipAddress").val(),
+		    'manage.port':$("#addport").val(),
+		    'manage.state':$("input[name='addstate']:checked").val(),
+	}
+	$.post(path + '/premachineManageAction!add.action', param,function(data){
+		if(data=="1"){
+			$('#add_preable_html').window('close');
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '添加成功', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+			
+		}else{
+			$('#add_preable_html').window('close');
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '添加失败', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+		}
+	},'text');	
+}
+
+function deleteItem(Id){
+	var param = {'manage.id':Id
+	};
+	$.post(param + '/premachineManageAction!delete.action', param,function(data){
+		if(data=="1"){
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '删除成功', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+			
+		}else{
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '删除失败', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+		}
+	},'text');	
+
+}
+function disable(Id){
+
+	var param = {'manage.id':Id,
+			'manage.state':'0',
+	};
+	$.post(path + '/premachineManageAction!updatepre.action', param,function(data){
+		if(data=="1"){
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '修改成功', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+			
+		}else{ 
+			$('#manager_list_tab').datagrid('unselectAll');
+			$.messager.alert('提示', '修改失败', 'info');
+			loadData(path + '/premachineManageAction!execute.action',
+					'manager_list_tab', null);
+		}
+	},'text');	
+}

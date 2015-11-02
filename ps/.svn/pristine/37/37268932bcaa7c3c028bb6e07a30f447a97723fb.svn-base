@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.linkonworks.df.busi.dao.PlatformTradelogDao">
+
+	<select id="findChart" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.PlatformTradelog">
+		
+	select sum(GHW) GHW, SUM(QMGS) QMGS, opeDatetime
+	  from (select decode(factory_name, '挂号网', 1, 0) GHW,
+	               decode(factory_name, '齐脉公司', 1, 0) QMGS,
+	               to_char(ope_datetime, 'YYYY-MM-DD') opeDatetime
+	          from tb_platform_tradelog
+	          where  1=1
+	          	<if test="factoryNo!=null and factoryNo!=''" >
+		   			and factory_no = #{factoryNo}
+		   		</if>
+	          	
+	      		<if test="start!=null and start!=''">
+	      			and ope_datetime between to_date(#{start}, 'yyyy/mm/dd') and to_date(#{end}, 'yyyy/mm/dd')
+	      		</if>
+	          )
+	 group by opeDatetime
+	 order by opeDatetime
+
+	</select>
+
+	<select id="visitList"  parameterType="page" resultType="com.linkonworks.df.vo.PlatformTradelog">
+		select A.id           id,
+        A.factory_name factoryName,
+        A.factory_no   factoryNo,
+        A.hos_code     hosCode,
+        A.busi_no      busiNo,
+        A.busi_name    busiName,
+        A.ope_datetime opeDatetime,
+        A.rece_content receContent,
+        A.send_content sendContent,
+        A.ope_result opeResult,
+        A.pati_serial patiSerial,
+        A.inpati_number inpatiNumber,
+        A.medical_insurance_code medicalInsuranceCode,
+        A.name name
+   from (select id,
+                factory_name,
+                factory_no,
+                hos_code,
+                busi_no,
+                busi_name,
+                ope_datetime,
+                rece_content,
+                send_content,
+                ope_result,
+                pati_serial,
+                inpati_number,
+                medical_insurance_code,
+                name
+           from tb_platform_tradelog
+          where
+	   		1=1
+	   		<if test="params.factoryNo!=null and params.factoryNo!=''" >
+	   			and factory_no = #{params.factoryNo}
+	   		</if>
+	   		<if test="params.busiNo!=null and params.busiNo!=''">
+	   			and busi_no=#{params.busiNo}
+	   		</if>
+	   		<if test="params.opeDatetime!=null and params.opeDatetime!=''">
+		     	and to_char(ope_datetime,'yyyy-mm-dd')=#{params.opeDatetime}
+	   		</if>
+	   		and ope_result='T'
+	   		) A
+	</select>
+
+	<select id="findPageList"  parameterType="page" resultType="com.linkonworks.df.vo.PlatformTradelog">
+		select A.id           id,
+        A.factory_name factoryName,
+        A.factory_no   factoryNo,
+        A.hos_code     hosCode,
+        A.busi_no      busiNo,
+        A.busi_name    busiName,
+        A.ope_datetime opeDatetime,
+        A.rece_content receContent,
+        A.send_content sendContent,
+        A.ope_result opeResult,
+        A.pati_serial patiSerial,
+        A.inpati_number inpatiNumber,
+        A.medical_insurance_code medicalInsuranceCode,
+        A.name name
+   from (select id,
+                factory_name,
+                factory_no,
+                hos_code,
+                busi_no,
+                busi_name,
+                ope_datetime,
+                rece_content,
+                send_content,
+                ope_result,
+                pati_serial,
+                inpati_number,
+                medical_insurance_code,
+                name,
+                exception_explain exceptionExplain
+           from tb_platform_tradelog
+          where
+	   		1=1
+	   		<if test="params.factoryNo!=null and params.factoryNo!=''" >
+	   			and factory_no = #{params.factoryNo}
+	   		</if>
+	   		<if test="params.busiNo!=null and params.busiNo!=''">
+	   			and busi_no=#{params.busiNo}
+	   		</if>
+	   		<if test="params.opeDatetime!=null and params.opeDatetime!=''">
+		     	and to_char(ope_datetime,'yyyy-mm-dd')=#{params.opeDatetime}
+	   		</if>
+	   		and ope_result='F'
+	   		) A
+	</select>
+	
+	<select id="searchPageList"  parameterType="page" resultType="com.linkonworks.df.vo.PlatformTradelog">
+		select A.factory_name factoryName,
+	       A.factory_no   factoryNo,
+	       A.busi_name    busiName,
+	        A.busi_no    busiNo,
+	       A.ope_datetime opeDatetime,
+	       A.visit_count  sumDayCount,
+	       A.false_times  NoNormalCount
+	       from (select factory_name,
+	                                         factory_no,
+	                                         busi_name,
+	                                         busi_no,
+	                                         to_char(ope_datetime, 'YYYY-MM-DD') ope_datetime,
+	                                         count(*) visit_count,
+	                                         sum(decode(ope_result, 'F', 1, 0)) false_times
+	                                    from tb_platform_tradelog
+	                                     where 
+									   		1=1
+									   		<if test="params.factoryNo!=null and params.factoryNo!=''" >
+									   			and factory_no = #{params.factoryNo}
+									   		</if>
+									   		<if test="params.busiNo!=null and params.busiNo!=''" >
+		   										and busi_no = #{params.busiNo}
+		   									</if>
+									   		<if test="params.beginDate!=null and params.beginDate!=''" >
+									   			and ope_datetime between to_date(#{params.beginDate}, 'yyyy/mm/dd') and to_date(#{params.endDate}, 'yyyy/mm/dd')
+									   		</if>
+	                                   group by factory_name,
+	                                            factory_no,
+	                                            busi_name,
+	                                            busi_no,
+	                                            to_char(ope_datetime,
+	                                                    'YYYY-MM-DD')
+	                                   order by ope_datetime) A
+	</select>
+	
+	<select id="getPageList" parameterType="page"
+		resultType="com.linkonworks.df.vo.InteBusi">
+		select 
+		   b.id  id,
+		   f.factory_name factoryName,
+		   b.factory_id  factoryId,
+	       b.busi_no      busiNo,
+	       b.busi_name    busiName,
+	       b.abnormal_num abnormalNum,
+	       b.call_num     callNum,
+	       b.busi_state   busiState,
+	       b.busi_state   state
+	  from tb_intebusi b, tb_interfactory f
+	 where f.id = b.factory_id
+	  
+		<if test="params.busiNo!=null  and params.busiNo!=''">
+			and b.busi_no=#{params.busiNo}
+		</if>
+		<if test="params.factoryNo!=null  and params.factoryNo!=''">
+			and f.factory_no=#{params.factoryNo}
+		</if>
+	</select>
+
+	<select id="getFactoryList" resultType="com.linkonworks.df.vo.Interfactory">
+		select 
+	     f.id "id",
+	     f.factory_name "factoryName",
+	     f.factory_no "factoryNo"
+		from tb_interfactory f
+		where 1=1		
+
+	</select>
+	
+	<select id="getInteBusi" resultType="com.linkonworks.df.vo.InteBusi">
+		select busi.busi_no busiNo,busi.busi_name busiName from tb_intebusi busi where busi.busi_state=1
+	</select>
+	
+	<insert id="addInteBusi" parameterType="com.linkonworks.df.vo.InteBusi">
+		insert into tb_intebusi(id,factory_id,busi_no,busi_name,busi_state,abnormal_num,call_num)
+		values(lkpspf.seq_tb_intebusi.nextval,#{factoryId},#{busiNo},#{busiName},#{busiState},#{abnormalNum},#{callNum})
+	</insert>
+	
+	<update id="updateInteBusi" parameterType="map">
+		update tb_intebusi t
+		<set>
+			<if test="factoryId!=null and factoryId!=''">
+				t.factory_id = #{factoryId},
+			</if>
+			<if test="busiNo!=null and busiNo!=''">
+				t.busi_no = #{busiNo},
+			</if>
+			<if test="busiName!=null and busiName!=''">
+				t.busi_name = #{busiName},
+			</if>
+			<if test="abnormalNum!=null and abnormalNum!=''">
+				t.abnormal_num = #{abnormalNum},
+			</if>
+			<if test="callNum!=null and callNum!=''">
+				t.call_num = #{callNum}
+			</if>
+			where 1 = 1
+			<if test="id!=null and id!=''">
+				and t.id=#{id}
+			</if>
+		</set>
+	</update>
+	
+	<update id="updateState" parameterType="map">
+		update tb_intebusi t
+		<set>
+			<if test="busiState!=null and busiState!=''">
+				t.busi_state=#{busiState}
+			</if>
+		</set>
+		where 1=1
+			<if test="id!=null and id!=''">
+				and t.id=#{id}
+			</if>
+	</update>
+	
+	
+	
+	<select id="pageImportPage" parameterType="page" resultType="map">
+		select t.table_name       tableName,
+       t.table_summary    tableSummary,
+       t.data_total       dataTotal,
+       t.import_frequency importFrequency,
+       t.data_resource   dataResource,
+       decode(t.unit_code,'1','北院','2','南院') unitCode
+    from tb_show_import_table t  
+	</select>
+	
+	
+	<select id="pageCallCenterLog" parameterType="page" resultType="map">
+		select c.id id,
+	       c.extension extension,
+	       decode(c.receive_type,'1','接入','呼出') receiveType,
+	       to_char(c.start_time,'yyyy-mm-dd hh24:mi:ss') startTime,
+	       to_char(c.end_time,'yyyy-mm-dd hh24:mi:ss') endTime,
+	       c.service_no serviceNo,
+	       F_GET_DEPT_NAME(c.dept_code) deptName,
+	       c.extension_name extensionName,
+	       c.telephone telephone,
+	       decode(c.unit_code,'1','南院','2','北院') unitCode
+        from tb_call_log c
+        where 1=1
+		<if test="params.startDate!=null and params.startDate!=''">
+			and c.start_time <![CDATA[>=]]> to_date(#{params.startDate},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		<if test="params.endDate!=null and params.endDate!=''">
+			and  c.start_time <![CDATA[<=]]> to_date(#{params.endDate},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+	</select>
+	
+	
+	<select id="getBusi" parameterType="map" resultType="com.linkonworks.df.vo.PlatformTradelog">
+		select b.busi_no busiNo,b.Busi_Name busiName from tb_intebusi b 
+	</select>
+	
+	
+	
+	
+	
+	<select id="getColums" parameterType="map" resultType="map">
+		select column_name,trim(comments) from all_col_comments 
+		where 1=1 and  owner='LKPSPF' 
+		<if test="tableName!=null and tableName!=''">
+			and table_name=upper(#{tableName})
+		</if>
+		
+		
+	</select>
+	
+	<select id="getTabelNameDetail" parameterType="page" resultType="map">
+		select * from 
+		<if test="params.tableName!='' and params.tableName!=''">
+			${params.tableName} t
+		</if>
+		where 1 = 1 
+		<if test="params.unitCode!='' and params.unitCode!=null">
+			and t.unit_code = #{params.unitCode}
+		</if>
+	</select>
+
+</mapper>

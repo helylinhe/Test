@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.linkonworks.df.busi.dao.DiseaseItemTemplateDao">
+
+
+	<resultMap type="diseaseItemTemplate" id="diseaseItemTempalteResult">
+			<id property="id" column="id"/>
+			<result property="operateDate" column="operate_date"/>
+			<result property="employeeCode" column="employee_code"/>
+			<result property="useState" column="use_state"/>
+			<result property="showNo" column="show_no"/>
+			<association property="diseaseNameDict" column="disease_name_id" javaType="DiseaseNameDict">
+				<id property="diseaseNameId" column="disease_name_id"></id>
+				<result property="diseaseName" column="disease_name"/>
+			</association>
+			<association property="diseaseItem" column="disease_group_id" javaType="DiseaseItem">
+				<id property="diseaseGroupId" column="disease_group_id"/>
+				<result property="groupOne" column="group_one"/>
+				<result property="groupTwo" column="group_two"/>
+				<result property="itemName" column="item_name"/>
+				<result property="recordType" column="record_type"/>
+				<result property="listValue" column="list_value"/>
+				<result property="dataType" column="data_type"/>
+			</association>
+			
+		</resultMap>
+
+	<select id="diseaseItemFirst"  resultType="com.linkonworks.df.vo.DiseaseItem">
+		select distinct(d.group_one) "groupOne" from tb_disease_item d
+		where d.use_state=1 
+	</select>
+	
+	<select id="diseaseItemSeconde" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.DiseaseItem">
+		select distinct(d.group_two) "groupTwo" from tb_disease_item d
+		where d.use_state=1 and d.group_two is not null
+		<if test="groupTwo!='' and groupTwo!=null">
+			and  d.group_two=#{groupTwo}
+		</if>
+	</select>
+	
+	<select id="diseaseNameDict" parameterType="java.util.List" resultType="com.linkonworks.df.vo.DiseaseNameDict">
+		select d.disease_name_id "diseaseNameId",
+       		   d.disease_name "diseaseName"
+ 		from tb_disease_name_dict  d
+      where d.use_state=0
+      <if test="list!=null">
+      	and d.dept_code in 
+      	 <foreach collection="list" index="index" item="item"
+      	 	open="(" separator="," close=")">
+      	 	 #{item.deptCode}	
+      	 </foreach>
+      </if>
+	</select>
+	
+	
+	<select id="pageListDiseaseRight" parameterType="java.util.Map" resultMap="diseaseItemTempalteResult">
+		  select
+		  	   item.disease_group_id "id",
+       		   item.group_one,
+               item.group_two,
+               item.item_name,
+               trim(item.record_type) "record_type"
+	       from tb_disease_item   item,
+	       tb_disease_name_dict     d,
+	       tb_disease_item_template t
+    where t.disease_name_id = d.disease_name_id
+         and item.disease_group_id = t.disease_group_id
+          and item.use_state = 1
+		  and d.use_state = 0
+		  and t.use_state = 1
+		<if test="diseaseNameId!='' and diseaseNameId!=null ">
+			and t.disease_name_id =#{diseaseNameId}
+		</if>
+		order by t.show_no 
+  
+	</select>
+	
+	
+	<select id="pageListDisease" parameterType="page" resultType="com.linkonworks.df.vo.DiseaseItem">
+		select d.disease_group_id "diseaseGroupId",
+       		d.group_one "groupOne",
+       		d.group_two "groupTwo",
+       		d.item_name "itemName",
+       		trim(d.record_type) "recordType"
+		from tb_disease_item d where d.use_state=1
+		<if test="list!=null">
+			 and d.dept_code in 
+			 <foreach collection="list" index="index" item="item" 
+			 	open="(" separator="," close=")">
+			 	 #{item.deptCode}
+			 </foreach>
+		</if>
+		<if test="params.groupOne!='' and params.groupOne!=null">
+			and d.group_one = #{params.groupOne} 
+		</if>
+		<if test="params.groupTwo!='' and params.groupTwo!=null">
+			and d.group_one = #{params.groupTwo} 
+		</if>
+	</select>
+	
+	
+	<select id="diseaseItemTemplates" parameterType="java.lang.String" resultMap="diseaseItemTempalteResult">
+		select  item.disease_group_id,
+		         t.id,t.use_state,
+		         item.group_one,
+		         item.group_two,
+		         item.item_name,
+		         trim(item.record_type) record_type,
+		         item.list_value,
+		         t.show_no,
+		         item.data_type
+		         from tb_disease_item   item,
+		         tb_disease_name_dict     d,
+		         tb_disease_item_template t
+		    where t.disease_name_id = d.disease_name_id
+		          and item.disease_group_id = t.disease_group_id
+		          and item.use_state = 1
+		      and d.use_state = 0
+		      and t.use_state = 1
+		      and  d.disease_name_id=#{_parameter}
+		      order by t.show_no  
+	</select>
+	
+	
+	
+	<update id="updateUseState" parameterType="java.util.List">
+		update tb_disease_item_template r set r.use_state='0',r.operate_date=sysdate
+		where  r.id in
+			<foreach index="index" item="item" collection="list" 
+				open="(" separator="," close=")" >
+				#{item}
+			</foreach>
+	</update>
+	
+	<update id="updateNormalUseState" parameterType="java.util.List">
+		update tb_disease_item_template r set r.use_state='1',r.operate_date=sysdate
+		where  r.id in
+			<foreach index="index" item="item" collection="list" 
+				open="(" separator="," close=")" >
+				#{item}
+			</foreach>
+	</update>
+	
+	
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_disease_item_template.nextval FROM DUAL
+		</selectKey>
+		insert into tb_disease_item_template(id,disease_name_id,disease_group_id,operate_date,employee_code,use_state,show_no) 
+			SELECT seq_tb_flup_item_response.NEXTVAL , A.* FROM (
+		<foreach collection="list" item="item"  index="index" separator="union">
+			select #{item.diseaseNameDict.diseaseNameId},#{item.diseaseItem.diseaseGroupId},sysdate,#{item.employeeCode},#{item.useState} ,#{item.showNo} from dual
+		</foreach>
+		) A
+	</insert>
+	
+	<delete id="deleteDiseaseItem" parameterType="java.lang.String">
+		delete  from tb_disease_item_template t where t.disease_name_id=#{_parameter}
+	</delete>
+	
+</mapper>

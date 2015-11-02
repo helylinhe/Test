@@ -1,0 +1,194 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DepartmentService;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.Employee;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class DepartmentAction extends ActionSupport {
+
+	private DepartmentService departmentService;
+	private Page<Department> page = new Page<Department>(); // 参数传递(pageSize
+	// pageNumber)
+	private Map<String, String> map = new HashMap<String, String>(); // 参数传递(筛选条件参数)
+
+	/**
+	 * 查询科室信息
+	 */
+	public String execute() {
+		page.setParams(map);
+		Map userMap = new HashMap();
+		userMap.put("rows", departmentService.getDepartment(page));
+		userMap.put("totalRecord", page.getTotalRecord());
+		userMap.put("totalPage", page.getTotalPage());
+		userMap.put("pageNo", page.getPageNo());
+		JSON json = JSONArray.fromObject(userMap);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String queryPages() {
+		HttpSession session = ServletActionContext.getRequest().getSession();
+		Employee employee = (Employee) session.getAttribute("employee");
+		Map hashMap=new HashMap();
+		hashMap.putAll(map);
+		if (!"".equals(map.get("deptCode")) && map.get("deptCode") != null) {	
+		} else {
+			hashMap.put("deptCode",Arrays.asList(employee.getDeptCode().split(",")));
+		}
+		page.setParams(hashMap);
+		Map userMap = new HashMap();
+		userMap.put("rows", departmentService.getPageDepartment(page));
+		userMap.put("totalRecord", page.getTotalRecord());
+		userMap.put("totalPage", page.getTotalPage());
+		userMap.put("pageNo", page.getPageNo());
+		JSON json = JSONArray.fromObject(userMap);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * 修改科室信息
+	 * 
+	 * @return
+	 */
+	public String updateDepartment() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		HttpServletRequest request = ServletActionContext.getRequest();
+
+		try {
+			Department department = new Department();
+			department.setDeptCode(request.getParameter("deptCode"));
+			department.setDeptName(request.getParameter("deptName"));
+			department.setDeptStatus(Integer.parseInt(request
+					.getParameter("deptStatus")));
+			department.setMedicalInsuranceCode(request
+					.getParameter("medicalInsuranceCode"));
+			department.setMedicalInsuranceName(request
+					.getParameter("medicalInsuranceName"));
+			department.setDeptSameCode(request.getParameter("deptSameCode"));
+			department.setUnitCode(request.getParameter("unitCode"));
+			department.setDeptSummary(request.getParameter("deptSummary"));
+			department.setExpertDept(request.getParameter("expertDept"));
+			department.setFlupDept(request.getParameter("flupDept"));
+			int result = departmentService.updateDepartment(department);
+			if (result >= 1)
+				response.getWriter().print("success");
+			else
+				response.getWriter().print("faild");
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("error");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 添加科室信息
+	 * 
+	 * @return
+	 */
+	public String addDepartment() {
+		HttpServletResponse response = ServletActionContext.getResponse();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		try {
+			Department department = new Department();
+			department.setDeptCode(request.getParameter("deptCode"));
+			department.setDeptName(request.getParameter("deptName"));
+			department.setDeptStatus(Integer.parseInt(request
+					.getParameter("deptStatus")));
+			department.setMedicalInsuranceCode(request
+					.getParameter("medicalInsuranceCode"));
+			department.setMedicalInsuranceName(request
+					.getParameter("medicalInsuranceName"));
+			department.setDeptSameCode(request.getParameter("deptSameCode"));
+			department.setUnitCode(request.getParameter("unitCode"));
+			department.setDeptSummary(request.getParameter("deptSummary"));
+			department.setExpertDept(request.getParameter("expertDept"));
+			department.setFlupDept(request.getParameter("flupDept"));
+			int result = departmentService.savaDepartment(department);
+			if (result >= 1)
+				response.getWriter().print("success");
+			else
+				response.getWriter().print("faild");
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("error");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public String queryAll() {
+		try {
+			HttpServletResponse response = ServletActionContext.getResponse();
+			List<Department> list = departmentService.queryAll();
+			JSON json = JSONArray.fromObject(list);
+			response.getWriter().print(json.toString());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	public DepartmentService getDepartmentService() {
+		return departmentService;
+	}
+
+	public void setDepartmentService(DepartmentService departmentService) {
+		this.departmentService = departmentService;
+	}
+
+	public Page<Department> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<Department> page) {
+		this.page = page;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+}

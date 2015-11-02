@@ -1,0 +1,185 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>院后随访系统</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+			<link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/default/easyui.css" />
+            <link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/icon.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/index.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/apssysframe.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/content.css" />
+			<script type="text/javascript" src="<%=path%>/js/jquery/jquery-1.7.2.min.js"></script>
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/jquery.easyui.min.js"></script>
+			<script type="text/javascript">var path="<%=path%>"</script>
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/locale/easyui-lang-zh_CN.js"></script>			
+           <script><!--
+           		
+           		$(function (){
+           			
+           			///根据用户的分辨率设置网页的大小
+           			//$(".easyui-layout").css({ width: getWidthInfo() , height:getHeightInfo()});
+           			$.post("<%=basePath%>sysmenudefiaction!leftMenuItems.action",function (data){
+           				$("#menu").html(data);
+           				$.parser.parse('#menu');  
+           				var arr=$("#menu a");
+           					var flag=false;
+           					$.each(arr,function (i,n){
+           						if($(this).text()=="医生随访工作台"){
+           							$(this).trigger("click");
+           							flag=true;
+           						};
+           					});
+           				 if(!flag){
+           						addTab("服务中心随访工作台","<%=path%>/jsp/flupTaskExecution/serviceactive.jsp");
+           					}
+           			},'html');	
+           			$.messager.show({
+		        		title:'系统消息',
+		        		msg:'您好${sessionScope.employee.name },欢迎使用本系统',
+		        		timeout:3000,
+		        		showType:'slide',
+		        		width:250,
+		        		height:100
+		        	});
+           		});
+	        function leftmenu_click(obj,url){
+		         var tabTitle= $(obj).text();   //get title
+				 if(tabTitle=="医生工作"){
+				  $("#tabs").hide();  
+		          $("#body_contend_iframe").show();
+				  $("#body_contend_iframe").html(createFrame(url));
+				 }else{
+				  $("#tabs").show();  
+		          $("#body_contend_iframe").hide(); 
+				  addTab(tabTitle, url);
+				 }
+		   }
+		  function addTab(subtitle, url) {
+		        if (!$('#tabs').tabs('exists', subtitle)) {
+                   $('#tabs').tabs('add', {
+                       title: subtitle,
+                       content: createFrame(url),
+                       closable: true,
+                       width: $('#mainPanle').width() - 10,
+                       height: $('#mainPanle').height() - 26
+                   });
+               } else {
+                   $('#tabs').tabs('select', subtitle);
+              }
+           }
+ 
+ 
+           function createFrame(url) {
+               var s = '<iframe name="mainFrame" scrolling="auto" frameborder="0"  src="' + url + '" style="width:100%;height:100%;"></iframe>';
+               return s;
+           }
+           
+           
+           function logout(){
+	 		$.messager.confirm('提示', "您确定要退出系统？",function(isok){
+	 				if(isok)
+ 					{
+	 					 $.ajax({
+	 	                    type: "POST",
+	 	                    loading: '正在注销...',
+	 	                    url: "<%=path%>/employeeAction!logout.action",
+	 	                    dataType: "json",
+	 	                    complete: function () {
+	 	                        //HideWaitMessageDialog(jWaitDialog);
+	 	                    },
+	 	                    success: function (result) {
+	 	                        if (result.success) {
+	 	                        	window.top.location.href = result.url;
+	 	                        } 
+	 	                    },
+	 	                    error: function () {
+	 	                        HideWaitMessageDialog(jWaitDialog);
+	 	                        $.messager.alert('提示', '发送系统错误,请与系统管理员联系!', 'error');
+	 	                    }
+	 	                });
+ 					}
+	 				
+	 			});
+	       }
+      function  loadBingDetail(patiSerial,inpatiNumber,inpatiSerialNumber){
+    	  $("#patiSerial").val(patiSerial);
+		  $("#inpatiNumber").val(inpatiNumber);
+		  $("#inpatiSerialNumber").val(inpatiSerialNumber);
+		  var url="/jsp/caseManagement/addbinli.jsp";
+		  $('#inpatiSerialNumber').val(inpatiSerialNumber);
+    		  if ($('#tabs').tabs('exists', "就诊详情")) {
+    			  $("#tabs").tabs('close','就诊详情');   			  
+                  $('#tabs').tabs('add', {
+                      title: "就诊详情",
+                      content: createFrame(path+url),
+                      closable: true
+                  });
+              }else{
+    			  $('#tabs').tabs('add', {
+                      title: "就诊详情",
+                      content: createFrame(path+url),
+                      closable: true
+                  });
+            		$("#tabs").tabs("select","就诊详情");}
+       }
+      //获取当前电脑屏幕的宽度
+      function  getWidthInfo(){
+    	  return  window.screen.width;
+      }
+      function  getHeightInfo(){
+    	  return  document.body.scrollHeight;
+      }
+      
+      /*function openWindow(data){
+      	var objChild = window.open(data); 
+      }*/
+		</script>
+  </head>
+  <jsp:include page="/jsp/comment/loginValidate.jsp"></jsp:include>
+  <body class="easyui-layout" >
+		  <div  data-options="region:'north'" class="bgcolor" split="false" border="false"
+			style="height: 70px; padding-left: 10px; padding-top: 15px; background-color: #E0ECFF">
+			<table width="100%" cellpadding="0" cellspacing="0"> 
+				<tr>
+					<td style="width: 45px;">
+						<img src="<%=path%>/images/logo.png" width="45px" alt="林康科技" />
+					</td>
+					<td>
+						<span id="index-title"
+							style="font-size: 26px; margin-left: 15px; color: #144E78">院后随访系统</span>
+					</td>
+					<td
+						style="text-align: right; color: #144E78;font-color:black ;
+						 font-weight: bold; vertical-align: bottom; padding-bottom: 5px;">
+						<img src="<%=path%>/images/user.gif" />
+						&nbsp;您好（${sessionScope.employee.name }）&nbsp;&nbsp;&nbsp;&nbsp; [&nbsp;
+						<a href="javascript:void(0);" style="color: #144E78" onclick="logout();">注销</a>&nbsp;]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</td>
+
+				</tr>
+			</table>
+			</div>   
+			    <div   data-options="region:'west'" split="true" style="width: 150px;" id="menu">
+			    </div>   
+			    <div data-options="region:'center'" id="body_content" style="min-width:1250px ">
+			    	<div id='tabs' class='easyui-tabs' fit='true'></div>
+          		    <div id='body_contend_iframe' style="display:none;width:100%;height:100%;"></div>
+          		     <input type="hidden" id="patiSerial"/>
+					 <input type="hidden" id="inpatiNumber"/>
+					 <input type="hidden" id="inpatiSerialNumber">
+			    </div>
+	   
+     </body>
+</html>

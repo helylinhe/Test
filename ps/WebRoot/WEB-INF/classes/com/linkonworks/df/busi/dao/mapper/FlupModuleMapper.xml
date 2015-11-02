@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupModuleDao">
+	
+	<select id="getFlupModule" parameterType="page" resultType="flupmodule">
+	<!-- 
+	   select 
+       a.info_code,
+       a.info_name,
+       a.info_content,savaFlupModule
+       b.dept_name,
+       a.info_beyone,
+       a.info_belong,
+       a.operate_date,
+       c.name
+	   from tb_flup_module a left join tb_department b on a.maintain_dept = b.input_code
+                             left join tb_employee c on a.operate_empolyee_code = c.dept_code 
+		where 1=1
+		<if test="params.flupName!=null and params.flupName!=''">
+		   and a.flup_name=#{params.flupName}
+		</if>
+		<if test="params.deptCode!=null and params.deptCode!=''">
+		   and c.dept_name=#{params.deptCode}
+		</if>
+		<if test="params.diagName!=null and params.diagName!=''">
+		   and a.diag_name=#{params.diagName}
+		</if>
+		<if test="params.flupType!=null and params.flupType!=''">
+		   and a.flup_type=#{params.flupType}
+		</if>
+	 -->
+	 select 
+	 	<!-- id "id",  -->
+	 	info_code "infoCode",
+	 	info_name "infoName",
+	 	info_content "infoContent",
+	 	f_get_dept_name(maintain_dept) "maintainDeptName",
+   		maintain_dept "maintainDept",
+	 	info_beyone "infoBeyone",
+	 	info_belong "infoBelong",
+	 	to_char(operate_date ,'yyyy-mm-dd') "operateDate",
+	 	F_GET_EMPLOYEE_NAME(operate_empolyee_code) "operateEmpolyeeCode"
+	 from tb_flup_module where  1=1
+	 <if test="params.maintainDept!=null and params.maintainDept!=''">
+		 	and maintain_dept = #{params.maintainDept}
+	</if>
+	 <if test="params.infoBeyone!=null and params.infoBeyone!=''">
+		   and info_beyone = #{params.infoBeyone}
+	</if>
+	<if test="params.infoName!=null and params.infoName!=''">
+		   and info_name like '%'||#{params.infoName}||'%'
+	</if>
+	<if test="params.infoBelong!=null and params.infoBelong!=''">
+		   and info_belong = #{params.infoBelong}
+	</if>
+	<if test="params.infoContent!=null and params.infoContent!=''">
+		   and info_content = #{params.infoContent}
+	</if>
+	<if test="list!=null">
+		   and maintain_dept in 
+		   <foreach collection="list" index="index" item="item" open="(" separator=","
+		   	close=")">
+		     #{item.deptCode}
+		   </foreach>
+	</if>						
+		order by operate_date desc
+	</select>
+	<update id="updateFlupModule" parameterType="flupModule">
+		update tb_flup_module set 
+			<!-- info_code = #{infoCode},  -->
+			info_name = #{infoName},
+			info_content = #{infoContent},
+			maintain_dept =#{maintainDept},
+			info_beyone = #{infoBeyone},
+			info_belong = #{infoBelong},
+			operate_date = sysdate,
+			operate_empolyee_code = #{operateEmpolyeeCode}
+		where info_code = #{infoCode}
+	</update>
+	<insert id="savaFlupModule" parameterType="flupModule">
+		insert into tb_flup_module(info_code,info_name,info_content,maintain_dept,info_beyone,info_belong,operate_date,operate_empolyee_code) 
+		values(seq_tb_flup_module.nextval,#{infoName},#{infoContent},#{maintainDept},#{infoBeyone},#{infoBelong},sysdate,#{operateEmpolyeeCode})
+	</insert>
+	
+	
+</mapper>

@@ -1,0 +1,50 @@
+$(function (){
+	
+	
+	$("#report_table_detail").datagrid( {
+		collapsible : true,
+		fitColumns:true,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		pagination : true,
+		singleSelect : true,
+	    title:'平台接入表详情',
+		pagination : true,
+		pageSize:10,
+        pageList:[10,20],
+ }); 
+	
+	/****
+	 * 加载数据
+	 */
+	var param={'map.tableName':$($('#tableName', parent.document)).val(),'map.unitCode':$($('#tableUnitCode', parent.document)).val()};
+	$.post(path+'/platformTradelogaction!getTableNameDetail.action',param,function (data){
+		var options = $("#report_table_detail").datagrid("options");  
+		 options.columns = eval(data.columns); 
+		 $("#report_table_detail").datagrid(options);   
+		 var blm_datapatient_data={"total":data.total,"rows":data.rows};
+		 $('#report_table_detail').datagrid('loadData',blm_datapatient_data);  
+		 var p = $('#report_table_detail').datagrid('getPager'); 
+		  $(p).pagination({
+					onSelectPage:function (pageNumber, pageSize){
+			  			var paramdate = $.extend({'page.pageNo':pageNumber,'page.pageSize':pageSize}, param);
+						$.post(path+'/platformTradelogaction!getTableNameDetail.action',paramdate,function (d){
+							var op = $("#report_table_detail").datagrid("options");  
+								op.columns = eval(d.columns); 
+							 $("#report_table_detail").datagrid(op) ;   
+							 var blm_datapatient_data2={"total":d.total,"rows":d.rows};
+							 $('#report_table_detail').datagrid('loadData',blm_datapatient_data2);  
+						},'json')
+					},onChangePageSize:function (pageSize){
+						$.post(path+'/platformTradelogaction!getTableNameDetail.action',$.extend({'page.pageSize':pageSize}, param),function (d2){
+							var opp = $("#blm_grid").datagrid("options");  
+								opp.columns = eval(d2.columns); 
+							 $("#report_table_detail").datagrid(opp) ;   
+							 var blm_datapatient_data3={"total":d2.total,"rows":d2.rows};
+							 $('#report_table_detail').datagrid('loadData',blm_datapatient_data3);  
+						},'json')
+					},
+		  });
+	},'json');
+});

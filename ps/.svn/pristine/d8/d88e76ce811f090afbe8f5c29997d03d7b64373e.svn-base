@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.linkonworks.df.busi.dao.DynamicReportDao">
+	<select id="pageReportItems" parameterType="page" resultType="java.util.Map">
+	select A.f_select   "itemName",
+       A.c_select   "reportItemName",
+       A.table_name "tableName"
+  		from (select 'inpati_number' f_select,
+               '患者基本信息' c_select,
+               'tb_pati' table_name
+          from dual
+        union all
+        select 'pati_serial', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'billing_name', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'name', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'unit_code', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'in_hospital_date', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'inpati_serial_number', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select distinct (d.item_name),
+                        d.report_item_name,
+                        'tb_inspect_detail' table_name
+          from tb_inspect_detail d
+         inner join tb_inspect e
+            on d.inspect_id = e.inspect_id
+          <if test="list!=null and list!=''">
+            and e.dept_code  in
+            <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+              #{item.deptCode}
+            </foreach>
+          </if>
+          union all
+		select distinct (k.exam_class), k.exam_sub_class, 'tb_check'
+		from tb_check k
+		where 1 = 1  
+	    <if test="list!=null and list!=''">
+				and k.dept_code  in
+				<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+				</foreach>
+		</if>
+		 ) A
+	</select>
+	
+	
+	<select id="findReportName" parameterType="java.util.List" resultType="reportName">
+		select t.report_name "reportName",t.id "id" from tb_report_name t where t.status=1 
+		<if test="list!=null and list!=''">
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+			</foreach>
+		</if>
+	</select>
+	
+	
+</mapper>

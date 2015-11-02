@@ -1,0 +1,278 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DynamicReportDao;
+import com.linkonworks.df.busi.service.DynamicReportService;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.ExportResponse;
+import com.linkonworks.df.vo.ReportName;
+
+public class DynamicReportServiceImpl implements DynamicReportService {
+
+	private DynamicReportDao dynamicReportDao;
+
+	public DynamicReportDao getDynamicReportDao() {
+		return dynamicReportDao;
+	}
+
+	public void setDynamicReportDao(DynamicReportDao dynamicReportDao) {
+		this.dynamicReportDao = dynamicReportDao;
+	}
+
+	@Override
+	/**--------------------------------------------------------------------------------------------------*/
+	public List<Map<String, String>> pageReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageReportItems(page);
+	}
+
+	@Override
+	public List<ReportName> findReportName(List<Department> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportName(list);
+	}
+
+	@Override
+	public int insertBatch(List<ExportResponse> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.insertBatch(list);
+	}
+
+	@Override
+	public List<ExportResponse> getReportItems(String deptCode) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.getReportItems(deptCode);
+	}
+
+	@Override
+	public int deleteBatch(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.deleteBatch(tableNameId);
+	}
+
+	@Override
+	public List<Map<String, String>> findReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportItems(page);
+	}
+
+
+	@Override
+	public List<Map<String, String>> findRightReporItems(Map<String,String> map) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findRightReporItems(map);
+	}
+
+
+
+
+	@Override
+	public String getDynamicSql(Map<String, String> map) {
+		dynamicReportDao.getDynamicSql(map);
+		String sql=map.get("result");
+		return sql;
+	}
+
+	@Override
+	public List<Map<String, String>> dynamicPageData(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.dynamicPageData(map);
+	}
+
+	@Override
+	public HSSFWorkbook exportReportData(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		
+		//创建一个workbook
+		HSSFWorkbook qubbb = new HSSFWorkbook();
+		String tableNameId="";
+		/****
+		 * 样式设置
+		 */
+		HSSFCellStyle style = qubbb.createCellStyle(); // 样式对象   
+        style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直   
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平   
+        style.setWrapText(true); 
+        
+        
+        /*****
+         * 
+         * 创建EXCEL HEADER部分
+         */
+		HSSFSheet sheet = qubbb.createSheet("报表");
+		HSSFRow rowTitle= sheet.createRow(0);
+		HSSFCell cellTitel = rowTitle.createCell(0);
+		cellTitel.setCellValue("报表");
+		
+		
+		/****
+		 * 创建大类
+		 */
+		HSSFRow row=sheet.createRow(1);
+		HSSFCell cell = row.createCell(0);
+		cell.setCellValue("患者基本信息");
+	        //可以设置跨行，跨列显示
+	    sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
+	       
+	   List<ExportResponse> r = dynamicReportDao.getReportItems(map.get("deptCode"));
+	   Map<String,List<ExportResponse>> hashmap=new LinkedHashMap<String,List<ExportResponse>>();
+	   ExportResponse response=null;
+	   for(int i=0;i<r.size();i++){
+		   response=(ExportResponse) r.get(i);
+		   tableNameId=response.getDeptNameId();
+		   if(!hashmap.containsKey(response.getGroupName())){
+			   List<ExportResponse> export=new ArrayList<ExportResponse>();
+			   export.add(response);
+			   hashmap.put(response.getGroupName(), export);  
+		   }else{
+			  List<ExportResponse>  result=hashmap.get(response.getGroupName());
+			  result.add(response);
+			  hashmap.put(response.getGroupName(), result);
+		   }
+	   }
+	   /*****
+	    * 循环动态报表大类
+	    */
+	   int count=5;
+	   for(Iterator it=hashmap.keySet().iterator();it.hasNext();){
+		   String key=it.next().toString();
+		   List<ExportResponse> resultItem=hashmap.get(key);
+		   row.createCell(count+1).setCellValue(key.replace("★", ""));
+		   sheet.addMergedRegion(new CellRangeAddress(1, 1,(count+1),(resultItem.size()+count)));
+		   count=count+resultItem.size();
+	   }  
+	   
+	   /****
+	    * 基本项信息和检查项 检验项
+	    */
+	   /*
+        * 创建列名称
+        */
+      
+       HSSFRow row1= sheet.createRow(2);
+       
+       HSSFCell inpatiNumber= row1.createCell(0);
+       inpatiNumber.setCellValue("住院号");
+       
+       HSSFCell name= row1.createCell(1);
+       name.setCellValue("姓名");
+       
+       HSSFCell gender= row1.createCell(2);
+       gender.setCellValue("性别");
+       
+       HSSFCell age= row1.createCell(3);
+       age.setCellValue("年龄");
+       
+       HSSFCell inHospitalData= row1.createCell(4);
+       inHospitalData.setCellValue("入院日期");
+       
+       HSSFCell outHospitalData= row1.createCell(5);
+       outHospitalData.setCellValue("出院日期");
+       int column=5;
+       for(Iterator it=hashmap.keySet().iterator();it.hasNext();){
+		   String key=it.next().toString();
+		   List<ExportResponse> resultItem=hashmap.get(key);
+		   for(int i=0;i<resultItem.size();i++){
+			   column++;
+			   row1.createCell(column).setCellValue(resultItem.get(i).getItemName().replace("★", ""));
+		   }
+	   }  
+       map.put("tableNameId", tableNameId);
+       dynamicReportDao.getDynamicSql(map);
+       Map<String, String> dynamicSql = new HashMap<String, String>();
+	   dynamicSql.put("sql", map.get("result"));
+	   List<Map<String,String>> data=dynamicReportDao.dynamicPageData(dynamicSql);
+	   int currentrows=3;
+	   HSSFRow rowsdata=null;
+	   Map<String,String> resultdata=null;
+	   for(int j=0;j<data.size();j++){
+		   resultdata=data.get(j);
+		   rowsdata =sheet.createRow(currentrows);
+		   rowsdata.createCell(0).setCellValue(resultdata.get("inpatiNumber"));
+		   rowsdata.createCell(1).setCellValue(resultdata.get("name"));
+		   rowsdata.createCell(2).setCellValue(resultdata.get("gender"));
+		   rowsdata.createCell(3).setCellValue(resultdata.get("age"));
+		   rowsdata.createCell(4).setCellValue(resultdata.get("inHospitalDate"));
+		   rowsdata.createCell(5).setCellValue(resultdata.get("outHospitalDate"));
+		   int cellNumber=6;
+		   ExportResponse responseColumn=null;
+		   for(int z=0;z<r.size();z++){
+			   responseColumn=(ExportResponse) r.get(z);
+		    	String value=responseColumn.getColumnName().toUpperCase()+"";
+		    	rowsdata.createCell(cellNumber).setCellValue(resultdata.get(value));
+		    	cellNumber++;
+		   }
+		   currentrows++;
+	   }
+		return qubbb;
+
+	}
+	@Override
+	public List<Map<String, String>> getReportName(String deptCode) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.getReportName(deptCode);
+	}
+
+	@Override
+	/**-------------------------------------------------------------------------------*/
+	public void addReport(ReportName reportName) {
+		// TODO Auto-generated method stub
+		dynamicReportDao.addReport(reportName);
+	}
+
+	@Override
+	/**---------------------------------------------------------------------------------------------*/
+	public void editReport(ReportName reportName) {
+		// TODO Auto-generated method stub
+		dynamicReportDao.editReport(reportName);
+	}
+
+	@Override
+	/**----------------------------------------------------------------------------------------*/
+	public void editStatus(ReportName reportName) {
+		// TODO Auto-generated method stub
+		dynamicReportDao.editStatus(reportName);
+	}
+
+	@Override
+	/**--------------------------------------------------------------------------------------*/
+	public List<Map<String, String>> pageReport(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageReport(page);
+	}
+
+	@Override
+	public List<Map<String, String>> loadInspectCheck(Map<String,Object> param) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.loadInspectCheck(param);
+	}
+
+	@Override
+	public List<Map<String, String>> loadReportItems(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.loadReportItems(map);
+	}
+
+	@Override
+	public List<ExportResponse> findViewReportItems(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findViewReportItems(tableNameId);
+	}
+
+	
+}

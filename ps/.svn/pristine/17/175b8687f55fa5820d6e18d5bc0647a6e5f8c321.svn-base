@@ -1,0 +1,412 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DepartmentService;
+import com.linkonworks.df.busi.service.DictService;
+import com.linkonworks.df.busi.service.EmployeeService;
+import com.linkonworks.df.busi.utils.FinalUtil;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.busi.utils.Md5Utils;
+import com.linkonworks.df.busi.utils.SessionData;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.HospitalConfig;
+import com.linkonworks.df.vo.LoginLog;
+import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.Preparable;
+
+public class EmployeeAction extends ActionSupport implements ModelDriven,
+		Preparable {
+
+	private static final long serialVersionUID = 1L;
+	private HttpServletResponse response;
+	private EmployeeService employeeService;
+	private DepartmentService departmentService;
+	private DictService dictService;
+	private Employee employee;
+	private String jobnum;
+	
+
+
+	private Map<String, String> map = new HashMap<String, String>(); // 参数传递(筛选条件参数)
+	private Page<Employee> page = new Page<Employee>(); // 参数传递(pageSize
+	
+	
+	
+
+	/****
+	 * 注销用户信息
+	 * @return
+	 */
+	public void logout(){
+		//使得Session失效
+		ServletActionContext.getRequest().getSession().invalidate();
+		Map result = new HashMap();
+		result.put("url", "/PS/login.jsp");
+		result.put("success", true);
+		JSONObject json=JSONObject.fromObject(result);
+		response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	} 
+	
+
+	/**
+	 * 登陆验证
+	 * @return
+	 */
+	public String login() {
+		Map<String, Object> result = new HashMap<String, Object>();
+		// 判断用户名或密码是否为空
+		if (employee.getJobnum()==null 
+				|| employee.getPasswd()==null) {
+			result.put("msg", "用户名或密码不能为空!");
+			result.put("success", false);
+		} else {
+			employee.setPasswd(Md5Utils.md5(employee.getPasswd()));
+			Employee e=employeeService.login(employee);
+			if(e==null)
+			{
+				result.put("msg", "用户名或密码不正确!");
+				result.put("success", false);
+			}
+			else
+			{
+				//根据上下文获得获得Session对象
+				HttpSession session = ServletActionContext.getRequest().getSession();
+				List<String> arr=null;
+				List<Department>  list= null;
+				if((e.getRoleName()!=null && e.getRoleName().equals(FinalUtil.DEPART)) || (e.getRoleName()!=null && e.getRoleName().equals(FinalUtil.ADMIN))){
+					arr=new ArrayList<String>();
+					list = departmentService.findById(arr);
+					Department d = new Department();
+					d.setDeptCode("");
+					d.setDeptName("不限");
+					list.add(0,d);	
+				}else{
+					 arr=Arrays.asList(e.getDeptCode().split(","));
+					 list = departmentService.findById(arr);
+
+					
+				}
+				
+				/*****
+				 * 获取院区信息
+				 */
+				List<String> listHos=new ArrayList<String>();
+				if(e.getUnitCode().indexOf(",")>0){
+					String str[]=e.getUnitCode().split(",");
+					for(int i=0;i<str.length;i++){
+						listHos.add(str[i]);
+					}
+					
+				}else{
+					listHos.add(e.getUnitCode());
+				}
+				List<HospitalConfig> hospitalConfig=employeeService.getHosptialConfig(listHos);
+				/****
+				 * 把院区保存到session中
+				 */
+				session.setAttribute("hospitalCode",hospitalConfig);
+				
+				//获得用户所拥有的科室code
+				session.setAttribute("departmentTable", list); 
+				session.setAttribute("employee", e); //设置当前用户登陆进来的信息
+				session.setAttribute(FinalUtil.DICTTABLE, dictService.getDictAll());//设置tb_dict表总数据
+				session.setAttribute("epartmentAll2", departmentService.queryAll2()); 
+				/*//登陆记录
+				LoginLog info = new LoginLog();
+				info.setCode(e.getJobnum());
+				info.setLoginIp(ServletActionContext.getRequest().getRemoteHost());
+				employeeService.loginInfo(info);*/
+				
+				result.put("url", "/PS/main.jsp");
+				result.put("success", true);
+			}
+		}
+
+		JSONObject json = JSONObject.fromObject(result);
+		response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String queryPages() {
+		page.setParams(map);
+		Map<String, Object> itemMap = new HashMap<String, Object>();
+		itemMap.put("rows", employeeService.getPageEmp(page));
+		itemMap.put("totalRecord", page.getTotalRecord());
+		itemMap.put("totalPage", page.getTotalPage());
+		itemMap.put("pageNo", page.getPageNo());
+		JSON json = JSONArray.fromObject(itemMap);
+		response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void addEmp() {
+		employee.setPasswd(Md5Utils.md5("123456"));
+		try {
+			int result = employeeService.insert(employee);
+			String json = "";
+			if (result >= 1) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+			System.out.println(employee.getUnitCode());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void updEmp() {
+		try {
+			int result = employeeService.update(employee);
+			String json = "";
+			if (result >= 1) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	
+	public void checkJobnum(){
+		try {
+			Map<String,Object> map=new HashMap<String,Object>();
+			map.put("jobnum", employee.getJobnum());
+			 HttpServletResponse response =ServletActionContext.getResponse();
+			Employee employee=employeeService.checkJobnum(map);			
+			if(employee!=null){
+				response.getWriter().print("true");
+			}else{
+				response.getWriter().print("false");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+/**
+	 * 修改密码
+	 * @return
+	 */
+	public String updatePwd(){
+		employee.setJobnum(SessionData.getEmployeeCode());
+		employee.setPasswd(Md5Utils.md5(employee.getPasswd()));
+		employee.setNewPwd1(Md5Utils.md5(employee.getNewPwd1()));
+		int row = employeeService.updatePwd(employee);
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		if(row>0){
+			jsonMap.put("message", "修改密码成功！");
+			ServletActionContext.getRequest().getSession().invalidate();
+			jsonMap.put("url", "/PS/main.jsp");
+		}else{
+			jsonMap.put("message", "修改密码失败！");
+		}
+		JsonUtil.jsonData(jsonMap);	
+		return null;
+	}
+	/**
+	 * 加载科室
+	 * @return
+	 */
+	public String loadCombobox(){
+		List<Department> list = SessionData.getDepartmentCode();
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		jsonMap.put("deptCode", list);
+		JsonUtil.jsonData(jsonMap);	
+		return null;
+	}
+	
+	/**
+	 * 重置密码
+	 * @return
+	 */
+	public String updatePwdAll(){
+		String[] arr = employee.getJobnum().split(",");
+		int row = employeeService.updatePwdAll(arr);
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		if(row>0){
+			jsonMap.put("message", "重置密码成功！");
+		}else{
+			jsonMap.put("message", "重置密码失败！");
+		}
+		JsonUtil.jsonData(jsonMap);	
+		return null;
+	}
+	/**
+	 * 科室随访统计
+	 * @return
+	 */
+	public String loadDataGrid() {
+		Map hashMap=new HashMap();
+		hashMap.putAll(map);
+		List<Department> l = new ArrayList<Department>();
+		System.out.println(map.get("deptCode"));
+		if(map.get("deptCode")!=""){
+			Department de = new Department();
+			de.setDeptCode(map.get("deptCode"));
+			l.add(de);
+		}else{
+		   l = SessionData.getDepartmentCode();
+		}
+		hashMap.put("list",  l);
+		page.setParams(map);
+		Map<String, Object> itemMap = new HashMap<String, Object>();
+		String type = ServletActionContext.getRequest().getParameter("flupType");
+		if(type.equals("1")){
+			itemMap.put("rows", employeeService.getDeptFlupCount(page));
+			itemMap.put("totalRecord", page.getTotalRecord());
+			itemMap.put("totalPage", page.getTotalPage());
+		}else{
+			itemMap.put("rows", employeeService.getDeptFlupCountBydept(page));
+			itemMap.put("totalRecord", page.getTotalRecord());
+			itemMap.put("totalPage", page.getTotalPage());
+		}
+		JsonUtil.jsonData(itemMap);
+		return null;
+	}
+	
+	
+	/**
+	 * 科室随访统计图表
+	 * @return
+	 */
+	public String getDeptHigtChart() {
+		Map hashMap=new HashMap();
+		hashMap.putAll(map);
+		List<Department> l = new ArrayList<Department>();
+		//System.out.println(map.get("deptCode"));
+		if(map.get("deptCode")!=""){
+			Department de = new Department();
+			de.setDeptCode(map.get("deptCode"));
+			l.add(de);
+		}else{
+		   l = SessionData.getDepartmentCode();
+		}
+		hashMap.put("list",  l);
+		page.setParams(map);
+		page.setPageSize(10000);
+		Map<String, Object> itemMap = new HashMap<String, Object>();
+		String type = ServletActionContext.getRequest().getParameter("flupType");
+		if(type.equals("1")){
+			itemMap.put("rows", employeeService.getDeptFlupCount(page));
+			itemMap.put("totalRecord", page.getTotalRecord());
+			itemMap.put("totalPage", page.getTotalPage());
+		}else{
+			itemMap.put("rows", employeeService.getDeptFlupCountBydept(page));
+			itemMap.put("totalRecord", page.getTotalRecord());
+			itemMap.put("totalPage", page.getTotalPage());
+		}
+		JsonUtil.jsonData(itemMap);
+		return null;
+	}
+	public Employee getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
+	}
+
+	public EmployeeService getEmployeeService() {
+		return employeeService;
+	}
+
+	public void setEmployeeService(EmployeeService employeeService) {
+		this.employeeService = employeeService;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	public Page<Employee> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<Employee> page) {
+		this.page = page;
+	}
+
+	@Override
+	public Object getModel() {
+		return employee;
+	}
+
+	@Override
+	public void prepare() throws Exception {
+		employee = new Employee();
+
+	}
+
+
+	public void setDictService(DictService dictService) {
+		this.dictService = dictService;
+	}
+
+
+
+	public String getJobnum() {
+		return jobnum;
+	}
+
+
+	public void setJobnum(String jobnum) {
+		this.jobnum = jobnum;
+	}
+
+
+	public void setDepartmentService(DepartmentService departmentService) {
+		this.departmentService = departmentService;
+	}
+
+
+}

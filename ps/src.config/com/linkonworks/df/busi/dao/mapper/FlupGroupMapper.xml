@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupGroupDao">
+
+	<select id="getAllFlupGroup" parameterType="map" resultType="flupgroup">
+		select DISTINCT(g.group_one) groupOne from tb_flup_group g where
+		g.use_state=1
+	</select>
+
+	<select id="getGroupTwo" parameterType="map" resultType="flupgroup">
+		select DISTINCT(g.group_two) groupTwo from tb_flup_group g where
+		g.use_state=1
+		and g.group_two is not null
+		<if test="groupOne!=null and groupOne!=''">
+			and g.group_one =#{groupOne} 
+		</if>
+	</select>
+
+	<insert id="insert" parameterType="flupgroup">
+		insert into tb_flup_group
+		(
+		flup_group_id,
+		group_one,
+		group_two,
+		group_three,
+		item_name,
+		record_type,
+		data_type,
+		group_one_py,
+		log_date,
+		employee_code,
+		use_state,
+		item_posi,
+		item_required,
+		dept_code
+		)
+		values(
+		seq_tb_flup_group.nextval,
+		#{groupOne},
+		#{groupTwo},
+		#{groupThree},
+		#{itemName},
+		#{recordType},
+		#{dataType},
+		#{groupOnePy},
+		SYSDATE,
+		#{employeeCode},
+		'1',
+		#{itemPosi},
+		#{itemRequired},
+		#{deptCode}
+		)
+	</insert>
+	<select id="getPageGroups" parameterType="page" resultType="flupgroup">
+		select
+			dept_code deptCode,
+			F_GET_DEPT_NAME(dept_code) department,
+			flup_group_id "flupGroupId",
+			group_one "groupOne",
+			group_two
+			"groupTwo",
+			group_three "groupThree",
+			group_show_no "groupShowNo",
+			item_name "itemName",
+			record_type "recordType",
+			data_type "dataType",
+			f_get_employee_name(employee_code) "employeeCode",
+			log_date "logDate",
+			item_posi "itemPosi",
+			item_required "itemRequired"
+			from
+			tb_flup_group
+			where 1=1
+			and use_state='1'
+			<if test="params.groupOnePy!=null and params.groupOnePy!=''">
+				and group_one_py like '%'||#{params.groupOnePy}||'%'
+			</if>
+			<if test="params.groupOne!=null and params.groupOne!=''">
+				and group_one like '%'||#{params.groupOne}||'%'
+			</if>
+			<if test="params.flupGroupId!=null and params.flupGroupId!=''">
+				and flup_group_id like '%'||#{params.flupGroupId}||'%'
+			</if>
+			<if test="params.recordType!=null and params.recordType!=''">
+				and record_type like '%'||#{params.recordType}||'%'
+			</if>
+			<if test="params.dataType!=null and params.dataType!=''">
+				and data_type like '%'||#{params.dataType}||'%'
+			</if>
+			<if test="params.itemName!=null and params.itemName!=''">
+				and item_name like '%'||#{params.itemName}||'%'
+			</if>
+			<if test="list!=null">
+				and dept_code in 
+				<foreach collection="list" index="index" item="item"
+					open="(" separator="," close=")">
+					#{item.deptCode}	
+				</foreach>
+			</if>
+			order by log_date desc
+	</select>
+
+	<select id="getPageGroupOne" parameterType="page" resultType="flupgroup">
+		select
+		distinct group_one "groupOne",group_two "groupTwo",group_three
+		"groupThree"
+		from
+		tb_flup_group
+		where 1=1
+		and use_state='1'
+		<if test="params.groupOnePy!=null and params.groupOnePy!=''">
+			and group_one_py like '%'||#{params.groupOnePy}||'%'
+		</if>
+		<if test="params.groupOne!=null and params.groupOne!=''">
+			and group_one like '%'||#{params.groupOne}||'%'
+		</if>
+	</select>
+
+	<select id="getFlupGroup" resultType="flupgroup" parameterType="java.lang.String">
+		select g.flup_group_id,g.group_one,g.group_two,g.group_three from
+		tb_flup_item_response r,tb_flup_group g
+		where
+		g.flup_group_id=r.flup_group_id
+		and r.flup_name_id=#{_parameter}
+	</select>
+
+
+	<!-- 模板左边展示随访项 -->
+	<select id="standerTemplateGroup" parameterType="page"
+		resultType="flupgroup">
+		select g.flup_group_id "flupGroupId",
+		g.group_one "groupOne",
+		g.group_two "groupTwo",
+		g.group_three "groupThree",
+		g.item_name
+		"itemName",
+		g.record_type "recordType"
+		from tb_flup_group g
+		where 1=1
+		<if test="params.groupOne!=null and params.groupOne!=''">
+			and g.group_one=#{params.groupOne}
+		</if>
+		<if test="params.groupTwo!=null and params.groupTwo!=''">
+			and g.group_two=#{params.groupTwo}
+		</if>
+		order by g.log_date desc
+	</select>
+
+	<!-- 模板右边展示随访项 -->
+	<select id="rightStandTemplateItem" parameterType="page"
+		resultType="flupgroup">
+		select g.flup_group_id "flupGroupId",
+		g.group_one "groupOne",
+		g.group_two "groupTwo",
+		g.group_three "groupThree",
+		g.item_name
+		"itemName",
+		g.record_type "recordType"
+		from tb_flup_group
+		g,tb_flup_name_dict d
+		where d.flup_group_id=g.flup_group_id
+		<if test="params.flupNameId!=null and params.flupNameId!=''">
+			and d.flup_name_id=#{params.flupNameId}
+ </if>
+		order by g.log_date desc
+	</select>
+
+	<update id="update" parameterType="flupgroup">
+		update  tb_flup_group
+		<set>
+			<if test="groupOne!=null and groupOne!=''">
+				group_one=#{groupOne},
+			</if>
+			<if test="groupTwo!=null and groupTwo!=''">
+				group_two=#{groupTwo},
+			</if>
+			<if test="groupThree!=null and groupThree!=''">
+				group_three=#{groupThree},
+			</if>
+			<if test="itemName!=null and itemName!=''">
+				item_name=#{itemName},
+			</if>
+			<if test="recordType!=null and recordType!=''">
+				record_type=#{recordType},
+			</if>
+			<if test="dataType!=null and dataType!=''">
+				data_type=#{dataType},
+			</if>
+			<if test="groupOnePy!=null and groupOnePy!=''">
+				group_one_py=#{groupOnePy},
+			</if>
+			<if test="employeeCode!=null and employeeCode!=''">
+				employee_code=#{employeeCode},
+			</if>
+			<if test="itemPosi!=null and itemPosi!=''">
+				item_posi=#{itemPosi},
+			</if>
+			<if test="itemRequired!=null and itemRequired!=''">
+				item_required=#{itemRequired},
+			</if>
+			<if test="deptCode!=null and deptCode!=''">
+				dept_code=#{deptCode},
+			</if>
+			log_date=SYSDATE,
+		    use_state='1'
+		</set>
+		where
+		flup_group_id=#{flupGroupId}
+		
+	</update>
+
+
+	<delete id="delete" parameterType="map">
+		update tb_flup_group set
+		use_state='0' where flup_group_id=#{flupGroupId}
+	</delete>
+	<select id="checkGroup" parameterType="map">
+		select * from tb_flup_group where 1=1
+		<if test="itemName=null and itemName!=''">
+			and item_name=#{itemName}
+	  	</if>
+		<if test="groupOne=null and groupOne!=''">
+			and group_one =#{groupOne} 
+	  	</if>
+		and use_satae='1'
+	</select>
+
+
+	
+		<select id="checkFlupGroup" parameterType="java.util.Map" resultType="int">
+		select count(1)
+			from tb_flup_group g
+			where 1 = 1
+			<if test="groupOne!=null and groupOne!=''">
+			and g.group_one =#{groupOne}
+			</if>
+			<if test="groupTwo!=null and groupTwo!=''">
+			and g.group_two =#{groupTwo}
+			</if>
+			<if test="groupThree!=null and groupThree!=''">
+			and g.group_three= #{groupThree}
+			</if>
+			<if test="itemName!=null and itemName!=''">
+			and g.item_name = #{itemName}
+			</if>
+			<if test="recordType!=null and recordType!=''">
+			and g.record_type= #{recordType}
+			</if>
+			<if test="itemRequired!=null and itemRequired!=''">
+			and g.item_required= #{itemRequired}
+			</if>
+			<if test="deptCode!=null and deptCode!=''">
+				and g.dept_code= #{deptCode}
+			</if>
+	</select>
+
+		<select id="getAllFlupGroup2" parameterType="map" resultType="flupgroup">
+			select DISTINCT(g.group_one) groupOne from tb_flup_group g where
+			g.use_state=1 and
+			
+		 <if test="searType!=null">
+		  lower(g.group_one_py) like #{info}
+		  </if>
+		  <if test="searType==null">
+		   g.group_one like #{info}
+		  </if>
+	</select>
+	
+	<select id="getAllFlupGroup3" parameterType="map" resultType="flupgroup">
+			select DISTINCT(g.item_name) groupOne from tb_flup_group g where
+			g.use_state=1 and
+			
+		 <if test="searType!=null">
+		  lower(g.group_one_py) like #{info}
+		  </if>
+		  <if test="searType==null">
+		   g.item_name like #{info}
+		  </if>
+	</select>
+		
+	
+
+</mapper>

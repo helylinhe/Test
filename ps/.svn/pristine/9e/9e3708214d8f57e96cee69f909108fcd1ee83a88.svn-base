@@ -1,0 +1,56 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.FlupDynamicDao;
+import com.linkonworks.df.busi.service.FlupDynamicService;
+import com.linkonworks.df.vo.FlupDynamic;
+
+public class FlupDynamicServiceimpl implements FlupDynamicService {
+	
+	private FlupDynamicDao flupDynamicDao;
+	
+
+	public FlupDynamicDao getFlupDynamicDao() {
+		return flupDynamicDao;
+	}
+
+	public void setFlupDynamicDao(FlupDynamicDao flupDynamicDao) {
+		this.flupDynamicDao = flupDynamicDao;
+	}
+
+	/**
+	 * 根据病人编号、住院号、住院流水号获取随访列表中的所有随访项
+	 */
+	@Override
+	public List<FlupDynamic> findAllFlupDynamic(Page page) {
+		List<FlupDynamic> list=new ArrayList<FlupDynamic>();
+		try {
+			list=this.flupDynamicDao.findAllFlupDynamic(page);
+			System.out.println(list.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	/**
+	 * 查询已经设定的随访项
+	 */
+	@Override
+	public List<FlupDynamic> findFlupDynamic(Page page) {
+		return this.flupDynamicDao.findFlupDynamic(page);
+	}
+
+	@Override
+	public void editFlupDynamic(Page page) {
+		this.flupDynamicDao.editFlupDynamic(page);
+	}
+
+	@Override
+	public void addFlupDynamic(Page page) {
+		this.flupDynamicDao.addFlupDynamic(page);
+	}
+
+}

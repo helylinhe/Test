@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PatiReturnRuleDao">
+
+	<select id="findPageList" parameterType="page" resultType="com.linkonworks.df.vo.PatiReturnRule">
+	select d.id                    id,
+       d.dept_code             deptCode,
+       F_GET_DEPT_NAME(d.dept_code)  deptName,
+       d.return_type           returnType,
+       d.return_cycle          returnCycle,
+       d.return_tot_num        returnTotNum,
+       d.flup_doctor_code      flupDoctorCode,
+       F_GET_EMPLOYEE_NAME(d.flup_doctor_code)      flupDoctorName,
+       d.diag_code             diagCode,
+       d.diag_name             diagName,
+       d.diag_gpcode           diagGpcode,
+       d.diag_gpname           diagGpname,
+       d.operate_date          operateDate,
+       d.operate_employee_code operateEmployeeCode,
+       d.del_state             delState,
+       d.retplan_dept_code     retplanDeptCode,
+       F_GET_DEPT_NAME(d.retplan_dept_code)  retplanDeptName
+       from tb_pati_return_rule d
+	   where 1=1 and d.del_state =0
+	   <if test="params.deptCode!=null and params.deptCode!='' ">
+		and d.dept_code = #{params.deptCode}
+	   </if>
+	</select>
+	<insert id="insert" parameterType="com.linkonworks.df.vo.PatiReturnRule">
+	insert into tb_pati_return_rule values(SEQ_TB_PATI_RETURN_RULE.nextVal,#{deptCode},#{returnType},#{returnCycle}
+	,#{returnTotNum},#{flupDoctorCode}
+	,#{diagCode},#{diagName},#{diagGpcode},#{diagGpname},sysdate,#{operateEmployeeCode},0,#{retplanDeptCode})
+	</insert>
+	  
+	  <insert id="insertDetail" parameterType="java.util.List">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT SEQ_TB_PATI_RETURN_RULE.currval FROM DUAL
+		</selectKey>
+		insert into tb_retday_detail
+        select seq_tb_retday_detail.nextval, A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{id},
+	 	 	#{item.returnNumber},
+	   		#{item.returnSerialNumber},
+	   		#{item.returnContent}
+            from dual 
+             </foreach>
+        ) A
+	  </insert>
+	  <select id="getReRetdayDetails" parameterType="com.linkonworks.df.vo.RetdayDetail" resultType="com.linkonworks.df.vo.RetdayDetail">
+	    select d.id id,
+        d.rule_id ruleId,
+        d.return_number returnNumber,
+        d.return_serial_number returnSerialNumber,
+        d.return_content returnContent
+   		from tb_retday_detail d where d.rule_id = #{ruleId} order by d.return_number
+	  </select>
+	  
+	   <select id="getDepartment" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.Department">
+	   select * from(select  d.outp_or_inp_name outpOrInpName , d.dept_code deptCode , d.dept_name deptName,d.unit_code unitCode,rownum rn from tb_department d where rownum<![CDATA[<=]]>80 and 
+	   d.outp_or_inp in (2, 0) and 
+	  <if test="searType!=null">
+	   d.input_code   like #{keyInfo}
+	  </if>
+	  <if test="searType==null">
+	  d.dept_name like #{keyInfo}
+	  </if>
+	   order by length(d.dept_name) 
+	   ) where rn <![CDATA[>]]>0
+	  </select>
+	  
+	  <update id="update" parameterType="com.linkonworks.df.vo.PatiReturnRule" >
+	  update tb_pati_return_rule r
+   set r.dept_code             = #{deptCode},
+       r.return_tot_num        = #{returnTotNum},
+       r.flup_doctor_code      = #{flupDoctorCode},
+       r.diag_code             = #{diagCode},
+       r.diag_name             = #{diagName},
+       r.diag_gpcode           = #{diagGpcode},
+       r.diag_gpname           = #{diagGpname},
+       r.operate_date          = sysdate,
+       r.operate_employee_code = #{operateEmployeeCode},
+       r.retplan_dept_code     = #{retplanDeptCode}
+ 	where r.id = #{id}
+	  </update>
+	  <delete id="deleteDetails" parameterType="java.util.Map">
+		  delete tb_retday_detail r where r.rule_id =#{id}
+	  </delete>
+	  
+	  
+	    <insert id="insertDetailHasId" parameterType="java.util.List">
+		insert into tb_retday_detail
+        select seq_tb_retday_detail.nextval, A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{item.ruleId},
+	 	 	#{item.returnNumber},
+	   		#{item.returnSerialNumber},
+	   		#{item.returnContent}
+            from dual 
+             </foreach>
+        ) A
+	  </insert>
+	  <update id="updateRule" parameterType="String" >
+		update tb_pati_return_rule r set r.del_state = 1 where r.id in
+		<foreach item="item" index="index" collection="array"
+			open="(" separator="," close=")">
+			 #{item, jdbcType=NUMERIC}  
+		</foreach>
+	</update>
+</mapper>

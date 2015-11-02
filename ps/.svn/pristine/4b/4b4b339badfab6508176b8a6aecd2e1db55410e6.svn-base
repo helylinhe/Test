@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.ReportDataDao">
+
+	<select id="reportDate" parameterType="java.util.Map"
+		resultType="map">
+		select A.*,o.operation_name,o.operation_doctor_code,o.operation_prognosis from (
+		 select 
+			t.id  "ID",
+		    p.name "NAME",
+		    p.gender "GENDER", 
+		    F_GET_PATI_AGE(p.pati_serial, p.inpati_number) "AGE",
+		    p.current_addr "CURRENT_ADDR",
+		    t.flup_mobile "FLUP_MOBILE",
+		    diag.billing_name "BILLING_NAME",
+		    diag.inpati_number,
+		    diag.pati_serial,
+		    to_char(diag.in_hospital_date,'yyyy-mm-dd') "IN_HOSPITAL_DATE",
+		    to_char(diag.out_hospital_date,'yyyy-mm-dd') "OUT_HOSPITAL_DATE",
+		    diag.out_hosp_diag "OUT_HOSP_DIAG",
+		    diag.total_money   "TOTAL_MONEY",
+		    diag.charity_aid_money "CHARITY_AID_MONEY",
+		    t.flup_result "FLUP_RESULT",
+		    t.flup_failre "FLUP_FAILRE",
+		    to_char(t.flup_date,'yyyy-mm-dd') "FLUP_DATE",
+		    t.flup_table_name_id "FLUP_TABLE_NAME_ID"
+		    from tb_pati p, tb_flup_task t, tb_inpati_diag diag
+		    where p.inpati_number = t.inpati_number
+		    and p.pati_serial = t.pati_serial
+		    and diag.pati_serial = t.pati_serial
+		    and diag.inpati_serial_number = t.inpati_serial_number
+		     <if test="flupComplete !='' and flupComplete !=null">
+		    	 and t.flup_complete = #{flupComplete}
+		    </if>
+			<if test="inpatiNumber!='' and inpatiNumber!=null">
+				and p.inpati_number like '%'||#{inpatiNumber}||'%'
+	       </if>
+			<if test="startDate !='' and startDate !=null ">
+				and t.flup_plan_date  <![CDATA[>=]]>
+				to_date(#{startDate},'yyyy-MM-dd')
+			</if>
+			<if test="endDate !='' and endDate !=null ">
+				and t.flup_plan_date  <![CDATA[<=]]>
+				to_date(#{endDate},'yyyy-MM-dd')
+			</if>
+			<if test="name !='' and name !=null ">
+				and p.name like '%'||#{name}||'%'
+	         </if>
+			<if test="doctorCode !='' and doctorCode !=null ">
+				and t.flup_doctor_code=#{doctorCode}
+	        </if>
+			<if test="flupNameId !='' and flupNameId !=null ">
+				and flup_table_name_id=#{flupNameId}
+	       </if>
+	       <if test="deptCode !='' and deptCode !=null ">
+				and t.dept_code in
+				<foreach item="item" index="index" collection="deptCode"  
+            			open="(" separator="," close=")">#{item}</foreach>  
+	       </if>
+		) A left join tb_pati_operate o
+		on o.inpati_number=A.inpati_number and o.pati_serial=A.pati_serial
+
+	</select>
+
+
+
+	<select id="pageList" parameterType="page" resultType="map">
+		select 
+		    A.id "id",
+		    A.flup_table_name_id   "flupTableNameId",
+		    A.flup_date             "flupDate",
+		    A.name "name",
+		    A.age "age",
+		    A.gender "gender",
+		    A.inpati_number "inpatiNumber",
+		    A.inpati_serial_number "inpatiSerialNumber",
+		    A.pati_serial "patiSerial",
+		    A.out_hosp_diag "outHospDiag",
+		    A.total_money "totalMoney",
+		    A.charity_aid_money "charityAidMoney",
+		    o.operation_name "operationName",
+		    o.operation_doctor_code
+		    "operationDoctorCode",
+		    A.doctorName "doctorName",
+		    A.flup_result "flupResult",
+            A.flup_failre "flupFailre",
+		    o.operation_prognosis "operationPrognosis"
+		    from (select
+		    to_char(t.flup_date,'yyyy-mm-dd') flup_date,
+		    p.name,
+		    p.gender,
+		    F_GET_PATI_AGE(p.pati_serial, p.inpati_number)  age,
+		    diag.out_hosp_diag,
+		    diag.total_money,
+		    diag.charity_aid_money,
+		    diag.inpati_serial_number,
+		    diag.inpati_number,
+		    diag.pati_serial,
+		    t.id,
+		    t.flup_table_name_id,
+		    t.flup_result,
+            t.flup_failre,
+		    F_GET_EMPLOYEE_NAME(t.flup_doctor_code) doctorName
+		    from tb_pati p,
+		    tb_flup_task t, tb_inpati_diag diag
+		    where p.inpati_number =t.inpati_number
+		    and p.pati_serial = t.pati_serial
+		    and diag.pati_serial =
+		    t.pati_serial
+		    and diag.inpati_serial_number =
+		    t.inpati_serial_number
+		    <if test="params.flupComplete !='' and params.flupComplete !=null">
+		    	 and t.flup_complete = #{params.flupComplete}
+		    </if>
+		    <if test="params.startDate !='' and params.startDate !=null ">
+		      and to_char(t.flup_date,'yyyy-MM-dd')  <![CDATA[>=]]>  #{params.startDate}
+		    </if>
+		    <if test="params.endDate !='' and params.endDate !=null ">
+		      and  to_char(t.flup_date,'yyyy-MM-dd')  <![CDATA[<=]]>  #{params.endDate}
+		    </if>
+		    <if test="params.name !='' and params.name !=null ">
+		      and p.name like '%'||#{params.name}||'%'
+		     </if>
+		    <if test="params.doctorCode !='' and params.doctorCode !=null ">
+		      and t.flup_doctor_code=#{params.doctorCode}
+		     </if>
+		    <if test="params.flupNameId !='' and params.flupNameId !=null ">
+		      and flup_table_name_id=#{params.flupNameId}
+		      </if>
+		    <if test="params.inpatiNumber !='' and params.inpatiNumber !=null ">
+		      and   t.inpati_number = #{params.inpatiNumber}
+		      </if>
+		    <if test="list !=null ">
+		       and t.dept_code in 
+		       	<foreach collection="list" index="index" item="item"
+		       		open="(" separator="," close=")">
+		       		#{item.deptCode}	
+		       	</foreach>
+		      </if>
+		    ) A
+		    left join tb_pati_operate o
+		    on o.inpati_number = A.inpati_number
+		    and
+		    o.inpati_serial_number = A.inpati_serial_number
+			order by A.flup_date desc
+	</select>
+
+
+	<select id="flupItems" parameterType="java.lang.String"
+		resultType="com.linkonworks.df.vo.FlupGroup">
+	select group_one "groupOne", group_two "groupTwo", group_name "groupName"
+  from (select distinct g.flup_group_id,
+                        g.group_one,
+                        g.group_two,
+                        (case
+                          when g.group_two is null and g.record_type = 'fx' then
+                           g.group_one
+                          when g.record_type = 'dx' and g.group_two is null then
+                           g.group_one
+                          when g.record_type = 'dx' and
+                               g.group_two is not null then
+                           g.group_two
+                          when g.record_type = 'wb' then
+                           g.item_name
+                          else
+                           g.group_two
+                        end) group_name,
+                        g.group_three,
+                        g.item_name,
+                        g.record_type,
+                        g.data_type,
+                        g.item_required,
+                        r.show_no
+          from tb_flup_group g, tb_flup_item_response r, tb_flup_name_dict d
+         where g.flup_group_id = r.flup_group_id
+           and r.flup_name_id = d.flup_name_id
+           and r.use_state = 1
+           and g.use_state = 1
+           and d.flup_name_id = #{_parameter}
+         order by to_number(r.show_no) asc)
+ group by group_one, group_two, group_name
+ order by group_one
+	</select>
+	
+	
+	
+	<select id="findMobileItems" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.MobileFlup">
+	select b.group_one "groupOne",b.group_two "groupTwo",b.item_name "itemName",a.item_value "itemValue"
+  from tb_mobile_flup a
+  right join (select group_one , group_two, item_name 
+  from (select distinct g.flup_group_id,
+                        g.group_one,
+                        g.group_two,
+                        (case
+                          when g.group_two is null and g.record_type = 'fx' then
+                           g.group_one
+                          when g.record_type = 'dx' and g.group_two is null then
+                           g.group_one
+                          when g.record_type = 'dx' and
+                               g.group_two is not null then
+                           g.group_two
+                          when g.record_type = 'wb' then
+                           g.item_name
+                          else
+                           g.group_two
+                        end) group_name,
+                        g.group_three,
+                        g.item_name,
+                        g.record_type,
+                        g.data_type,
+                        g.item_required,
+                        r.show_no
+          from tb_flup_group g, tb_flup_item_response r, tb_flup_name_dict d
+         where g.flup_group_id = r.flup_group_id
+           and r.flup_name_id = d.flup_name_id
+           and r.use_state = 1
+           and g.use_state = 1
+           and d.flup_name_id = #{flupNameId}
+         order by to_number(r.show_no) asc)
+ group by group_one, group_two, item_name ) b
+    on a.group_one = b.group_one
+   and a.group_two = b.group_two
+   and a.item_name = b.item_name
+  
+   and a.pati_serial = #{patiSerial}
+		and a.inpati_number = #{inpatiNumber}
+		and a.task_id = #{id}
+	</select>
+	
+	
+	<select id="loadFlupNameDict" parameterType="com.linkonworks.df.vo.Department" resultType="com.linkonworks.df.vo.FlupNameDict">
+		select d.flup_name flupName,d.flup_name_id flupNameId from tb_flup_name_dict d
+		where d.use_state = 1 and d.dept_code in 
+		<foreach item="item" index="index" collection="list"
+			open="(" separator="," close=")">
+			 #{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+	</select>
+	
+	
+
+
+</mapper>

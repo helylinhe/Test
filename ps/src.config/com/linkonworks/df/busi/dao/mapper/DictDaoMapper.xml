@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DictDao">
+		<select id="getCommentCodeType" resultType="dict"   parameterType="String">
+			select 
+				d.name,
+				d.input_code 
+			from tb_dict d where d.echo_serial=#{echoSerial}
+		</select>
+		
+		<select id="commentAllCode" resultType="dict">
+			select 
+				d.name "name",
+				d.input_code "inputCode",
+				d.echo_serial "echoSerial",
+				d.code "code"
+			from tb_dict d where d.echo_serial in
+			<foreach collection="list" item="item" index="index"
+				    open="(" close=")" separator=",">
+				#{item}    	
+			</foreach>
+			 
+		</select>
+		<select id="getDictAll" resultType="dict">
+			select 
+				name "name",
+				code "code",
+				code_type "codeType"
+			from tb_dict  where 1=1 order by code_type,code
+		</select>
+		
+		
+</mapper>

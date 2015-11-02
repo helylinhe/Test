@@ -1,0 +1,29 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DynamicReportDao;
+import com.linkonworks.df.busi.service.DynamicReportService;
+
+public class DynamicReportServiceImpl implements DynamicReportService {
+
+	private DynamicReportDao dynamicReportDao;
+
+	public DynamicReportDao getDynamicReportDao() {
+		return dynamicReportDao;
+	}
+
+	public void setDynamicReportDao(DynamicReportDao dynamicReportDao) {
+		this.dynamicReportDao = dynamicReportDao;
+	}
+
+	@Override
+	public List<Map<String, String>> pageReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageReportItems(page);
+	}
+	
+	
+}

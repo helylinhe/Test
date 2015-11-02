@@ -1,0 +1,36 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.InteBusi;
+import com.linkonworks.df.vo.Interfactory;
+import com.linkonworks.df.vo.PlatformTradelog;
+
+public interface PlatformTradelogService {
+
+	public List<InteBusi> getPageList(Page page);
+	
+	public List<Interfactory> getFactoryList();
+	
+	public List<InteBusi> getInteBusi();
+
+	
+	public int addInteBusi(InteBusi busi);
+	
+	
+	public int updateInteBusi(Map<String,String> map);
+	
+	public int updateState(Map<String,String> map);
+
+	
+	public List<PlatformTradelog> searchPageList(Page page);
+	
+	public List<PlatformTradelog> findPageList(Page page);
+	
+	public List<PlatformTradelog> findChart(Map<String, String> map);
+
+}

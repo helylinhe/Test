@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DiseaseNameDictDao">
+<!-- 查找 -->
+		<select id="getDiseaseNameDict" parameterType="page" resultType="diseaseNameDict">
+				select
+					disease_name_id "diseaseNameId",
+					disease_name "diseaseName",
+					dept_code   "deptCode",
+					f_get_dept_name(dept_code) "deptName",
+					to_char(operate_date,'yyyy-mm-dd') "operateDate",
+					employee_code "employeeCode",
+					use_state "useState",
+					use_state "useStateBt"
+ 				from tb_disease_name_dict where 1=1
+ 
+				<if test="params.diseaseName!=null and params.diseaseName!=''">
+				   and disease_name like '%${params.diseaseName}%'
+				</if>
+				<if test="params.operateDate!=null and params.operateDate!=''">
+				   and operate_date = #{params.operateDate}
+				</if>
+				<if test="list!=null">
+					and dept_code  in 
+					<foreach collection="list" index="index" item="item" 
+						open="(" separator="," close=")">
+							#{item.deptCode}
+						</foreach> 
+				</if>
+				 order by operate_date desc
+			</select>
+			
+			
+			<update id="updateState" parameterType="diseaseNameDict">
+					update tb_disease_name_dict set use_state=#{useState} where disease_name_id=#{diseaseNameId}
+			</update>
+			
+			<update id="updateDiseaseNameDict" parameterType="diseaseNameDict">
+					update tb_disease_name_dict set 
+						disease_name = #{diseaseName},
+						dept_code = #{deptCode},
+						operate_date = sysdate,
+						employee_code = #{employeeCode}
+					where disease_name_id=#{diseaseNameId}
+			</update>
+			
+			<insert id="addDiseaseNameDict" parameterType="diseaseNameDict">
+				insert into tb_disease_name_dict(disease_name_id,disease_name,disease_name_spell,dept_code,operate_date,employee_code,use_state)  values(seq_tb_disease_name_dict.nextval,#{diseaseName},#{diseaseNameSpell},#{deptCode},sysdate,#{employeeCode},0)    
+			</insert>
+			
+			<select id="checkFlupGroup" parameterType="java.util.Map" resultType="int">
+			select count(1)
+			from tb_disease_name_dict g
+			where 1 = 1
+			<if test="deptCode!=null and deptCode!=''">
+			and g.dept_code =#{deptCode}
+			</if>
+			<if test="diseaseName!=null and diseaseName!=''">
+			and g.disease_name =#{diseaseName}
+			</if>
+			<if test="diseaseNameSpell!=null and diseaseNameSpell!=''">
+			and g.disease_name_spell= #{diseaseNameSpell}
+			</if>
+			
+	</select>
+			
+</mapper>

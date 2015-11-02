@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+	<constant name="struts.objectFactory.spring.autoWire" value="name" />
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.multipart.maxSize" value="1073741824" />
+
+	<package name="default" namespace="/" extends="struts-default">
+
+		<!-- 拦截器配置 -->
+		<interceptors>
+			<interceptor name="loginInterceptor"
+				class="com.linkonworks.df.busi.interceptor.LoginInterceptor"></interceptor>
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="loginInterceptor"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="loginStack"></default-interceptor-ref>
+
+		<global-results>
+			<result name="login">/login.jsp</result>
+		</global-results>
+
+		<action name="useraction" class="userAction"></action>
+		<action name="flupitemaction" class="flupItemAction"></action>
+		<action name="flupnamedictaction" class="flupNameDictAction"></action>
+		<action name="flupitemresponseaction" class="flupItemResponseAction"></action>
+		<action name="flupgroupaction" class="flupGroupAction"></action>
+		<action name="flupmoduleaction" class="flupModuleAction"></action>
+		<!-- 随访知识库 -->
+		<action name="diagKnowledgeAction" class="diagKnowledgeAction"></action>
+		<action name="blacklistaction" class="blackListAction"></action>
+		<action name="mployeeaction" class="employeeAction"></action>
+		<!-- 字典 -->
+		<action name="dictaction" class="dictAction"></action>
+
+		<action name="employeeAction" class="employeeAction">
+		</action>
+
+		<action name="inpatiDiagAction" class="inpatiDiagAction"></action>
+		<action name="checkAction" class="checkAction"></action>
+		<action name="patiOperateAction" class="patiOperateAction"></action>
+		<action name="inspectAction" class="inspectAction"></action>
+
+		<!-- 导入规则 -->
+		<action name="dataImportRuleAction" class="dataImportRuleAction"></action>
+
+
+		<action name="patiAction" class="patiAction"></action>
+
+
+		<action name="departmentaction" class="departmentAction"></action>
+		<action name="flupTaskAction" class="flupTaskAction"></action>
+
+		<!-- Role Action -->
+		<action name="roleaction" class="roleAction"></action>
+
+		<!-- 菜单Action -->
+		<action name="sysmenudefiaction" class="sysMenuDefiAction"></action>
+
+		<!-- 用户角色Action -->
+		<action name="roleprivsaction" class="rolePrivsAction"></action>
+
+		<action name="patiflupruleaction" class="patiFlupRuleAction"></action>
+
+		<!-- 付费方式 -->
+		<action name="payTypeAction" class="payTypeAction"></action>
+
+		<!-- 随访字典评价Action -->
+		<action name="flupadvisedictaction" class="flupAdviseDictAction"></action>
+
+		<!-- 随访电话ACTION -->
+		<action name="mobileflupaction" class="mobileFlupAction"></action>
+
+		<!-- 随访电话ACTION -->
+		<action name="diagGroupAction" class="diagGroupAction"></action>
+
+		<action name="medicalHistoryaction" class="medicalHistoryAction"></action>
+
+		<action name="diseaseItemAction" class="diseaseItemAction"></action>
+
+
+	
+		<!-- 疾病模板 -->
+		<action name="diseaseitemtemplateaction" class="diseaseItemTemplateAction"></action>
+		<action name="patiDiseaseDictAction" class="patiDiseaseDictAction"></action>
+
+
+		<action name="diseaseNameDictAction" class="diseaseNameDictAction"></action>
+		
+		<action name="patidiseasedetailaction" class="patiDiseaseDetailAction"></action>
+		
+		
+		<!-- 数据导出EXCEL -->
+		<action name="reportdataaction" class="reportDataAction"></action>
+		
+		<action name="patiReturnRuleAction" class="patiReturnRuleAction"></action>
+
+		<action name="returnTaskAction" class="returnTaskAction"></action>	
+		
+		<action name="fileIndexAction" class="fileIndexAction"></action>
+		
+			
+		<action name="firstTreataction" class="firstTreatAction"></action>
+		
+			
+		<action name="ketiReportaction" class="ketiReportAction"></action>	
+		
+		
+		<action name="platformTradelogaction" class="platformTradelogAction"></action>	
+		
+		
+		
+	</package>
+</struts>

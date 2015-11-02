@@ -1,0 +1,11 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+
+public interface DynamicReportService {
+
+	public List<Map<String,String>> pageReportItems(Page page);
+}

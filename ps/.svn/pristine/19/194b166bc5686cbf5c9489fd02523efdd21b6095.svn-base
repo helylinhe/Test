@@ -1,0 +1,17 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.FlupDynamic;
+
+public interface FlupDynamicService {
+
+	//根据随病人编号、住院号、流水号获取该病人随访表的所有随访项随访项
+	public List<FlupDynamic> findAllFlupDynamic(Page page);
+	//根据随访次数、随访时间、患者编号查询随访项 
+	public List<FlupDynamic> findFlupDynamic(Page page);
+	public void editFlupDynamic(Page page);
+	public void addFlupDynamic(Page page);
+	
+}

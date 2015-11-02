@@ -1,0 +1,50 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.vo.FlupPlan;
+import com.linkonworks.df.vo.FlupTask;
+import com.linkonworks.df.vo.MobileFlup;
+
+public interface MobileFlupService {
+
+	public int insertBatchs(List<MobileFlup> list,FlupTask task);
+	
+	public int insertBatch(List<MobileFlup> list);
+
+	public int update(MobileFlup mobileFlup);
+	
+	public int updateFlupPlan(Map<String,String> map);
+	
+	
+	public int updatePatiFlupRule(Map<String,String> map);
+	
+	
+	public List<FlupPlan> findNextPlans(Map<String,String> map);
+	
+	public List<FlupPlan> findNext(Map<String,String> map);
+	
+	
+	 public int deleteFlupTask(Map<String,String> map);
+	 
+	 public int updateFlupDate(FlupPlan p);
+	 
+	 public int updateFlupTask(FlupTask t);
+	 
+	 public int insertAddFlupPlans(List<FlupPlan> list);
+	 
+	 
+	 public int checkMobileFlup(Map<String,String> map);
+	 
+	 
+	 /*****
+	  * 获取某个人的历史随访信息
+	  * @param map
+	  * @return
+	  */
+	 public List<MobileFlup> histroyFlupInfo(Map<String,String> map);
+	 
+	 
+	 public int deleteFlupItem(Map<String,String> map);
+}

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DiseaseItemDao">
+	<select id="getPageDisease" parameterType="page" resultType="diseaseItem">
+		select
+		disease_group_id "diseaseGroupId",
+		group_one
+		"groupOne",
+		group_two
+		"groupTwo",
+		group_show_no "groupShowNo",
+		item_name
+		"itemName",
+		trim(record_type) "recordType",
+		data_type "dataType",
+		list_value
+		"listValue",
+		item_posi "itemPosi",
+		dept_code "deptCode",
+		f_get_dept_name(dept_code) "deptName",
+		log_date "logDate",
+	    f_get_employee_name(employee_code) "employeeCode"
+		from
+		tb_disease_item
+		where 1=1
+		and use_state='1'
+		
+		<if test="params.groupOne!=null and params.groupOne!=''">
+			and group_one like '%'||#{params.groupOne}||'%'
+		</if>
+		<if test="params.recordType!=null and params.recordType!=''">
+			and record_type like '%'||#{params.recordType}||'%'
+		</if>
+		<if test="params.dataType!=null and params.dataType!=''">
+			and data_type like '%'||#{params.dataType}||'%'
+		</if>
+		<if test="params.itemName!=null and params.itemName!=''">
+			and item_name like '%'||#{params.itemName}||'%'
+		</if>
+		 order by log_date desc
+	</select>
+	<insert id="insert" parameterType="diseaseItem">
+		insert into
+		tb_disease_item
+		(
+		disease_group_id,
+		group_one,
+		group_two,
+		group_show_no,
+		item_name,
+		record_type,
+		data_type,
+		list_value,
+		item_posi,
+		group_one_py,
+		dept_code,
+		log_date,
+		employee_code,
+		use_state)
+		values(
+		seq_tb_disease_item.nextval,
+		#{groupOne},
+		#{groupTwo},
+		#{groupShowNo},
+		#{itemName},
+		#{recordType},
+		#{dataType},
+		#{listValue},
+		#{itemPosi},
+		#{groupOnePy},
+		#{deptCode},
+		SYSDATE,
+		#{employeeCode},
+		'1'
+		)
+	</insert>
+	<delete id="delete" parameterType="map">
+		update tb_disease_item set
+		use_state='0' where
+		disease_group_id=#{diseaseGroupId}
+	</delete>
+	<update id="update" parameterType="diseaseItem">
+		update tb_disease_item
+		set
+		group_one=#{groupOne},
+		group_two=#{groupTwo},
+		group_show_no=#{groupShowNo},
+		item_name=#{itemName},
+		record_type=#{recordType},
+		data_type=#{dataType},
+		group_one_py=#{groupOnePy},
+		list_value=#{listValue},
+		dept_code=#{deptCode},
+		item_posi=#{itemPosi}
+		where
+		disease_group_id=#{diseaseGroupId}
+	</update>
+	
+	
+	<select id="getPageGroupOne" parameterType="page" resultType="diseaseItem">
+		select
+		distinct group_one "groupOne",group_two "groupTwo"
+		from
+		tb_disease_item
+		where 1=1
+		and use_state='1'
+		<if test="params.groupOnePy!=null and params.groupOnePy!=''">
+			and group_one_py like '%'||#{params.groupOnePy}||'%'
+		</if>
+		<if test="params.groupOne!=null and params.groupOne!=''">
+			and group_one like '%'||#{params.groupOne}||'%'
+		</if>
+	</select>
+</mapper>

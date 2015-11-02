@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="userAction" class="com.linkonworks.df.busi.action.UserAction"
+		scope="prototype">
+		<property name="userService" ref="userService"></property>
+	</bean>
+
+
+	<bean id="flupNameDictAction" class="com.linkonworks.df.busi.action.FlupNameDictAction"
+		scope="prototype">
+		<property name="flupNameDictService" ref="flupNameDictService"></property>
+		<property name="dataImportRuleService" ref="dataImportRuleService"></property>
+	</bean>
+
+	<bean id="flupItemAction" class="com.linkonworks.df.busi.action.FlupItemAction"
+		scope="prototype">
+		<property name="flupItemService" ref="flupItemService"></property>
+
+	</bean>
+
+
+	<bean id="flupItemResponseAction" class="com.linkonworks.df.busi.action.FlupItemResponseAction"
+		scope="prototype">
+		<property name="flupItemResponseService" ref="flupItemReponseService"></property>
+		<property name="flupNameDictService" ref="flupNameDictService"></property>
+	</bean>
+
+	<bean id="flupGroupAction" class="com.linkonworks.df.busi.action.FlupGroupAction"
+		scope="prototype">
+		<property name="flupGroupService" ref="flupGroupService"></property>
+		<property name="mobileFlupService" ref="mobileFlupService"></property>
+	</bean>
+	<bean id="flupModuleAction" class="com.linkonworks.df.busi.action.FlupModuleAction"
+		scope="prototype">
+		<property name="flupModuleService" ref="flupModuleService"></property>
+		<property name="dataImportRuleService" ref="dataImportRuleService"></property>
+	</bean>
+
+	<!-- 随访知识库 -->
+	<bean id="diagKnowledgeAction" class="com.linkonworks.df.busi.action.DiagKnowledgeAction"
+		scope="prototype">
+		<property name="diagKnowledgeService" ref="diagKnowledgeService"></property>
+		<property name="dataImportRuleService" ref="dataImportRuleService"></property>
+	</bean>
+	<bean id="blackListAction" class="com.linkonworks.df.busi.action.BlackListAction"
+		scope="prototype">
+		<property name="blackListService" ref="blackListService"></property>
+	</bean>
+
+	<bean id="employeeAction" class="com.linkonworks.df.busi.action.EmployeeAction"
+		scope="prototype">
+		<property name="employeeService" ref="employeeService"></property>
+		<property name="dictService" ref="dictService"></property>
+		<property name="departmentService" ref="departmentService"></property>
+
+	</bean>
+
+
+
+	<!-- 字典Action -->
+	<bean id="dictAction" class="com.linkonworks.df.busi.action.DictAction" scope="prototype">
+		<property name="dictService" ref="dictService"></property>
+	</bean>
+
+	<bean id="inpatiDiagAction" class="com.linkonworks.df.busi.action.InpatiDiagAction" scope="prototype">
+		<property name="inpatiDiagService" ref="inpatiDiagService"></property>
+	</bean>
+
+	<bean id="checkAction" class="com.linkonworks.df.busi.action.CheckAction" scope="prototype">
+		<property name="checkService" ref="checkService"></property>
+	</bean>
+
+	<bean id="patiOperateAction" class="com.linkonworks.df.busi.action.PatiOperateAction" scope="prototype">
+		<property name="patiOperateService" ref="patiOperateService"></property>
+	</bean>
+	<bean id="inspectAction" class="com.linkonworks.df.busi.action.InspectAction"  scope="prototype">
+		<property name="inspectService" ref="inspectService"></property>
+	</bean>
+
+
+	<bean id="patiAction" class="com.linkonworks.df.busi.action.PatiAction" scope="prototype">
+		<property name="patiService" ref="patiService"></property>
+		<property name="nationDictService" ref="nationDictService"></property>
+		<property name="patiFlupRuleService" ref="patiFlupRuleService"></property>
+		<property name="mobileFlupService" ref="mobileFlupService"></property>
+	</bean>
+
+
+	<!-- 字典Action -->
+	<bean id="dataImportRuleAction" class="com.linkonworks.df.busi.action.DataImportRuleAction" scope="prototype">
+		<property name="dataImportRuleService" ref="dataImportRuleService"></property>
+	</bean>
+	<bean id="departmentAction" class="com.linkonworks.df.busi.action.DepartmentAction" scope="prototype">
+		<property name="departmentService" ref="departmentService"></property>
+	</bean>
+	<!-- 规则修改 -->
+	<bean id="flupTaskAction" class="com.linkonworks.df.busi.action.FlupTaskAction" scope="prototype">
+		<property name="dataImportRuleService" ref="dataImportRuleService"></property>
+		<property name="flupTaskService" ref="flupTaskService"></property>
+		<property name="blackListService" ref="blackListService"></property>
+	</bean>
+
+
+	<!-- 角色Role -->
+	<bean id="roleAction" class="com.linkonworks.df.busi.action.RoleAction" scope="prototype">
+		<property name="roleService" ref="roleService"></property>
+	</bean>
+
+	<!-- 菜单ACTION -->
+	<bean id="sysMenuDefiAction" class="com.linkonworks.df.busi.action.SysMenuDefiAction" scope="prototype">
+		<property name="sysMenuDefiService" ref="sysMenuDefiService"></property>
+		<property name="privsService" ref="privsService"></property>
+	</bean>
+
+	<!-- 用户角色ACTION -->
+	<bean id="rolePrivsAction" class="com.linkonworks.df.busi.action.RolePrivsAction" scope="prototype">
+		<property name="rolePrivsService" ref="rolePrivsService"></property>
+		<property name="privsService" ref="privsService"></property>
+	</bean>
+
+	<!-- 随访属性ACTION -->
+	<bean id="patiFlupRuleAction" class="com.linkonworks.df.busi.action.PatiFlupRuleAction" scope="prototype">
+		<property name="patiFlupRuleService" ref="patiFlupRuleService"></property>
+		<property name="flupTaskService" ref="flupTaskService"></property>
+	</bean>
+
+	<bean id="payTypeAction" class="com.linkonworks.df.busi.action.PayTypeAction" scope="prototype">
+		<property name="payTypeService" ref="payTypeService"></property>
+	</bean>
+
+	<bean id="flupAdviseDictAction" class="com.linkonworks.df.busi.action.FlupAdviseDictAction" scope="prototype">
+		<property name="flupAdviseDictService" ref="flupAdviseDictService"></property>
+	</bean>
+
+	<!-- 电话随访ACTION -->
+	<bean id="mobileFlupAction" class="com.linkonworks.df.busi.action.MobileFlupAction" scope="prototype">
+		<property name="mobileFlupService" ref="mobileFlupService"></property>
+		<property name="flupTaskService" ref="flupTaskService"></property>
+	</bean>
+
+	<!-- 诊断组维护ACTION -->
+	<bean id="diagGroupAction" class="com.linkonworks.df.busi.action.DiagGroupAction" scope="prototype">
+		<property name="diagGroupService" ref="diagGroupService"></property>
+	</bean>
+
+	<bean id="medicalHistoryAction" class="com.linkonworks.df.busi.action.MedicalHistoryAction" scope="prototype">
+		<property name="medicalHistoryService" ref="medicalHistoryService"></property>
+	</bean>
+
+
+	<!-- 动态报表ACTION -->
+	<bean id="dynamicReportAction" class="com.linkonworks.df.busi.action.DynamicReportAction" scope="prototype">
+		<property name="dynamicReportService" ref="dynamicReportService"></property>
+	</bean>
+
+	<bean id="diseaseItemTemplateAction" class="com.linkonworks.df.busi.action.DiseaseItemTemplateAction" scope="prototype">
+		<property name="diseaseItemTemplateService" ref="diseaseItemTemplateService"></property>
+	</bean>
+
+	
+
+	<!-- 疾病维护ACTION -->
+	<bean id="diseaseItemAction" class="com.linkonworks.df.busi.action.DiseaseItemAction" scope="prototype">
+		<property name="diseaseItemService" ref="diseaseItemService"></property>
+	</bean>
+
+
+
+	<bean id="diseaseNameDictAction" class="com.linkonworks.df.busi.action.DiseaseNameDictAction" scope="prototype">
+		<property name="diseaseNameDictService" ref="diseaseNameDictService"></property>
+	</bean>
+	
+	<bean id="patiDiseaseDetailAction" class="com.linkonworks.df.busi.action.PatiDiseaseDetailAction" scope="prototype">
+		<property name="patiDiseaseDetailService" ref="patiDiseaseDetailService"></property>
+	</bean>
+
+	<!-- 病例 -->
+	<bean id="patiDiseaseDictAction" class="com.linkonworks.df.busi.action.PatiDiseaseDictAction" scope="prototype"> 
+		<property name="patiDiseaseDictService" ref="patiDiseaseDictService"></property>
+		<property name="inpatiDiagServices" ref="inpatiDiagService"></property>
+	</bean>
+	
+	<!-- 数据导出EXCE -->
+	<bean id="reportDataAction" class="com.linkonworks.df.busi.action.ReportDataAction" scope="prototype"> 
+		<property name="reportDataService" ref="reportDataService"></property>
+	</bean>
+
+	<bean id="patiReturnRuleAction" class="com.linkonworks.df.busi.action.PatiReturnRuleAction" scope="prototype"> 
+		<property name="patiReturnRuleService" ref="patiReturnRuleService"></property>
+	</bean>
+
+	<bean id="returnTaskAction" class="com.linkonworks.df.busi.action.ReturnTaskAction" scope="prototype"> 
+		<property name="returnTaskService" ref="returnTaskService"></property>
+	</bean>
+	
+	<bean id="fileIndexAction" class="com.linkonworks.df.busi.action.FileIndexAction" scope="prototype"> 
+		<property name="fileIndexService" ref="fileIndexService"></property>
+		<property name="flupDynamicService" ref="flupDynamicService"></property>
+	</bean>
+	
+	<bean id="firstTreatAction" class="com.linkonworks.df.busi.action.FirstTreatAction" scope="prototype"> 
+		<property name="firstTreatService" ref="firstTreatService"></property>
+	</bean>
+	<bean id="ketiReportAction" class="com.linkonworks.df.busi.action.KetiReportAction" scope="prototype"> 
+		<property name="ketiReportService" ref="ketiReportService"></property>
+	</bean>
+	<bean id="platformTradelogAction" class="com.linkonworks.df.busi.action.PlatformTradelogAction" scope="prototype"> 
+		<property name="platformTradelogService" ref="platformTradelogService"></property>
+	</bean>
+	<!-- 医嘱查询 -->
+	<bean id="doctorAdviceAction" class="com.linkonworks.df.busi.action.DoctorAdviceAction" scope="prototype"> 
+		<property name="doctorAdviceService" ref="doctorAdviceService"></property>
+	</bean>
+	<!-- 前置机管理 -->
+	<bean id="premachineManageAction" class="com.linkonworks.df.busi.action.PremachineManageAction" scope="prototype"> 
+		<property name="premachineManageService" ref="premachineManageService"></property>
+	</bean>
+</beans>
+

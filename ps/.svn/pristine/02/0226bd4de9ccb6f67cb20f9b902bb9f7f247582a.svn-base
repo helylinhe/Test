@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!-- 检验表 -->
+<mapper namespace="com.linkonworks.df.busi.dao.InspectDao">
+	<select id="getPageInspect" parameterType="page" resultType="inspect">
+		select
+	     ti.id "id",
+	     ti.pati_serial "patiSerial",
+	     ti.inpati_number "inpatiNumber",
+	     ti.inpati_serial_number "inpatiSerialNumber",
+	     ti.sample "sample",
+	     replace(td.item_name,'★','|') "itemName",
+         td.report_item_name "inspectName",
+	     td.inspect_result "inspectResult",
+	     td.refer_scale "referScale",
+	     td.inspect_id inspectId,
+         td.item_code itemCode,
+	     to_char(ti.inspect_date,'yyyy-MM-dd') "inspectDate",
+	     F_GET_EMPLOYEE_NAME(ti.inspect_doctor) "inspectDoctor",
+	     F_GET_EMPLOYEE_NAME(ti.check_doctor) "checkDoctor",
+	     td.result_unit "resultUnit"
+	     from tb_inspect ti left join tb_inspect_detail  td
+	     on ti.inspect_id=td.inspect_id
+     where 1=1
+		 <if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and ti.pati_serial=#{params.patiSerial}
+		 </if>
+		 <if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and ti.inpati_number=#{params.inpatiNumber}
+		 </if>
+		 <if test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+		   and ti.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+		 order by td.item_name,td.report_item_name
+	</select>
+	<select id="getInspects" parameterType="page" resultType="inspect">
+	  select 
+       ti.name name ,
+       ti.inpati_number inpatiNumber,
+       ti.inpati_serial_number inpatiSerialNumber,
+       replace(td.item_name,'★','|') "itemName",
+       to_char(ti.inspect_date,'yyyy-MM-dd') "inspectDate",
+       td.inspect_id inspectId,
+       td.item_code itemCode,
+       ti.pati_serial patiSerial
+       from tb_inspect ti , tb_inspect_detail  td
+       where ti.inspect_id=td.inspect_id  
+         <if test="params.inspectDate!=null and params.inspectDate!=''">
+		   and  to_char((ti.inspect_date),'yyyy-MM-dd') <![CDATA[>=]]>  #{params.inspectDate}
+		 </if>
+		 <if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and ti.pati_serial=#{params.patiSerial}
+		 </if>
+		 <if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and ti.inpati_number=#{params.inpatiNumber}
+		 </if>
+		 <if test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+		   and ti.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+		  group by td.item_name,ti.inspect_date,td.inspect_id,
+          td.item_code,ti.pati_serial,ti.name,ti.inpati_number,ti.inpati_serial_number
+	</select>
+	
+	<select id="getInspectsDetail" parameterType="java.util.Map" resultType="inspect">
+		  select 
+		  	  td.report_item_code reportItemCode,
+              replace(td.item_name, '★', '|') "itemName",
+              td.report_item_name "inspectName",
+              td.inspect_result "inspectResult",
+              td.refer_scale "referScale",
+              td.result_unit "resultUnit"
+         from tb_inspect_detail td
+        where  td.inspect_id = #{inspectId} and td.item_code = #{itemCode} order by td.print_order
+	</select>
+	
+	<select id="getHighChars" parameterType="java.util.Map" resultType="inspect">
+	   select 
+ 		 dd.item_name itemName,
+         to_char(ti.inspect_date,'yyyy-MM-dd') inspectDate,
+         dd.refer_scale referScale,
+         dd.inspect_result inspectResult
+            from tb_inspect_detail dd, tb_inspect ti
+            where dd.inspect_id = ti.inspect_id
+            and dd.report_item_code = #{reportItemCode}
+            and ti.pati_serial = #{patiSerial}
+	</select>
+	
+</mapper>

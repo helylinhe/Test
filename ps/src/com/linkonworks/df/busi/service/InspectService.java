@@ -1,0 +1,20 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.Inspect;
+
+public interface InspectService {
+	public List<Inspect> getPageInspect(Page page);
+	
+	public List<Inspect> getInspects(Page page);
+	
+	public List<Inspect> getInspectsDetail(Map<String , Object> map);
+	
+	public List<Inspect> getHighChars(Map<String , Object> map);
+	
+	
+	public List<Map<String,String>> printFlupName(Map<String,Object> map);
+}

@@ -1,0 +1,52 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.dao.FirstTreatDao;
+import com.linkonworks.df.busi.service.FirstTreatService;
+import com.linkonworks.df.vo.Check;
+import com.linkonworks.df.vo.Inspect;
+
+public class FirstTreatServiceImpl implements FirstTreatService{
+
+	private FirstTreatDao firstTreatDao;
+
+	public FirstTreatDao getFirstTreatDao() {
+		return firstTreatDao;
+	}
+
+	public void setFirstTreatDao(FirstTreatDao firstTreatDao) {
+		this.firstTreatDao = firstTreatDao;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Map<String, String>> getPatiInfo(Map<String, Object> map) {
+		firstTreatDao.getPatiInfo(map);
+		return (List<Map<String, String>>) map.get("someList");
+	}
+
+	@Override
+	public List<Inspect> getInspectInfo(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return firstTreatDao.getInspectInfo(map);
+	}
+
+	@Override
+	public List<Check> getCheckInfo(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return firstTreatDao.getCheckInfo(map);
+	}
+
+	@Override
+	public int savePatiCase(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		
+		return firstTreatDao.savePatiCase(map);
+	}
+
+	
+	
+}

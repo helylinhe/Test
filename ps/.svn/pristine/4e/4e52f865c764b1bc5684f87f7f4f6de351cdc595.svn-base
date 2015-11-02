@@ -1,0 +1,245 @@
+$(function (){
+	
+	$.ajax({
+        type: "post",
+        url: path+'/dataImportRuleAction!loadComboboxCount.action',
+        dataType : "json",
+        success: function(data){
+        	$('#deptCode').combogrid({    
+        		 panelWidth:200,    
+         	     idField:'deptCode',    
+         	     textField:'deptName',
+         	     data:data[0].department,
+        		 columns:[[    
+        		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+        		           {field:'deptName',title:'科室名称',width:120},    
+        		           {field:'unitCode',title:'院区',width:50,
+        		        	   formatter : function(value,row,index) {
+        		   				if(value=='1'){return '北院';}
+        		   				if(value=='2'){return '南院';}
+        		   			     }
+        		        	 },    
+        		       ]] ,   
+        	});
+        	$('#flupName').combogrid({    
+        	    panelWidth:200,    
+        	    idField:'flupNameId',    
+        	    textField:'flupName',
+        	    data:data[0].flupNameDictVO,
+        	    columns:[[    
+              	        {field:'flupName',title:'随访名称',width:180},    
+              	        {field:'flupNameId',title:'flupNameId',width:100,hidden:true},    
+              	    ]],
+              	    singleSelect : true,
+              	    onClickRow:function(index,row){
+              	    	$('#flupName').val(row.flupName);
+              	    	$('#flupNameId').val(row.flupNameId);
+      				} 
+        	});  
+//        	$('#deptCode').combobox('loadData', data[0].department);
+//        	$('#deptCode').combobox('select', data[0].department[0].deptCode);
+        	search();
+        },
+    });
+	
+	
+	
+	
+	$('#keshisuifangratetable').datagrid( {
+		method:'get',
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		queryParams : '',
+		singleSelect : true,
+	    title:'随访结果统计',
+		pagination : true,
+		pageSize:10,
+        pageList:[10,20],
+		columns : [[  
+				{
+					field : 'deptCode',
+					title : '科室代码',
+					width : 80,
+					align : 'center',
+					hidden:true
+				},
+				{
+					field : 'flupTableNameId',
+					title : '随访表ID',
+					width : 80,
+					align : 'center',
+					hidden:true
+				},
+			{
+				field : 'deptName',
+				title : '科室名称',
+				width : 80,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+				}
+			}, {
+				field : 'flupName',
+				title : '随访表名',
+			    width : 200,
+				align : 'center',
+				formatter : function(value,row,index) {
+					return value==''?'全部':value;
+				}
+			}, {
+			field : 'totalCountNum',
+			title : '随访总人数',
+		    width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'complateCountUnum',
+			title : '已随访人数',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		},{
+			field : 'count',
+			title : '随访率',
+			width : 100,
+			align : 'center',
+			formatter: function(value,row,index){
+					if(row.totalCountNum=="0"){
+						return "0%";
+					}else{
+					return formatFloat(row.complateCountUnum*100/row.totalCountNum,2) + "%";
+					}
+			}
+		}
+		]],
+		onClickRow : function(rowIndex, rowData) {
+			if($("#flupType").combobox('getValue')=='0'){
+				var row = $("#keshisuifangratetable").datagrid("getSelected");
+//				createHighcharts(rows, rowData.itemName, "全院");
+				$.ajax({
+					type : "post",
+					url : path + '/employeeAction!getDeptHigtChart.action',
+					dataType : "json",
+					data : {    
+						        'map.flupTableNameId':$("#flupName").combogrid('getValue'),'map.deptCode': rowData.deptCode,
+								'map.flupDateStart':$("#flupDateStart").datebox("getValue"),'map.flupDateEnd':$("#flupDateEnd").datebox("getValue"),
+								'map.flupType':$("#flupType").combobox("getValue")
+					},
+					success : function(data) {
+						createHighcharts(data[0].rows,row.deptName+'随访率统计' , row.deptName);
+					}
+				});
+			}else{
+				var row = $("#keshisuifangratetable").datagrid("getSelected");
+				$.ajax({
+					type : "post",
+					url : path + '/employeeAction!getDeptHigtChart.action',
+					dataType : "json",
+					data : {
+						'map.flupTableNameId':$("#flupName").combogrid('getValue'),'map.deptCode': rowData.deptCode,
+						'map.flupDateStart':$("#flupDateStart").datebox("getValue"),'map.flupDateEnd':$("#flupDateEnd").datebox("getValue"),
+						'map.flupType':$("#flupType").combobox("getValue")
+					},
+					success : function(data) {
+						
+						createHighcharts(data[0].rows,row.deptName+'随访率统计' , row.deptName);
+					}
+				});
+				
+			}
+		}
+ });  
+});
+
+function search(){
+	$("#keshisuifangratetable").datagrid("unselectAll");
+	var param={'map.flupTableNameId':$("#flupName").combogrid('getValue'),'map.deptCode': $("#deptCode").combogrid("getValue"),
+			'map.flupDateStart':$("#flupDateStart").datebox("getValue"),'map.flupDateEnd':$("#flupDateEnd").datebox("getValue"),
+			'flupType':$("#flupType").combobox("getValue")};
+	 loadData(path+'/employeeAction!loadDataGrid.action','keshisuifangratetable',param);
+}
+
+function formatFloat(src, pos)
+{
+    return Math.round(src*Math.pow(10, pos))/Math.pow(10, pos);
+}
+
+
+function createHighcharts(data, title, name) {
+	console.info(data);
+	var categories = new Array();
+	var seriesDate = new Array();
+	var text = '';
+	var titleText = '';
+	if (data.length == 0) {
+		categories.push('');
+		seriesDate.push('');
+		text = '无图像';
+		titleText = '';
+	} else {
+		text = '';
+		titleText = data[0].resultUnit;
+		for ( var int = 0; int < data.length; int++) {
+			if($("#flupType").combobox('getValue')=='0'){
+				categories.push(data[int].flupDate);
+				seriesDate.push(parseFloat(data[int].flupRate));
+			}else{
+				categories.push(data[int].deptName);
+				seriesDate.push(parseFloat(formatFloat(data[int].complateCountUnum*100/data[int].totalCountNum,2)));
+			}
+		}
+	}
+
+	$('#container').highcharts({
+		chart : {
+			type : 'spline'
+		},
+		title : {
+			text : title
+		},
+		subtitle : {
+			text : text
+		},
+		xAxis : {
+			categories : categories,
+			labels : {
+				step : 1
+			},
+			tickInterval : 1
+		},
+		yAxis : {
+			title : {
+				text : '随访率(%)'
+			},
+			labels : {
+				formatter : function() {
+					return this.value;
+				}
+			}
+		},
+		tooltip : {
+			crosshairs : true,
+			shared : true
+		},
+		plotOptions : {
+			spline : {
+				marker : {
+					radius : 4,
+					lineColor : '#666666',
+					lineWidth : 1
+				}
+			}
+		},
+		series : [ {
+			name : name,
+			data : seriesDate
+		} ]
+	});
+
+}

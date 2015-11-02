@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.EmployeeDao">
+	<select id="getPageEmp" parameterType="page" resultType="employee">
+		select te.jobnum "jobnum",
+	    te.passwd "passwd",
+	    te.name "name",
+	    te.dept_code
+	    "deptCode",
+	    te.title "title",
+	    te.position "position",
+	    te.status "status",
+	    te.memo "memo",
+	    te.mobile_phone
+	    "mobilePhone",
+	    te.role_code "roleCode",
+	    te.contact_number "contactNumber",
+	    f_get_dept_name(te.dept_code) "department",  
+	    tr.role_name "roleName",
+	    replace(replace(te.unit_code,'2','南院'),'1','北院') unitCode
+	    from tb_employee te
+        left join
+        tb_role tr
+        on te.role_code=tr.role_code
+        where 1=1
+		<if test="params.jobnum!=null and params.jobnum!=''">
+			and te.jobnum like '%'||#{params.jobnum}||'%'
+		</if>
+		<if test="params.name!=null and params.name!=''">
+			and te.name like '%'||#{params.name}||'%'
+		</if>
+		<if test="params.deptCode!=null and params.deptCode!=''">
+			and te.dept_code like   '%'||#{params.deptCode}||'%' 
+		</if>
+		<if test="params.roleCode!=null and params.roleCode!=''">
+			and te.role_code like '%'||#{params.roleCode}||'%'
+		</if>
+		<if test="params.status!=null and params.status!=''">
+			and te.status like '%'||#{params.status}||'%'
+		</if>
+
+		<if test="params.mobilePhone!=null and params.mobilePhone!=''">
+			and te.mobile_phone like '%'||#{params.mobilePhone}||'%'
+		</if>
+		<if test="params.contactNumber!=null and params.contactNumber!=''">
+			and te.contact_number like'%'||#{params.contactNumber}||'%'
+		</if>
+		<if test="params.title!=null and params.title!=''">
+			and te.title like '%'||#{params.title}||'%'
+		</if>
+		order by te.jobnum desc
+	</select>
+	<insert id="insert" parameterType="employee">
+		insert into
+		tb_employee(
+		jobnum,
+		passwd,
+		name,
+		dept_code,
+		title,
+		position,
+		status,
+		mobile_phone,
+		role_code,
+		contact_number,
+		unit_code
+		)
+		values(
+		#{jobnum},
+		#{passwd},
+		#{name},
+		#{deptCode},
+		#{title},
+		#{position},
+		#{status},
+		#{mobilePhone},
+		#{roleCode},
+		#{contactNumber},
+		#{unitCode}
+		)
+	
+	</insert>
+
+	<update id="update" parameterType="employee">
+		update
+		tb_employee
+		set
+		name=#{name},
+		dept_code=#{deptCode},
+		title=#{title},
+		position=#{position},
+		status=#{status},
+		mobile_phone=#{mobilePhone},
+		role_code=#{roleCode},
+		contact_number=#{contactNumber}
+		where
+		jobnum=#{jobnum}
+
+     </update>
+
+	<select id="login" parameterType="employee" resultType="employee">
+		select
+		    e.jobnum "jobnum",
+		    e.name "name",
+		    e.passwd "passwd",
+		    e.title  "title",
+		    e.position "position",
+		    e.status "status",
+		    e.memo "memo",
+		    e.dept_code "deptCode",
+		    f_get_dept_name(e.dept_code) "department",
+		    e.mobile_phone "mobilePhone",
+		    e.role_code "roleCode",
+		    r.role_name  "roleName",
+		    e.unit_code  "unitCode"
+    from tb_employee e ,tb_role r 
+    where r.role_code=e.role_code  
+		<if test="jobnum!=null and jobnum!=''">
+			and e.jobnum=#{jobnum}
+			</if>
+		<if test="passwd!=null and passwd!=''">
+			and e.passwd=#{passwd}
+			</if>
+	</select>
+	<insert id="loginInfo" parameterType="loginlog">
+		<!--  insert into
+		tb_login_log(id,code,login_time,login_ip)
+		values(seq_tb_login_log.nextval,#{code},sysdate,#{loginIp}) 
+		-->
+		insert into tb_login_log(id,login_code,login_time,login_ip,machine_name,prog_name,ope_type,ope_code,ope_content,send_content,rece_content,ope_result)
+		values(seq_tb_login_log.nextval,'001',sysdate,'aa','aa','随访系统','1','1','a','b','c','d')
+	</insert>
+
+	<select id="checkJobnum" resultType="employee" parameterType="map">
+		select * from tb_employee where jobnum=#{jobnum}
+	</select>
+	
+	<update id="updatePwd" parameterType="com.linkonworks.df.vo.Employee" > 
+	 update tb_employee e
+  	 set e.passwd = #{newPwd1}
+ 	 where e.jobnum = (select m.jobnum
+                      from tb_employee m
+                     where m.jobnum = #{jobnum}
+                       and e.passwd = #{passwd})
+	</update>
+	
+	<update id="updatePwdAll" parameterType="com.linkonworks.df.vo.Employee" > 
+	 update tb_employee e
+  	 set e.passwd = 'e10adc3949ba59abbe56e057f20f883e'
+ 	 where e.jobnum in 
+ 	 	 <foreach item="item" index="index" collection="array"
+			open="(" separator="," close=")">
+			 #{item, jdbcType=NUMERIC}  
+	 </foreach>
+	</update>
+	
+	<select id="getDeptFlupCount" parameterType="page" resultType="com.linkonworks.df.vo.DeptFlupCount">	
+		select Z.flup_table_name_id flupTableNameId,
+		       Z.dept_code deptCode,
+		       Z.dept_name deptName,
+		       Z.flup_name flupName,
+		       decode( Z.total_count_num, '', 0, Z.total_count_num ) totalCountNum,
+		       decode(x.complate_count_unum, '', 0, x.complate_count_unum)  complateCountUnum
+      from (select Y.*, t.total_count_num
+              from (select A.flup_table_name_id,
+                           A.dept_code,
+                           A.dept_name,
+                           d.flup_name
+                      from (select F_GET_DEPT_NAME(t.dept_code) dept_name,
+                                   t.flup_table_name_id flup_table_name_id,
+                                   t.dept_code
+                              from tb_flup_task t
+                             group by t.dept_code, t.flup_table_name_id) A
+                     inner join tb_flup_name_dict d
+                        on d.flup_name_id = A.flup_table_name_id) Y
+              left join (select count(1) total_count_num,
+                               t.dept_code,
+                               t.flup_table_name_id
+                          from tb_flup_task t where
+                          1=1 
+                <if test="params.flupDateStart!=null and params.flupDateStart!=''">
+				and  t.flup_plan_date <![CDATA[>=]]>
+				to_date(#{params.flupDateStart},'yyyy-MM-dd')
+				</if>
+				<if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+				and  t.flup_plan_date <![CDATA[<=]]>
+				to_date(#{params.flupDateEnd},'yyyy-MM-dd')
+				</if>  
+				 <if test="params.flupTableNameId!=null and params.flupTableNameId!=''">
+					and t.flup_table_name_id = #{params.flupTableNameId}
+				</if>
+				 <if test="params.list and params.list!=''">
+					and  t.dept_code  in
+					<foreach item="item" index="index" collection="params.list"
+					open="(" separator="," close=")">
+				 		#{item.deptCode, jdbcType=NUMERIC}  
+				</foreach>
+				</if>
+                group by t.dept_code, t.flup_table_name_id) t
+                on t.dept_code = Y.dept_code
+               and Y.flup_table_name_id = t.flup_table_name_id) Z
+      left join (select count(1) complate_count_unum,
+                        ut.dept_code,
+                        ut.flup_table_name_id
+                   from tb_flup_task ut
+                  where ut.flup_complete = 1 
+                  <if test="params.flupDateStart!=null and params.flupDateStart!=''">
+				and  ut.flup_plan_date <![CDATA[>=]]>
+				to_date(#{params.flupDateStart},'yyyy-MM-dd')
+				</if>
+				<if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+				and  ut.flup_plan_date <![CDATA[<=]]>
+				to_date(#{params.flupDateEnd},'yyyy-MM-dd')
+				</if>  
+				 <if test="params.flupTableNameId!=null and params.flupTableNameId!=''">
+					and ut.flup_table_name_id = #{params.flupTableNameId}
+				</if>
+				 <if test="params.list and params.list!=''">
+					and  ut.dept_code in
+					<foreach item="item" index="index" collection="params.list"
+					open="(" separator="," close=")">
+				 		#{item.deptCode, jdbcType=NUMERIC}  
+				</foreach>
+				</if>
+                  group by ut.dept_code, ut.flup_table_name_id) x
+        on x.dept_code = Z.dept_code
+       and Z.flup_table_name_id = x.flup_table_name_id  where 1=1
+		   <if test="params.flupTableNameId!=null and params.flupTableNameId!=''">
+					and Z.flup_table_name_id = #{params.flupTableNameId}
+			</if>
+			 <if test="params.deptCode and params.deptCode!=''">
+					and  Z.dept_code = #{params.deptCode}
+			</if>
+	</select>
+	
+	<select id="getDeptFlupCountBydept" parameterType="page" resultType="com.linkonworks.df.vo.DeptFlupCount">	
+	select deptcode deptCode ,deptname deptName,sum(totalcountnum) totalCountNum,sum(complatecountunum) complateCountUnum
+		from (select Z.flup_table_name_id flupTableNameId,
+		       Z.dept_code deptCode,
+		       Z.dept_name deptName,
+		       Z.flup_name flupName,
+		       decode( Z.total_count_num, '', 0, Z.total_count_num ) totalCountNum,
+		       decode(x.complate_count_unum, '', 0, x.complate_count_unum)  complateCountUnum
+      from (select Y.*, t.total_count_num
+              from (select A.flup_table_name_id,
+                           A.dept_code,
+                           A.dept_name,
+                           d.flup_name
+                      from (select F_GET_DEPT_NAME(t.dept_code) dept_name,
+                                   t.flup_table_name_id flup_table_name_id,
+                                   t.dept_code
+                              from tb_flup_task t
+                             group by t.dept_code, t.flup_table_name_id) A
+                     inner join tb_flup_name_dict d
+                        on d.flup_name_id = A.flup_table_name_id) Y
+              left join (select count(1) total_count_num,
+                               t.dept_code,
+                               t.flup_table_name_id
+                          from tb_flup_task t where
+                          1=1 
+                <if test="params.flupDateStart!=null and params.flupDateStart!=''">
+				and  t.flup_plan_date <![CDATA[>=]]>
+				to_date(#{params.flupDateStart},'yyyy-MM-dd')
+				</if>
+				<if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+				and  t.flup_plan_date <![CDATA[<=]]>
+				to_date(#{params.flupDateEnd},'yyyy-MM-dd')
+				</if>  
+				 <if test="params.list and params.list!=''">
+					and  t.dept_code in 
+				<foreach item="item" index="index" collection="params.list"
+					open="(" separator="," close=")">
+				 		#{item.deptCode, jdbcType=NUMERIC}  
+				</foreach>
+				</if>
+                group by t.dept_code, t.flup_table_name_id) t
+                on t.dept_code = Y.dept_code
+               and Y.flup_table_name_id = t.flup_table_name_id) Z
+      left join (select count(1) complate_count_unum,
+                        ut.dept_code,
+                        ut.flup_table_name_id
+                   from tb_flup_task ut
+                  where ut.flup_complete = 1 
+                  <if test="params.flupDateStart!=null and params.flupDateStart!=''">
+				and  ut.flup_plan_date <![CDATA[>=]]>
+				to_date(#{params.flupDateStart},'yyyy-MM-dd')
+				</if>
+				<if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+				and  ut.flup_plan_date <![CDATA[<=]]>
+				to_date(#{params.flupDateEnd},'yyyy-MM-dd')
+				</if>  
+				 <if test="params.list and params.list!=''">
+					and  ut.dept_code in 
+				<foreach item="item" index="index" collection="params.list"
+					open="(" separator="," close=")">
+				 		#{item.deptCode, jdbcType=NUMERIC}  
+				</foreach>
+				</if>
+                  group by ut.dept_code, ut.flup_table_name_id) x
+        on x.dept_code = Z.dept_code
+       and Z.flup_table_name_id = x.flup_table_name_id  where 1=1
+			 <if test="params.deptCode and params.deptCode!=''">
+					and  Z.dept_code = #{params.deptCode}
+			</if>
+			) group by deptcode ,deptname
+	</select>
+	
+	<select id="getHosptialConfig" parameterType="java.util.List" resultType="com.linkonworks.df.vo.HospitalConfig">
+			select h.unit_code unitCode, h.hos_short_name hosShortName
+			  from tb_hospital_config h
+			 where 1=1 and h.unit_code in 
+	 <foreach collection="list" item="item" open="(" separator="," close=")">
+	 	 	#{item}  
+	 </foreach>
+	 
+			
+	</select>
+	
+</mapper>
+

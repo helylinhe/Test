@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!-- 手术表 -->
+<mapper namespace="com.linkonworks.df.busi.dao.PatiOperateDao">
+
+	<select id="getPageOper" parameterType="page" resultType="patioperate">
+		select
+		tpo.inpati_number "inpatiNumber",
+		tpo.inpati_serial_number
+		"inpatiSerialNumber",
+		tpo.operation_name
+		"operationName",
+		tpo.operation_doctor_code
+		"operationDoctorCode",
+		tpo.operation_date
+		"operationDate"
+		from
+		tb_pati_operate tpo
+		where 1=1
+		<if test="params.patiSerial!=null and params.patiSerial!=''">
+			and tpo.pati_serial=#{params.patiSerial}
+		 </if>
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and tpo.inpati_number=#{params.inpatiNumber}
+		 </if>
+		<if
+			test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+			and tpo.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+	</select>
+</mapper>

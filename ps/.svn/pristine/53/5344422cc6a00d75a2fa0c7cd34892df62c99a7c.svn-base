@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PatiDiseaseDictDao">
+
+	<select id="findPageList" parameterType="page"
+		resultType="com.linkonworks.df.vo.PatiDiseaseDict">
+	select to_char(d.operate_date, 'yyyy-mm-dd') operateDate,
+       d.id id,
+       d.pati_serial patiserial,
+       d.inpati_number inpatiNumber,
+       d.inpati_serial_number inpatiSerialNumber,
+       d.dept_code deptCode,
+       d.disease_name_id diseaseNameId,
+       dict.disease_name diseaseName
+	  from  tb_pati_disease_dict d,tb_disease_name_dict dict
+	 where 1=1 and d.disease_name_id=dict.disease_name_id
+	 <choose>
+	 	<when test="params.medicalInsuranceCode !=null and  params.medicalInsuranceCode!=''">
+	 		and d.medical_insurance_code =#{params.medicalInsuranceCode}
+	 	</when>
+	 	<otherwise>
+	 		<if test="params.inpatiNumber !=null and  params.inpatiNumber!=''">
+			    and d.inpati_number =#{params.inpatiNumber}
+		    </if>
+	 	</otherwise>
+	 </choose>
+		<if test="params.name !=null and  params.name!=''">
+			and d.name  like '%'||#{params.name}||'%'
+		</if>
+	</select>
+
+	<select id="findDiseaseNameDict" resultType="com.linkonworks.df.vo.DiseaseNameDict">
+		select d.disease_name_id diseaseNameId,d.disease_name diseaseName from
+		tb_disease_name_dict d
+		where d.dept_code in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+	</select>
+
+	
+
+	<insert id="insert" parameterType="com.linkonworks.df.vo.PatiDiseaseDict">
+		insert into tb_pati_disease_dict(id,pati_serial,inpati_number,inpati_serial_number, medical_insurance_code,name,disease_name_id, operate_date,operate_employee_code,unit_code)
+		values(seq_tb_pati_disease_dict.nextval,#{patiSerial},#{inpatiNumber},#{inpatiSerialNumber},#{medicalInsuranceCode},#{name},#{diseaseNameId},sysdate,#{operateEmployeeCode},#{unitCode})
+	</insert>
+
+
+	<delete id="delete" parameterType="String">
+		delete tb_pati_disease_dict d where d.id in
+		<foreach item="item" index="index" collection="array" open="("
+			separator="," close=")">
+			#{item, jdbcType=NUMERIC}  
+		</foreach>
+	</delete>
+
+	<select id="findDate" resultType="com.linkonworks.df.vo.PatiDiseaseDetail"
+		parameterType="com.linkonworks.df.vo.PatiDiseaseDetail">
+		select
+		distinct(d.operate_date), d.pati_serial patiSerial, d.inpati_number
+		inpatiNumber , to_char(d.operate_date,'yyyy-mm-dd') operateDate from
+		tb_pati_disease_detail d where d.pati_serial =#{patiSerial} and
+		d.inpati_number= #{inpatiNumber}
+	</select>
+
+</mapper>
+

@@ -1,0 +1,76 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.RowBounds;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.UserDao;
+import com.linkonworks.df.busi.service.UserService;
+import com.linkonworks.df.vo.User;
+
+public class UserServiceImpl implements UserService{
+	
+	
+	private UserDao userDao;
+
+	@Override
+	public List<User> getUser(Map map) {
+		// TODO Auto-generated method stub
+		
+		return userDao.getUser(map);
+	}
+
+	public UserDao getUserDao() {
+		return userDao;
+	}
+
+	public void setUserDao(UserDao userDao) {
+		this.userDao = userDao;
+	}
+
+	@Override
+	public int saveUser(User user) {
+		
+		return userDao.saveUser(user);
+	}
+
+	@Override
+	public User getUserDetail(String name) {
+		// TODO Auto-generated method stub
+		return userDao.getUserDetail(name);
+	}
+
+	@Override
+	public List<User> getAllUser(Map map) {
+		
+		return userDao.getAllUser(map);
+	}
+
+	@Override
+	public int getAllUserCount(Map map) {
+		
+		return userDao.getAllUserCount(map);
+		
+	}
+
+	@Override
+	public List<User> findListPage(Page page) {
+		// TODO Auto-generated method stub
+		return userDao.findPageList(page);
+	}
+
+	@Override
+	public List<User> getPageUser(Page page) {
+		// TODO Auto-generated method stub
+		return userDao.getPageUser(page);
+	}
+
+	
+
+	
+
+	
+
+}

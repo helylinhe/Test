@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.linkonworks.df.busi.dao.DynamicReportDao">
+	<select id="pageReportItems" parameterType="page" resultType="java.util.Map">
+	  select rownum numberNo, r.group_name "groupName",r.item_name "itemName",r.table_name "tableName" from tb_report_item_selection r  
+		where 1=1  and r.item_name is not null
+	  <if test="params.groupName!=null and params.groupName!=''">
+	    and r.group_name like '%'||#{params.groupName}||'%'
+	  </if>
+	  <if test="params.itemName!=null and params.itemName!=''">
+	    and r.item_name  like '%'||#{params.itemName}||'%'
+	  </if>
+      <if test="list!=null and list!=''">
+				and r.dept_code  in
+				<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+				</foreach>
+		</if>
+		
+	</select>
+	
+	<select id="findViewReportItems" parameterType="java.lang.String" resultType="exportresponse">
+		select r.group_name "groupName",r.item_name "itemName",r.table_name "tableName" from tb_export_response r
+		where r.dept_table_id=#{_parameter}
+	</select>
+	
+	<select id="findRightReporItems" parameterType="java.util.Map" resultType="java.util.Map">
+		select r.id "id",r.group_name "groupName",r.item_name "itemName",r.table_name "tableName" from tb_export_response r
+		where 1=1 
+		<if test="deptTableId!=null and deptTableId!=''">
+		  	and r.dept_table_id=#{deptTableId}
+		</if>
+	</select>
+	
+	<select id="findReportName" parameterType="java.util.List" resultType="reportName">
+		select t.report_name "reportName",t.id "id" from tb_report_name t where t.status=1 
+		<if test="list!=null and list!=''">
+			and t.dept_code in 
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+			</foreach>
+		</if>
+	</select>
+	<!-- 查询动态报表列表 -->
+	<select id="pageReport" parameterType="page" resultType="java.util.Map">
+	  select 
+    A.id,
+    A.report_name   reportName,
+       A.dept_code   deptCode,
+       A.dept_name   deptName,
+       A.opreate_date opreateDate,
+       A.employee_no employeeNo,
+       A.status status,
+       A.unit_code unitCode
+      from (
+        select
+        t.id,
+        t.report_name,
+        t.dept_code ,
+         f_get_dept_name(t.dept_code) dept_name,
+         to_char(t.opreate_date,'yyyy-mm-dd') opreate_date,
+         f_get_employee_name(t.employee_no) employee_no,
+         t.status,
+         t.unit_code
+      from tb_report_name t
+     where 
+       1=1
+		 	<if test="params.reportName!=null and params.reportName!=''">
+			 	and t.report_name  like '%'||#{params.reportName}||'%' 
+		 	</if> 
+		 	<if test="params.deptCode!=null and params.deptCode!=''">
+			 	and t.dept_code =#{params.deptCode}
+		 	</if>
+		 ) A
+	</select>
+	<!-- 修改动态报表状态 -->
+	<update id="editStatus" parameterType="com.linkonworks.df.vo.ReportName">
+		 update tb_report_name t
+		    set t.status  = #{status}
+		  where id = #{id}
+	</update>
+	<!-- 修改动态报表信息 -->
+	<update id="editReport" parameterType="com.linkonworks.df.vo.ReportName">
+		 update tb_report_name t
+		    set t.report_name  = #{reportName},
+		        t.dept_code    = #{deptCode},
+		        t.opreate_date = to_date(#{opreateDate},'yyyy-mm-dd'),
+		        t.employee_no  = #{employeeNo},
+		        t.unit_code    = #{unitCode}
+		  where id = #{id}
+	</update>
+	<!-- 添加动态报表信息 -->
+	<insert id="addReport" parameterType="com.linkonworks.df.vo.ReportName">
+		insert into tb_report_name
+			  (id,
+			   dept_code,
+			   opreate_date,
+			   employee_no,
+			   unit_code,
+			   status,
+			   report_name)
+			values
+			  (seq_tb_report_name.nextval,
+			  #{deptCode},
+			  sysdate,
+			  #{employeeNo},
+			  #{unitCode},
+			  #{status},
+			  #{reportName})
+	</insert>
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_export_response.nextval FROM DUAL
+		</selectKey>
+		insert into tb_export_response(id,group_name,item_name,table_name,dept_table_id)
+			SELECT seq_tb_flup_item_response.NEXTVAL , A.* FROM (
+		<foreach collection="list" item="item"  index="index" separator="union">
+			select #{item.groupName},#{item.itemName},#{item.tableName},#{item.deptNameId} from dual
+		</foreach>
+		) A
+	</insert>
+	<delete id="deleteBatch" parameterType="java.lang.String">
+		delete from tb_export_response r where r.dept_table_id=#{_parameter}
+	</delete>
+	
+	<select id="getReportItems" parameterType="java.lang.String" resultType="exportresponse">  
+  select 'column'||rownum "columnName",M.group_name  "groupName",M.item_name "itemName" , M.dept_table_id "deptNameId"
+ 		from(SELECT T.* FROM TB_EXPORT_RESPONSE  T  where t.dept_table_id in (select n.id from tb_report_name n where n.dept_code=#{_parameter}) ORDER BY TABLE_NAME,GROUP_NAME,ITEM_NAME) M
+          
+	</select>
+	
+	<select id="findReportItems" parameterType="page" resultType="java.util.Map">
+		
+	  select z.name "name",
+	    to_char(z.OUT_HOSPITAL_DATE,'yyyy-MM-dd') "outHospitalDate",
+	    to_char(z.in_hospital_date,'yyyy-MM-dd') "inHospitalDate",
+	    decode(z.gender,1,'男',2,'女',null) "gender",
+	    f_get_pt_pati_age(x.pati_serial,x.inpati_number) "age",
+	    x.pati_serial "patiSerial",
+	    x.inpati_number "inpatiNumber",
+	    x.inpati_serial_number "inpatiSerialNumber",
+	   ${params.columns}
+	   from (select
+	    pati_serial,inpati_number,inpati_serial_number,${params.columnsInspect}
+	    from(select A.*,diag.out_hospital_date
+	    from (select t.id,
+	    t.pati_serial, t.inpati_number,
+	    t.inpati_serial_number,d.item_name,
+	    d.report_item_name,d.inspect_result
+	    from tb_inspect t,
+	    tb_inspect_detail d
+	    where t.inspect_id = d.inspect_id) A,
+	    tb_inpati_diag diag
+	    where A.pati_serial = diag.pati_serial
+	    and
+	    A.inpati_number = diag.inpati_number
+	    and A.inpati_serial_number =
+	    diag.inpati_serial_number
+	     <if test="list!=null and list!=''">
+				and diag.out_dept  in
+				<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+				</foreach>
+		</if>
+	    ) group by pati_serial,inpati_number,inpati_serial_number) x inner
+	    join
+	    TB_INPATI_DIAG z on x.pati_serial=z.pati_serial and
+	    x.inpati_number=z.inpati_number
+	    and
+	    x.inpati_serial_number=z.inpati_serial_number
+	</select>
+	
+	
+	<select id="getDynamicSql" parameterType="java.util.Map" statementType="CALLABLE">
+		{call p_dynamic_sql(#{deptCode,mode=IN,jdbcType=VARCHAR},#{inpatiNumber,mode=IN,jdbcType=VARCHAR},
+							#{name,mode=IN,jdbcType=VARCHAR},#{startDate,mode=IN,jdbcType=VARCHAR},
+							#{endDate,mode=IN,jdbcType=VARCHAR},#{result,mode=OUT,jdbcType=VARCHAR})}
+	</select>
+	
+	<select id="dynamicPageData" parameterType="java.util.Map" resultType="java.util.Map">
+		${sql}
+	</select>
+	
+	
+	
+	<select id="loadInspectCheck" parameterType="java.util.Map" resultType="java.util.Map">
+		select distinct(r.group_name) "groupName" from tb_report_item_selection r  
+			where 1=1  and r.group_name is not null
+			<if test="groupName!=null and groupName!=''">
+			 and r.group_name like '%'||#{groupName}||'%'
+			</if>
+			and  r.dept_code in 
+			<foreach collection="department" item="item" index="index" open="(" close=")" separator=",">
+						#{item.deptCode}
+			</foreach>
+	</select>
+	
+	<select id="loadReportItems" parameterType="java.util.Map" resultType="java.util.Map">
+		select distinct(r.item_name) "itemName",r.group_name "groupName" from tb_report_item_selection r  
+			where 1=1  and r.item_name is not null
+		<if test="groupName!=null and groupName!=''">
+			and r.group_name = #{groupName}
+		</if>
+	</select>
+	
+	
+	<select id="getReportName" parameterType="java.lang.String" resultType="java.util.Map">
+		select r.id id from tb_report_name r where r.dept_code=#{_parameter}
+	</select>
+	
+</mapper>

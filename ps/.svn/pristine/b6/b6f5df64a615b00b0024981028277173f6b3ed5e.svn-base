@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.MobileFlupDao">
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_mobile_flup.Nextval FROM DUAL
+		</selectKey>
+		insert into
+		tb_mobile_flup(id,flup_group_id,flup_name_id,pati_serial,inpati_number,group_one,group_two,group_three,data_type,item_name,item_value,task_id)
+		SELECT seq_tb_mobile_flup.Nextval , A.* FROM (
+		<foreach collection="list" item="item" index="index"
+			separator="union">
+			select
+			#{item.flupGroupId},#{item.flupNameId},#{item.patiSerial},#{item.inpatiNumber},#{item.groupOne},#{item.groupTwo},#{item.groupThree},#{item.dataType},#{item.itemName},#{item.itemValue},#{item.flupTaskId}
+			from dual
+		</foreach>
+		) A
+	</insert>
+
+
+	<update id="update" parameterType="mobileFlup">
+		update tb_mobile_flup
+		set
+		group_one=#{groupOne},
+		group_two=#{groupTwo},
+		group_three=#{groupThree},
+		item_name=#{itemName},
+		item_value=#{itemValue}
+		where flup_group_id=#{flupGroupId}
+	</update>
+
+	<update id="updateFlupPlan" parameterType="java.util.Map">
+		update tb_flup_plan p
+		<set>
+			<if test="flupStopState!='' and flupStopState!=null">
+				p.flup_stop_state = #{flupStopState},
+   			</if>
+			<if test="flupStopReason!='' and flupStopReason!=null">
+				p.flup_stop_reason = #{flupStopReason},
+   			</if>
+			<if test="operateEmployeeCode!='' and operateEmployeeCode!=null">
+				p.operate_employee_code = #{operateEmployeeCode},
+   			</if>
+			<if test="operateDate!='' and operateDate!=null">
+				p.operate_date = sysdate
+   			</if>
+		</set>
+		where p.pati_serial = #{patiSerial} and p.inpati_number =#{inpatiNumber}
+				and p.inpati_serial_number = #{inpatiSerialNumber}
+				and p.flup_num <![CDATA[>=]]> #{flupNum}
+
+	</update>
+
+
+	<update id="updatePatiFlupRule" parameterType="java.util.Map">
+		update tb_pati_flup_rule p
+		<set>
+			<if test="flupStatus!='' and flupStatus!=null">
+				p.flup_status = #{flupStatus},
+   			</if>
+			<if test="operateEmployeeCode!='' and operateEmployeeCode!=null">
+				p.operate_employee_code = #{operateEmployeeCode},
+   			</if>
+			<if test="operateDate!='' and operateDate!=null">
+				p.operate_date = sysdate
+   			</if>
+		</set>
+		where p.pati_serial = #{patiSerial} and p.inpati_number = #{inpatiNumber}
+			and p.inpati_serial_number = #{inpatiSerialNumber}
+
+	</update>
+
+	<select id="findNextPlans" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.FlupPlan">
+
+	select t.id "id",
+		 to_char(t.flup_plan_date,'yyyy-mm-dd') "flupPlanDate",t.TASK_OPEN
+		"taskOpen",
+		t.inpati_number "inpatiNumber" ,t.pati_serial "patiSerial",
+		t.inpati_serial_number "inpatiSerialNumber",
+		t.flup_num "flupNum"
+		from tb_flup_plan t
+		where t.FLUP_STOP_STATE = 0
+		<if test="patiSerial!=null and patiSerial!=''">
+			and t.pati_serial = #{patiSerial}
+					</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and t.inpati_number = #{inpatiNumber}
+					</if>
+		<if test="flupPlanDate!=null and flupPlanDate!=''">
+			and t.flup_plan_date > to_date(#{flupPlanDate},'yyyy-MM-dd')
+		</if>
+		order by t.flup_plan_date 
+
+	</select>
+
+	<select id="findNext" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.FlupPlan">
+		select t.id "id", 
+		to_char(t.flup_plan_date,'yyyy-mm-dd') "flupPlanDate"
+		from tb_flup_plan t
+		where t.FLUP_STOP_STATE = 0
+		<if test="patiSerial!=null and patiSerial!=''">
+			and t.pati_serial = #{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and t.inpati_number = #{inpatiNumber}
+		</if>
+		<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+			and t.inpati_serial_number = #{inpatiSerialNumber}
+		</if>
+		<if test="flupTimes!=null and flupTimes!='' and flupTimes!='NaN'">
+			and t.FLUP_NUM = #{flupTimes}
+		</if>
+		
+	</select>
+	
+	<delete id="deleteFlupTask" parameterType="java.util.Map">
+		delete from tb_flup_task t
+		 where  1 = 1
+		 <if test="patiSerial!=null and patiSerial!=''">
+			and t.pati_serial = #{patiSerial}
+		</if>
+		 <if test="inpatiNumber!=null and inpatiNumber!=''">
+			and t.inpati_number = #{inpatiNumber}
+		</if>
+		 <if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+			and t.inpati_serial_number = #{inpatiSerialNumber}
+		</if>
+		 <if test="flupNum!=null and flupNum!=''">
+			 and t.flup_times  <![CDATA[>=]]> #{flupNum}
+		</if>
+		 
+	</delete>
+
+
+	<update id="updateFlupDate" parameterType="com.linkonworks.df.vo.FlupPlan">
+		update tb_flup_plan p
+		<set>
+			<if test="flupPlanDate!=null and flupPlanDate!=''">
+				 p.flup_plan_date=to_date(#{flupPlanDate},'yyyy-mm-dd')
+			</if>
+		</set>
+		where 1 =1 
+		<if test="patiSerial!=null and patiSerial!=''">
+			and  p.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and p.inpati_number = #{inpatiNumber}
+			</if>
+			 <if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+				and p.inpati_serial_number = #{inpatiSerialNumber}
+			</if>
+			<if test="flupNum!=null and flupNum!=''">
+			and p.flup_num  = #{flupNum}
+		</if>
+	</update>
+	
+	<update id="updateFlupTask" parameterType="com.linkonworks.df.vo.FlupTask">
+		update tb_flup_task p
+		<set>
+			<if test="flupPlanDate!=null and flupPlanDate!=''">
+				 p.flup_plan_date=to_date(#{flupPlanDate},'yyyy-mm-dd')
+			</if>
+		</set>
+		where 1 =1 
+		<if test="patiSerial!=null and patiSerial!=''">
+			and  p.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and p.inpati_number = #{inpatiNumber}
+			</if>
+			 <if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+				and p.inpati_serial_number = #{inpatiSerialNumber}
+			</if>
+			 <if test="flupTimes!=null and flupTimes!=''">
+				 and p.flup_times  = #{flupTimes}
+		</if>
+			 <if test="id!=null and id!=''">
+				 and p.id= #{id}
+		</if>
+	</update>
+	
+	<!--<insert id="addFlupPlan" parameterType="java.util.List">
+		insert into tb_flup_plan(id,pati_serial,inpati_number,medical_insurance_code,inpati_serial_number,name,dept_code,
+	unit_code,flup_plan_date,task_open,flup_num,operate_date,operate_employee_code,flup_stop_state,flup_stop_reason)
+	values(seq_tb_flup_plan.nextval,#{patiSerial},#{inpatiNumber},#{medicalInsuranceCode},#{inpatiSerialNumber},#{name},#{deptCode},#{unitCode},
+			to_date(#{flupPlanDate},'yyyy-mm-dd'),#{taskOpen},#{flupNum},sysdate,#{operateEmployeeCode},#{flupStopState},#{flupStopReason})
+	</insert> -->
+	
+	<insert id="insertAddFlupPlans" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_flup_plan.nextval FROM DUAL
+		</selectKey>
+		insert into tb_flup_plan(id,pati_serial,inpati_number,medical_insurance_code,inpati_serial_number,name,dept_code,
+	unit_code,flup_plan_date,task_open,flup_num,operate_date,operate_employee_code,flup_stop_state,flup_stop_reason)
+		SELECT seq_tb_flup_plan.nextval , A.* FROM (
+		<foreach collection="list" item="item" index="index"
+			separator="union">
+			select
+			#{item.patiSerial},#{item.inpatiNumber},#{item.medicalInsuranceCode},#{item.inpatiSerialNumber},#{item.name},#{item.deptCode},#{item.unitCode},
+			to_date(#{item.flupPlanDate},'yyyy-mm-dd'),#{item.taskOpen},#{item.flupNum},sysdate,#{item.operateEmployeeCode},#{item.flupStopState},#{item.flupStopReason}
+			from dual
+		</foreach>
+		) A
+	</insert>
+	
+	
+	<select id="checkMobileFlup" parameterType="java.util.Map" resultType="int">
+		select count(1)
+		  from tb_mobile_flup f
+		 where 1=1
+		 <if test="patiSerial!=null and patiSerial!=''">
+			and  f.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and f.inpati_number = #{inpatiNumber}
+		</if>
+		<if test="taskId!=null and taskId!=''">
+				and f.task_id = #{taskId}
+		</if>
+		   
+
+	</select>
+	
+	
+	
+	<!-- 获取某次历史随访信息 -->
+	<select id="histroyFlupInfo" parameterType="java.util.Map" resultType="mobileflup">
+	select f.id "id",
+       f.flup_group_id "flupGroupId",
+       f.group_one "groupOne",
+       f.group_two "groupTwo",
+       f.group_three "groupThree",
+       f.item_name "itemName",
+       f.item_value "itemValue"
+  from tb_mobile_flup f
+ where 1=1
+ 	<if test="patiSerial!=null and patiSerial!=''">
+			and  f.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and f.inpati_number = #{inpatiNumber}
+		</if>
+		<if test="taskId!=null and taskId!=''">
+				and f.task_id = #{taskId}
+		</if>
+	</select>
+	
+	
+	<delete id="deleteFlupItem" parameterType="java.util.Map">
+		delete from tb_mobile_flup m where  1 = 1
+		<if test="patiSerial!=null and patiSerial!=''">
+			and  m.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and m.inpati_number = #{inpatiNumber}
+		</if>
+		<if test="taskId!=null and taskId!=''">
+				and m.task_id = #{taskId}
+		</if>
+	</delete>
+	
+
+</mapper>

@@ -1,0 +1,189 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.util.CellRangeAddress;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DiseaseItemTemplateDao;
+import com.linkonworks.df.busi.service.DiseaseItemTemplateService;
+import com.linkonworks.df.vo.DiseaseItem;
+import com.linkonworks.df.vo.DiseaseItemTemplate;
+import com.linkonworks.df.vo.DiseaseNameDict;
+
+public class DiseaseItemTemplateServiceImpl implements DiseaseItemTemplateService{
+
+	private DiseaseItemTemplateDao diseaseItemTemplateDao;
+
+	public DiseaseItemTemplateDao getDiseaseItemTemplateDao() {
+		return diseaseItemTemplateDao;
+	}
+
+	public void setDiseaseItemTemplateDao(
+			DiseaseItemTemplateDao diseaseItemTemplateDao) {
+		this.diseaseItemTemplateDao = diseaseItemTemplateDao;
+	}
+
+	@Override
+	public List<DiseaseItem> diseaseItemFirst() {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemFirst();
+	}
+
+	@Override
+	public List<DiseaseItem> diseaseItemSeconde(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemSeconde(map);
+	}
+
+	@Override
+	public List<DiseaseItem> pageListDisease(Page page) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.pageListDisease(page);
+	}
+
+	@Override
+	public List<DiseaseNameDict> diseaseNameDict(List list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseNameDict(list);
+	}
+
+	@Override
+	public List<DiseaseItemTemplate> pageListDiseaseRight(Map<String,Object> map) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.pageListDiseaseRight(map);
+	}
+
+	@Override
+	public List<DiseaseItemTemplate> diseaseItemTemplates(String diseaseItemId) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemTemplates(diseaseItemId);
+	}
+
+	@Override
+	public int addBatch(List<DiseaseItemTemplate> list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.insertBatch(list);
+	}
+
+	@Override
+	public int updateNormalUseState(List list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.updateNormalUseState(list);
+	}
+
+	@Override
+	public int updateUseState(List list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.updateUseState(list);
+	}
+
+	@Override
+	public int deleteDiseaseItem(String diseasName) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.deleteDiseaseItem(diseasName);
+	}
+
+	@Override
+	public HSSFWorkbook exportReportData(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		String d=sdf.format(new Date());
+		
+		//创建一个workbook
+		
+		HSSFWorkbook qubbb = new HSSFWorkbook();
+		
+		/****
+		 * 样式设置
+		 */
+		HSSFCellStyle style = qubbb.createCellStyle(); // 样式对象   
+        style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直   
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平   
+        style.setWrapText(true); 
+       
+        /*****
+         * 
+         * 创建EXCEL HEADER部分
+         */
+		HSSFSheet sheet = qubbb.createSheet("课题报表");
+		sheet.setHorizontallyCenter(true);
+		HSSFRow rowTitle= sheet.createRow(0);
+		HSSFCell cellTitel = rowTitle.createCell(0);
+		HSSFFont  f=qubbb.createFont();
+		HSSFCellStyle s = qubbb.createCellStyle(); 
+		
+		 
+        HSSFFont font = qubbb.createFont();
+        font.setColor(HSSFFont.COLOR_RED);
+        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        s.setFont(font);
+		
+		 
+		 s.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+		 s.setFont(font); 
+		 s.setFillBackgroundColor(HSSFColor.DARK_BLUE.index);
+		 cellTitel.setCellValue("课题报表") ;
+	        
+	        //可以设置跨行，跨列显示
+	         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0,89));
+			//创建行
+			HSSFRow row= sheet.createRow(1);
+			HSSFCell cell = row.createCell(0);
+			cell.setCellStyle(s);
+	        cell.setCellValue("一般指标");
+	        //可以设置跨行，跨列显示
+	         sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+	         
+	          HSSFCell cell1=row.createCell(9);
+	          cell1.setCellStyle(s);
+	          cell1.setCellValue("肝功能");
+	          sheet.addMergedRegion(new CellRangeAddress(1, 1, 9, 14));
+	          
+	          
+	          HSSFCell cell2=row.createCell(15);
+	          cell2.setCellStyle(s);
+	          cell2.setCellValue("肾功能");
+	          sheet.addMergedRegion(new CellRangeAddress(1, 1, 15,19));
+	
+	        
+	          
+	           
+	          
+			/*
+			 * 
+			 * 处理excel Body部分
+			 * 
+			 */
+	          int currentrows=2;
+	          List<Map<String,Object>> list=null;
+	         for(int i=0;i<list.size();i++){
+	        	 currentrows++;
+	        	 HSSFRow rows= sheet.createRow(currentrows);
+	        	 Map<String,Object> hashMap=list.get(i);
+	        	 
+	        	 HSSFCell cells0 = rows.createCell(0);
+	        	 cells0.setCellStyle(style);
+	        	 cells0.setCellValue(hashMap.get("inpatiNumber").toString());
+	        	 
+	        	 HSSFCell cells1 = rows.createCell(1);
+	        	 cells1.setCellStyle(style);
+	        	 if(hashMap.get("name")!=null){
+	        		 cells1.setCellValue(hashMap.get("name").toString());
+		      		}else{
+		      			cells1.setCellValue("");
+		      		}
+		    }
+	         return qubbb;
+	}
+}

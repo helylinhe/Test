@@ -1,0 +1,45 @@
+package com.linkonworks.df.busi.action;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DynamicReportService;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.busi.utils.SessionData;
+
+public class DynamicReportAction {
+	
+	private DynamicReportService dynamicReportService;
+	private Page page=new Page();
+
+	public DynamicReportService getDynamicReportService() {
+		return dynamicReportService;
+	}
+
+	public void setDynamicReportService(DynamicReportService dynamicReportService) {
+		this.dynamicReportService = dynamicReportService;
+	}
+	
+	
+	public Page getPage() {
+		return page;
+	}
+
+	public void setPage(Page page) {
+		this.page = page;
+	}
+
+	public String pageList(){
+		page.setList(SessionData.getDepartmentCode());
+		List<Map<String,String>> list=dynamicReportService.pageReportItems(page);
+		Map<String, Object> results=new HashMap<String, Object>();
+		results.put("rows",list);
+		results.put("totalRecord",page.getTotalRecord());
+		results.put("totalPage", page.getTotalPage());
+		results.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(results);
+		return null;
+	}
+}

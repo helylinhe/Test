@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DoctoradviceDao">
+		<select id="getDoctoradviceList" resultType="com.linkonworks.df.vo.DoctorAdvice"   parameterType="page">
+			select 
+				td.pati_serial "patiSerial",
+				td.inpati_serial_number "inpatiSerialNumber",
+				td.order_Class_Name "orderClassName",
+				td.start_Date_Time "startDateTime",
+				td.order_Text "orderText",
+				td.dosage "dosage",
+				td.dosage_Units "dosageUnits",
+				td.frequency "frequency",
+				td.administration "administration",
+				td.perform_Schedule "performSchedule",
+				td.eat_Time "eatTime",
+				td.stop_Date_Time "stopDateTime",
+				td.stop_Doctor "stopDoctor",
+				td.doctor "doctor",
+				td.freq_Detail "freqDetail",
+				td.drug_Billing_Attr "drugBillingAttr",
+				td.perform_Result "performResult",
+				td.freq_Counter "freqCounter",
+				td.stop_Nurse "stopNurse",
+				td.baoxiao "baoxiao",
+				td.back_Flag "backFlag"
+				from  tb_orders td 
+				where 
+				td.pati_serial = #{params.patiSerial} 
+				and td.inpati_serial_number = #{params.inpatiSerialNumber}
+		</select>
+		
+		
+		
+</mapper>

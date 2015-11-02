@@ -1,0 +1,43 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.FlupGroup;
+
+public interface FlupGroupService {
+
+	public List<FlupGroup> getAllFlupGroup();
+
+	public List<FlupGroup> getGroupTwo(Map map);
+
+	public Integer insert(FlupGroup flupGroup) throws Exception;
+
+	public Integer insert(Map FlupGroup) throws Exception;
+
+	public List<FlupGroup> getPageGroups(Page page);
+
+	public List<FlupGroup> getFlupGroup(String flupNameId);
+
+	public List<FlupGroup> getPageGroup(Map<String, Object> map);
+
+	public int update(FlupGroup flupGroup);
+
+	public int delete(Map<String, Object> map);
+	
+	
+	public int updates(Map<String,Object> map);
+	
+	
+	public List<FlupGroup> standerTemplateGroup(Page page);
+	
+	public List<FlupGroup> rightStandTemplateItem(Page page);
+	
+	public List<FlupGroup> getPageGroupOne(Page page);
+	
+	public  int checkFlupGroup(Map<String,String> map);
+	
+	//检索查询
+		public List<FlupGroup> getAllFlupGroup2(Map<String, Object> map);
+}

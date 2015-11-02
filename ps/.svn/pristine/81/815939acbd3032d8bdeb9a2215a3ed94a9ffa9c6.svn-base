@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DataImportRuleDao">
+	<!-- 根据类型获取dict -->
+	<select id="findDictByEchoSerial" resultType="dict" parameterType="String">
+		select 
+			d.name name ,
+			d.code inputCode 
+		from tb_dict d where d.code_type=#{echoSerial}
+	</select>
+	<!-- 获取所有的科室 -->
+	<select id="findAllDepartments" resultType="com.linkonworks.df.vo.Department" >
+	select d.dept_code deptCode, d.dept_name deptName from tb_department d 
+	</select>
+	<!-- 获取所有的随访表名字 -->
+	<select id="findAllFulpNameDicts" resultType="com.linkonworks.df.vo.FlupNameDict" >
+		select d.flup_name flupName,d.flup_name_id flupNameId from tb_flup_name_dict d
+		where d.use_state = 1 and  d.dept_code in 
+		<foreach item="item" index="index" collection="list"
+			open="(" separator="," close=")">
+			 #{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+		
+		
+	</select>
+	<!-- 查询规则维护 -->
+	<select id="findPageList" parameterType="page" resultType="com.linkonworks.df.vo.DataImportRule">
+       select d.id id,
+       t.dept_name deptName,
+       d.dept_code deptCode,
+       d.flup_name_id flupNameId,
+       F_GET_EMPLOYEE_NAME(d.flup_doctor_code) flupDoctorName,
+       d.flup_type flupType,
+       d.flup_way flupWay,
+       d.flup_object flupObject,
+       d.flup_cycle flupCycle,
+       d.flup_tot_num flupTotNum,
+       d.flup_first_day FlupFirstDay,
+       d.flup_status flupStatus,
+       d.flup_peonum flupPeonum,
+       d.del_state delState,
+       d.diag_name diagName,
+       d.diag_code diagCode,
+       f.flup_name flupName,
+       d.flup_doctor_code flupDoctorCode
+  from tb_data_import_rule d, tb_department t, tb_flup_name_dict f
+ where d.dept_code = t.dept_code
+   and f.flup_name_id = d.flup_name_id
+     <if test="params.delState!=null and params.delState!='' ">
+       and d.del_state =#{params.delState} 
+     </if>
+	 <if test="params.flupNameId!=null  and params.flupNameId!='' ">
+	   and d.flup_name_id like   '%'||#{params.flupNameId}||'%'
+	 </if>
+	  <if test="params.flupType!=null and   params.flupType!=''">
+	   and d.flup_type like '%'||#{params.flupType}||'%'
+	 </if>
+	 
+	  <if test="params.flupWay!=null and params.flupWay!=''">
+	   and d.flup_way like  '%'||#{params.flupWay}||'%'
+	 </if>
+	 <if test="params.flupCycle!=null  and params.flupCycle!=''">
+	   and d.flup_cycle like  '%'||#{params.flupCycle}||'%'
+	 </if>
+	 <if test="params.flupObject!=null  and params.flupObject!=''">
+	   and d.flup_object like  '%'||#{params.flupObject}||'%'
+	 </if>
+	 <if test="params.diagCode!=null  and params.diagCode!=''">
+	   and d.diag_code like  '%'||#{params.diagCode}||'%'
+	 </if>
+	 <if test="params.flupStatus!=null and  params.flupStatus!=''">
+	   and d.flup_status like  '%'||#{params.flupStatus}||'%'
+	 </if>
+	  <if test="list!=null">
+	   and t.dept_code in
+		   <foreach collection="list" index="index" item="item" 
+		   		open="(" close=")" separator=",">
+	  	   	  #{item.deptCode}
+	  	   </foreach>
+	 </if>
+	 and d.del_state =0
+	 order by d.operate_date desc 
+    </select>
+   <!-- 新增规则 --> 
+    <insert id="insert" parameterType="com.linkonworks.df.vo.DataImportRule"  >
+		insert into tb_data_import_rule values(seq_tb_data_import_rule.nextval,#{deptCode},#{flupNameId},#{flupType},
+		#{flupWay},#{flupObject},'',#{flupTotNum},#{flupStatus},'',#{flupDoctorCode},#{flupPeonum},#{diagCode},#{diagName},#{flupDept},sysdate,#{operateEmployeeCode},0,#{flupDateFlag})  
+	</insert>
+	<!-- 修改规则表 -->
+	<update id="update" parameterType="com.linkonworks.df.vo.DataImportRule" >
+		update tb_data_import_rule d set d.dept_code =#{deptCode},d.flup_name_id =#{flupNameId},d.flup_type =#{flupType},d.flup_way =#{flupWay},
+		d.flup_object =#{flupObject},d.flup_tot_num =#{flupTotNum},d.operate_employee_code=#{operateEmployeeCode},d.flup_peonum =#{flupPeonum},d.flup_doctor_code=#{flupDoctorCode},
+		d.flup_status =#{flupStatus},d.flup_dept =#{flupDept},d.diag_code =#{diagCode},d.diag_name =#{diagName},d.flup_date_flag=#{flupDateFlag}  where d.id= #{id}
+	</update>
+	<!-- 修改规则表的停用状态 -->
+	<update id="updateDataImportRule" parameterType="com.linkonworks.df.vo.DataImportRule" >
+		update tb_data_import_rule d  set d.del_state = #{delState}   where d.id= #{id}
+	</update>
+	
+	<select id="getEmployeesByeDeptCode" resultType="com.linkonworks.df.vo.Employee" parameterType="com.linkonworks.df.vo.Department">
+		    select jobNum  jobNum,name  name from tb_employee where dept_code like '%'||#{deptCode}||'%'
+				 order by name
+	</select>
+	
+	<insert id="insertImpruleDetail" parameterType="java.util.List">
+	    <selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_data_import_rule.currval FROM DUAL
+		</selectKey>
+		insert into tb_imprule_detail
+        select seq_tb_imprule_detail.nextval,A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{id},
+	 	 	#{item.inpatiNumber},
+	   		#{item.inpatiSerialNumber}
+            from dual 
+         </foreach>
+        ) A
+	  </insert>
+	  
+	  <insert id="insertImpruleDetailTow" parameterType="java.util.List">
+		insert into tb_imprule_detail
+        select seq_tb_imprule_detail.nextval,A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{item.impruleId},
+	 	 	#{item.inpatiNumber},
+	   		#{item.inpatiSerialNumber}
+            from dual 
+             </foreach>
+        ) A
+	  </insert>
+	  
+	  <delete id="deleteImpruleDetail" parameterType="com.linkonworks.df.vo.DataImportRule" >
+	 	 delete tb_imprule_detail d where d.imprule_id =#{id}
+	  </delete>
+	  
+	  	<select id="getDetailInfo" resultType="com.linkonworks.df.vo.ImpruleDetail" parameterType="com.linkonworks.df.vo.DataImportRule">
+	select d.id id,d.imprule_id impruleId,d.inpati_number inpatiNumber, d.inpati_serial_number inpatiSerialNumber from tb_imprule_detail
+ 	d where d.imprule_id = #{id} order by d.inpati_number 
+		</select>
+		
+	<select id="insertBoolean" resultType="int" parameterType="com.linkonworks.df.vo.DataImportRule">
+					   select d.id id
+			  from tb_data_import_rule d
+			 where d.dept_code = #{deptCode}
+			   and d.flup_type = #{flupType} and  d.del_state =0
+	</select>
+		
+</mapper>

@@ -1,0 +1,256 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.NationDictService;
+import com.linkonworks.df.busi.service.PatiFlupRuleService;
+import com.linkonworks.df.busi.service.PatiService;
+import com.linkonworks.df.busi.utils.ActionUtil;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.NationDict;
+import com.linkonworks.df.vo.Pati;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class PatiAction extends ActionSupport {
+	private HttpServletResponse response;
+	private PatiService patiService;
+	private NationDictService nationDictService;
+	private PatiFlupRuleService patiFlupRuleService;
+	private Pati pati;
+	private Map<String, String> map = new HashMap<String, String>();
+	private Page<Pati> page = new Page<Pati>(); // 参数传递(pageSize
+	private String ids;
+
+	public String addPati() {
+		ActionUtil.printParamsJSON();
+		try {
+			HttpSession session = ServletActionContext.getRequest()
+					.getSession();
+			Employee e = (Employee) session.getAttribute("employee");
+			pati.setEmployeeCode(e.getJobnum());
+			int result = patiService.insert(pati);
+			String json = "";
+
+			if (result >= 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	public String updPati() {
+		try {
+			Map<String,Object> map=new HashMap<String,Object>();
+			map.put("flupMobile", pati.getFlupMobile());
+			map.put("inpatiNumber", pati.getInpatiNumber());
+			map.put("patiSerial", pati.getPatiSerial());
+			int result = patiService.update(pati);
+			int res=patiFlupRuleService.update(map);
+			String json = "";
+			if (result+res > 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String delPati() {
+		String arr_ids[] = ids.split(",");
+		try {
+			int result = patiService.delete(Arrays.asList(arr_ids));
+			String json = "";
+			if (result > 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	public String query() {
+		List<NationDict> list = nationDictService.getAll();
+		JSON json = JSONArray.fromObject(list);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String queryPages() {
+		page.setParams(map);
+		Map<String, Object> itemMap = new HashMap<String, Object>();
+		itemMap.put("rows", patiService.getPagePati(page));
+		itemMap.put("totalRecord", page.getTotalRecord());
+		itemMap.put("totalPage", page.getTotalPage());
+		itemMap.put("pageNo", page.getPageNo());
+		JSON json = JSONArray.fromObject(itemMap);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/***
+	 * 获取病人基本信息
+	 * 
+	 * @return
+	 */
+	public String patiInfo() {
+		Pati p = patiService.getPatiInfo(map);
+		JSON json = JSONArray.fromObject(p);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void checkPati() {
+		try {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("patiSerial", pati.getPatiSerial());
+			map.put("inpatiNumber", pati.getInpatiNumber());
+			HttpServletResponse response = ServletActionContext.getResponse();
+			Pati p = patiService.checkPati(map);
+			if (p != null) {
+				response.getWriter().print("true");
+			} else {
+				response.getWriter().print("false");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/*****
+	 * 历史随访信息记录
+	 * @return
+	 */
+	public String queryHistory(){
+		page.setParams(map);
+		Map<String, Object> results=new HashMap<String, Object>();
+		List<Map<String,Object>> list=patiService.historyInfo(page);
+		results.put("rows",list);
+		results.put("totalRecord",page.getTotalRecord());
+		results.put("totalPage", page.getTotalPage());
+		results.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(results);
+		return null;
+	}
+
+	public PatiService getPatiService() {
+		return patiService;
+	}
+
+	public void setPatiService(PatiService patiService) {
+		this.patiService = patiService;
+	}
+
+	public Pati getPati() {
+		return pati;
+	}
+
+	public void setPati(Pati pati) {
+		this.pati = pati;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	public Page<Pati> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<Pati> page) {
+		this.page = page;
+	}
+
+	public String getIds() {
+		return ids;
+	}
+
+	public void setIds(String ids) {
+		this.ids = ids;
+	}
+
+	public NationDictService getNationDictService() {
+		return nationDictService;
+	}
+
+	public void setNationDictService(NationDictService nationDictService) {
+		this.nationDictService = nationDictService;
+	}
+
+	public static void main(String[] args) {
+		List<String> list = new ArrayList<String>();
+		list.add("保护环境"); // 向列表中添加数据
+		list.add("爱护地球"); // 向列表中添加数据
+		list.add("从我做起"); // 向列表中添加数据
+		System.out.println("使用clear方法前，List集合中数据");
+		for (int i = 0; i < list.size(); i++) { // 通过循环输出列表中的内容
+			System.out.println(i + ":" + list.get(i));
+		}
+		System.out.println("使用clear方法后，List集合中数据");
+		list.clear(); // 移除所有元素
+		if (list.size() <= 0) {
+			System.out.println("list对象为空！");
+		}
+	}
+
+	public PatiFlupRuleService getPatiFlupRuleService() {
+		return patiFlupRuleService;
+	}
+
+	public void setPatiFlupRuleService(PatiFlupRuleService patiFlupRuleService) {
+		this.patiFlupRuleService = patiFlupRuleService;
+	}
+
+}

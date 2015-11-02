@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.RolePrivsDao">
+
+	<delete id="deleteRolePrivs" parameterType="java.lang.String">
+		delete from tb_role_privs r where r.role_code =#{_parameter}
+	</delete>
+	
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_role_privs.nextval FROM DUAL
+		</selectKey>
+		insert into tb_role_privs(id,role_code,privs_id) 
+			SELECT seq_tb_role_privs.nextval , A.* FROM (
+		<foreach collection="list" item="item"  index="index" separator="union">
+			select #{item.roleCode},#{item.privsId} from dual
+		</foreach>
+		) A
+	</insert>
+	
+</mapper>

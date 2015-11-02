@@ -1,0 +1,507 @@
+<%@ page language="java" import="java.util.*,java.text.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+	Date date = new Date();
+	DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	String dateStr = df.format(date);
+	
+	     Calendar calendar =Calendar.getInstance();
+		 calendar.setTime(date);
+		 calendar.add(calendar.DATE,1);//把日期往后增加一天.整数往后推,负数往前移动
+		 date=calendar.getTime(); //这个时间就是日期往后推一天的结果 
+		 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		 String dateString = formatter.format(date);
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>上海市区域医疗行为监管平台</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+			<link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/default/easyui.css" />
+
+			<link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/icon.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/index.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/apssysframe.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/content.css" />
+			<script type="text/javascript" src="<%=path%>/js/jquery/jquery-1.7.2.min.js"></script>
+			<script language="javascript" type="text/javascript"
+				src="<%=path%>/js/My97DatePicker/WdatePicker.js"></script>
+			<script language="javascript" type="text/javascript"
+				src="<%=path%>/js/Highcharts-3.0.9/js/highcharts.js"></script>	
+				<script language="javascript" type="text/javascript"
+				src="<%=path%>/js/Highcharts-3.0.9/js/modules/exporting.js"></script>	
+				
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/jquery.easyui.min.js"></script>
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/locale/easyui-lang-zh_CN.js"></script>
+			<script type="text/javascript"> var path='<%=path%>';</script>
+			<script type="text/javascript" src="<%=path%>/js/comment/comment.js"></script>
+			<script type="text/javascript" src="<%=path%>/js/flupTaskExecution/phonefollow.js"></script>
+			<style>
+				.td_title_width {
+					width: 20%;
+					align: left;
+				}
+				
+				.td_text_width {
+					width: 20%;
+					align: right;
+				}
+				
+				.td_boder_bottom {
+					border-bottom: 1px solid black;
+				}
+				
+				
+			</style>
+		</head>
+  
+    <body class="easyui-layout" leftmargin="0" topmargin="0">
+    	<input type="hidden" id="deptCode"/>
+    	<input type="hidden" id="unitCode"/>
+    	<input type="hidden" id="medicalInsuranceCode"/>
+    	<input type="hidden" id="toDate" value="<%=dateStr %>">
+		<!-- Content Layout -->
+		<div region="center" style="border: 0px;">
+			<div
+				style="width: 95%; height: auto; margin-left: 15px; margin-top: 15px;">
+				<fieldset style="border: 1px solid #6293BB">
+					<legend>
+						基本信息
+					</legend>
+					<table style="width:100%; height: 200px; margin-left: 5%;"
+						cellspacing="0" cellpadding="0">
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								所属科室： <label id="department"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								病人编号： <label id="patiSerial"></label>
+							</td>
+
+							<td class="td_title_width" nowrap="nowrap">
+								住院次数：<label id="inpatiTimes"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								主治医师：<label id="attendDoctor"></label>
+							</td>
+						</tr>
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								住&nbsp;院&nbsp;号： <label id="inpatiNumber"></label>
+							</td>
+
+							<td class="td_title_width" nowrap="nowrap">
+								病人类型： <label id="billingCode"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								入院日期：<label id="inHospitalDate"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								主任医师：<label id="chiefDoctor"></label>
+							</td>
+						</tr>
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								姓&nbsp;&nbsp;&nbsp;&nbsp;名：  <label id="name"></label>
+							</td>
+							<td class="td_title_width">
+								性&nbsp;&nbsp;&nbsp;&nbsp;别： <label id="gender"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								出院日期：<label id="outHospitalDate"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								住院医师：<label id="inpatiDoctor"></label>
+							</td>
+						</tr>
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								年&nbsp;&nbsp;&nbsp;&nbsp;龄： <label id="age"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								出生日期： <label id="birthDate"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								住院天数：<label id="inHospitalDates"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								主刀医生：<label id="operationDoctorCode"></label> 
+							</td>
+						</tr>
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								证件类型： <label id="certificateType"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								证件号码： <label id="certificateNumber"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								  治疗情况：<label id="operationName"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								医疗总费：<label id="totalMoney"></label>
+							</td>
+						</tr>
+
+
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								手机号码：<label id="mobileNumber"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								家庭号码：<label id="familyNumber"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">门诊诊断：<label id="diag"></label>  
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								<!--  手术日期： <label id="operationDate"></label>  -->
+								慈善救助：<label id="charityAidMoney"></label>
+							</td>
+							
+						</tr>
+
+
+						<tr>
+							<td class="td_title_width" nowrap="nowrap">
+								联&nbsp;系&nbsp;人：  <label id="relationName"></label>
+							</td>
+							<td class="td_title_width" nowrap="nowrap">
+								联系人电话： <label id="relationMobileNumber"></label>
+							</td>
+							<td class="td_title_width">
+								地&nbsp;&nbsp;&nbsp;&nbsp;址：<label id="currentAddr"></label>
+							</td>
+						</tr>
+
+					</table>
+				</fieldset>
+			</div>
+			<div style="width: 95%; margin-left: 15px; margin-top: 5px;">
+				<fieldset style="border: 1px solid #6293BB">
+					<legend>
+						随访信息
+					</legend>
+			
+					<table style="width: 60%; height: 60px; margin-left: 5%; margin-right: 5%; margin-top: 10px;"
+						cellspacing="0" cellpadding="0">
+						<tr>
+							<td align="center" colspan="5" nowrap="nowrap"><span style="font-size: 20px;"><label id="flupName"></label></span>
+							</td>
+						</tr>
+						<tr>
+							<td nowrap="nowrap">
+								随访方式：<label id="type"></label>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;&nbsp;&nbsp;&nbsp;随访分类：<label id="way"></label>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;&nbsp;&nbsp;&nbsp;随访对象：<label id="object"></label>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;&nbsp;&nbsp;&nbsp;随访电话：<label id="phone"></label>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;&nbsp;&nbsp;&nbsp;随访次数：<label id="times"></label>
+							</td>
+							<td>&nbsp;
+								
+							</td>
+							<td nowrap="nowrap" style="width: 400px">
+								<a class="easyui-linkbutton" style="margin-bottom:10px;text-align: center;" >呼叫</a>
+								<a class="easyui-linkbutton" onclick="getPatiInfo()" style="margin-bottom:10px; ">电子病例</a>
+								<a class="easyui-linkbutton" onclick="getJCInfo()" style="margin-bottom:10px; ">调阅检查</a>
+								<a class="easyui-linkbutton" onclick="getJYInfo()" style="margin-bottom:10px; ">调阅检验</a>
+								<a class="easyui-linkbutton" onclick="findDY()" style="margin-bottom:10px; ">打印</a>
+							</td>
+							
+						</tr>
+						
+						<!--<tr>
+							<td nowrap="nowrap">
+								复诊提示：<input type="checkbox" value=""/>
+							</td>
+							<td nowrap="nowrap">
+								<input type="hidden" name="" value="" id="returnCode"/>
+								&nbsp;&nbsp;&nbsp;&nbsp;复诊科室：<label id="returnDepartment"></label>
+							</td>
+							<td nowrap="nowrap" colspan="5">
+								&nbsp;&nbsp;&nbsp;&nbsp;复诊日期：<input type="text" id="returnDate"/>
+							</td>
+						</tr>
+						--><!--<tr>
+							<td colspan="5" nowrap="nowrap">
+								症状检索：
+								<input type="text" style="width: 300px;" id="content_msg" onDblClick="opfast()" placeholder="双击选择症状！"/>
+							</td>
+						</tr>
+					--></table>
+					<table
+						style="width: 80%; height: 50px; margin-left: 5%; margin-right: 5%; margin-top:5px;margin-bottom: 10px;border-collapse:collapse;" border="1" bordercolor="#a0c6e5"
+						cellspacing="0" cellpadding="0">
+						
+						<tr>
+							<td style="padding-left: 5px;width:18%">
+								下次随访日期：
+							</td>
+							<td style="width:25%">
+								<label id="nextPlan">
+									
+								</label>
+							</td>
+							<td>
+								<a href="javascript:void(0);" onclick="showNextPlan()">下次随访设置</a>
+							</td>
+							
+						</tr>
+						
+					</table>
+					<div id="divTemplate" style="margin-bottom:2%;">
+					
+					</div>
+					<!--<span style="margin-left: 5%; margin-right: 5%;margin-top:5%;">
+						随访评价:<input type="text" style="width: 40%;" id="evalute" onDblClick="openevaluteTemplate()" placeholder="双击选择快捷回复！" />
+					</span>
+					-->
+					
+					
+					<span style="padding-left:5%;font-size:18px;">
+						随访结果&nbsp;
+						<select id="suifangstatu" style="font-size:15px;">
+							<option value="0">随访成功</option>
+							<option value="3">失访</option>
+							<option value="4">黑名单</option>
+							<option value="5">病故</option>
+						</select>
+					</span>
+					<span id="reasoninput" style="font-size:18px;">
+						原因说明：<input type="text" name="" id="reson" style="width:56%;"/>
+					</span><br/>
+					
+					<span  style="font-size:18px;padding-left:5%;">
+						随访备注&nbsp;&nbsp;<input type="text" name="" id="evaluate" style="width:72.5%;"/>
+					</span><br/>
+					
+					<span style="padding-left:5%;font-size:18px;">
+						延期随访: <input type="checkbox" id="delayCheck">
+						<span id="suifangpost">
+							延期日期:<input type="text" id="delayFlupDate" value="<%=dateString %>" style="width:100px;"/>
+						</span>
+					</span>
+					<span>
+						<a class="easyui-linkbutton" icon="icon-save" onclick="saveTemplateValu()">保存</a>
+					</span>
+					<table
+						style="width: 80%; height: 80px; margin-left: 5%; margin-right: 5%; margin-top:5px;margin-bottom: 10px;border-collapse:collapse;"
+						border="1" bordercolor="#a0c6e5" cellspacing="0" cellpadding="0">
+						<tr>
+							<td style="padding-left: 5px;width:18%">
+								计划随访医生：
+							</td>
+							<td style="width:25%;padding-left: 5px;">
+								<label id="planDoctor"></label>
+							</td>
+							<td style="padding-left: 5px;width:18%">
+								随访医生：
+							</td>
+							<td style="width:18%;padding-left: 5px;">
+								<label>${sessionScope.employee.name }</label>
+							</td>
+							
+						</tr>
+						<tr>
+							
+							<td style="padding-left: 5px;width:18%">
+								计划随访日期：
+							</td>
+							<td style="padding-left: 5px;"><label id="planDate"></label>
+							</td>
+							<td style="padding-left: 5px;width:18%">
+								随访日期：
+							</td>
+							<td style="padding-left: 5px;">
+								<%=dateStr %>
+							</td>
+							
+						</tr>
+					</table>
+				</fieldset>
+			</div>
+			<div
+				style="width: 400px; height: 100px; position: absolute; top: 500px; left: 165px;"
+				class="easyui-panel" id="smsfast_div">
+				<div id="smsfast_tab" class="easyui-datagrid"></div>
+			</div>
+		</div>
+		<!-- 隐藏随访表名ID -->
+		<input type="hidden" name="flupNameId" id="hiddenFlupNameId"/>
+		<input type="hidden" name="toflupNames" id="toflupNames"/>
+		<input type="hidden" name="toPatientname" id="toPatientname"/>
+		
+		<input type="hidden" name="togender" id="togender"/>
+		<input type="hidden" name="toage" id="toage"/>
+		<input type="hidden" name="topatiSerial" id="topatiSerial"/>
+		<input type="hidden" name="tofamilyNumber" id="tofamilyNumber"/>
+		<input type="hidden" name="torelationMobileNumber" id="torelationMobileNumber"/>
+		<input type="hidden" name="todepartment" id="todepartment"/>
+		<!-- 隐藏下次随访设置层 -->
+		<div class="easyui-window" title="下次随访设置" style="width:330px;height: auto;top: 120px;" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="true" model="true" inline="false"
+				resizable="false" minimizable="false"
+				id="next_plan">
+			<div>
+				<span>是否继续随访:</span>
+				<span>
+					<input type="radio" name="plans" checked="checked" value="0"/>继续随访
+					<input type="radio" name="plans" value="1"/>终止随访
+				</span>
+			</div>
+			<div>
+				<span>随访计划:</span>
+				  <ul id="nextplans"></ul>
+			</div>
+			<div align="center">
+				<span><input type="button" id="ensure" onclick="changeFlupPlan()" value="确定"/></span>&nbsp;&nbsp;
+				<span><input type="button" id="exit" onclick="javascript:$('#next_plan').window('close');" value="退出"/></span>
+			</div>
+		</div>
+		<div class="easyui-window" title="随访计划添加" style="height: auto;width:400px;" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="true" model="true" inline="false"
+				resizable="false" minimizable="false" id="add_plan">
+			<div>
+				<table id="table">
+				   <tr>
+						<td>计划随访日期:<input type="text" id="planDates0" rel="" style="width:100px;"/></td>
+						<td>第<lable id="timenext0"></lable>次随访</td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<span><img src="<%=path%>/js/jquery-easyui-1.3.5/themes/icons/edit_add.png" onclick="addTr()"/></span>
+				<span><img src="<%=path%>/js/jquery-easyui-1.3.5/themes/icons/cut.png" onclick="delTr()"/></span>
+			</div>
+			<div>
+				<span><input type="button" id="addPlanDate" value="确定"/></span>
+				<span><input type="button" id="exitPlan" onclick="javascript:$('#add_plan').window('close');" value="退出"/></span>
+			</div>
+		</div>
+		<!-- 弹出随访项窗口 -->
+		<div class="easyui-window" title="随访项信息" style="width:800px;height: 450px;top:20px;" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="false" model="true" inline="false"
+				resizable="true" minimizable="false"
+				id="followStudy_window">
+				<div id="followStudy_dateGrid"></div>
+			<div align="center">
+				<span><input type="button" id="ensure" onclick="followStudy()" value="确定"/></span>&nbsp;&nbsp;
+				<span><input type="button" id="exit" onclick="javascript:$('#followStudy_window').window('close');" value="退出"></span>
+			</div>
+		</div>
+			<!-- 
+		<div class="easyui-window" title="随访项" style="height: auto;width:400px;" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="true" model="true" inline="false"
+				resizable="false" minimizable="false" id="followStudy_window">
+			
+		</div>
+		 -->
+		
+		 <div id="edit_suifang_html"
+				style="width: 810px; height: 420px; model: true;" closed="true"
+				draggable="true" collapsible="false" maximizable="false"
+				shadow="true" model="true" inline="false" resizable="false"
+				minimizable="false" class="easyui-window" title="电子病历" >
+				
+				<table style="width:90%; height: 40px; margin-left: 5%;"
+						cellspacing="0" cellpadding="0">
+					<tr>
+					<td style="width: 10%">&nbsp;&nbsp;&nbsp;&nbsp;姓名:<label id="fileName"></label></td>
+					<td style="width: 10%">病人编号:<label id="filePatiSerial"></label></td>
+					<td style="width: 10%">住院流水号:<label id="filePatiSerialNumber"></label></td>
+					</tr>	
+				</table>
+				
+				<div id="fileIndexDiv" style="height: auto; width: 790px">
+				
+				</div>
+			</div>
+			
+			 <div id="jc_html"
+				style="width: 1100px; height: 450px; model: true;" closed="true"
+				draggable="true" collapsible="false" maximizable="false"
+				shadow="true" model="true" inline="false" resizable="false"
+				minimizable="false" class="easyui-window" title="检查信息" >
+				
+				<table style="width:90%; height: 40px; margin-left: 5%;"
+						cellspacing="0" cellpadding="0">
+					<tr>
+					<td style="width: 30%">&nbsp;&nbsp;&nbsp;&nbsp;姓名:<label id="cname"></label></td>
+					<td style="width: 30%">病人编号:<label id="cpatiSerial"></label></td>
+					<td style="width: 30%">住院流水号:<label id="cinpatiSerialNumber"></label></td>
+					</tr>	
+				</table>
+				
+				<div id="jcDiv" style="height: auto;  width: 1050px;margin-left: 10px">
+				
+				</div>
+			</div>
+			
+		 <div id="jy_html"
+				style="width: 1020px; height: 700px; model: true;" closed="true"
+				draggable="true" collapsible="false" maximizable="false"
+				shadow="true" model="true" inline="false" resizable="false"
+				minimizable="false" class="easyui-window" title="检验信息" >
+				
+				<table style="width:90%; height: 40px;"
+						cellspacing="0" cellpadding="0">
+					<tr>
+					<td style="width: 20%">&nbsp;&nbsp;&nbsp;&nbsp;姓名:<label id="yname"></label></td>
+					<td style="width: 20%">病人编号:<label id="ypatiSerial"></label></td>
+					<td style="width: 20%">住院流水号:<label id="yinpatiSerialNumber"></label></td>
+					</tr>	
+				</table>
+				
+				<div style="width: 34%;height: 365px; margin-left: 10px; margin-top: 5px; float: left;">
+					<div id="jyDiv"  style="height:350px" >
+					
+					</div>
+				</div>
+				
+				<div style="width: 60%; height: 365px;  margin-left: 10px; margin-top: 5px;float: left; ">
+					<div id="jyDivDetail" style="height:350px" >
+					
+					</div>
+				</div>
+				
+				
+	   <div id="p" class="easyui-panel" title="分析图表"     
+           style="width: 980px; height: 300px; margin-left: 10px;"   
+        data-options="iconCls:'',closable:false, border : false,    
+                collapsible:true,minimizable:false,maximizable:false">   
+   				 <div id="container"  style="width: 950px; height: 270px"   >
+					
+				</div>  
+		</div> 
+	</div>	
+	<!-- 事件触发 -->
+	<input type="hidden" id="fileIndex"/>
+	<form action="<%=path%>/flupitemresponseaction!exportWord.action" id="exportFlupName">
+				<input type="hidden" name="flupNameId" id="flupNameId" value=""/>
+				<input type="hidden" name="flupNames" id="flupnames" value=""/>
+				<input type="hidden" name="Patientname" id="Patientname" value=""/>
+				<input type="hidden" name="Patgender" id="Patgender" value=""/>
+				<input type="hidden" name="Patage" id="Patage" value=""/>
+				<input type="hidden" name="PatpatiSerial" id="PatpatiSerial" value=""/>
+				<input type="hidden" name="PatfamilyNumber" id="PatfamilyNumber" value=""/>
+				<input type="hidden" name="PatrelationMobileNumber" id="PatrelationMobileNumber" value=""/>
+				<input type="hidden" name="Patdepartment" id="Patdepartment" value=""/>
+				<input type="hidden" name="showButton" id="showButton" value=""/>
+			</form>
+  </body>
+</html>

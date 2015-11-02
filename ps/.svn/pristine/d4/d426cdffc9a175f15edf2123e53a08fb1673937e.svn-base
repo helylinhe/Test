@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupItemResponseDao">
+	
+	
+	
+	
+	<resultMap type="flupitemresponse" id="FlupItemResponseResult">
+		<id property="id" column="id"/>
+		<result property="showNo" column="show_no"/>
+		<result property="operateDate" column="operate_date"/>
+		<result property="employeeCode" column="employee_code"/>
+		<result property="useState" column="use_state"/>
+		<association property="flupNameDict" column="flup_name_id" javaType="FlupNameDict">
+			<id property="flupNameId" column="flup_name_id"/>
+			<result property="flupName" column="flup_name"/>
+		</association>
+		<association property="flupGroup" column="flup_group_id" javaType="FlupGroup">
+			<id property="flupGroupId" column="flup_group_id"/>
+			<result property="groupOne" column="group_one"/>
+			<result property="groupTwo" column="group_two"/>
+			<result property="groupThree" column="group_three"/>
+			<result property="itemName" column="item_name"/>
+			<result property="recordType" column="record_type"/>
+			<result property="dataType" column="data_type"/>
+			<result property="itemRequired" column="item_required"/>
+		</association>
+	</resultMap>
+	
+	<select id="findPageList" parameterType="page" resultMap="FlupItemResponseResult">
+			select g.flup_group_id "id",
+		       g.flup_group_id,
+		       g.group_one,
+		       g.group_two,
+		       g.group_three,
+		       g.item_name,
+		       g.record_type
+		  from tb_flup_group g
+		  where g.use_state=1
+  				<if test="params.groupOne!=null and params.groupOne!=''">
+		 			and g.group_one=#{params.groupOne}
+		 		</if>
+		 		<if test="params.groupTwo!=null and params.groupTwo!=''">
+		 			and g.group_two=#{params.groupTwo}
+		 		</if> 
+		 		<if test="params.itemName!=null and params.itemName!=''">
+		 			and g.item_name=#{params.itemName}
+		 		</if>
+  order by g.log_date desc
+	</select>
+	
+	
+	<select id="findFlupItemPage" parameterType="java.util.Map" resultMap="FlupItemResponseResult">          
+          select g.flup_group_id "id",
+		       g.group_one,
+		       g.group_two,
+		       g.group_three,
+		       g.item_name,
+		       g.record_type
+		  from tb_flup_group g, tb_flup_item_response r, tb_flup_name_dict d
+		 where g.flup_group_id = r.flup_group_id
+		   and r.flup_name_id = d.flup_name_id
+		   and g.use_state = 1
+		   and d.use_state = 1
+		   and r.use_state = 1
+		   <if test="flupNameId!=null and flupNameId!=''">
+          			and d.flup_name_id =#{flupNameId}
+           </if>
+		   order by to_number(r.show_no) asc
+          
+	</select>
+	
+	
+	<select id="getFlupItemResponseList" resultMap="FlupItemResponseResult" parameterType="java.lang.String">
+		select 
+			r.id, 
+			r.flup_name_id, 
+			r.flup_group_id,
+			r.use_state
+  		From tb_flup_item_response r
+ 		where  r.flup_name_id = #{_parameter}
+	</select>
+	
+	<select id="getFlupItems" parameterType="java.lang.String" resultMap="FlupItemResponseResult">
+		select g.flup_group_id "id",
+		       g.group_one,
+		       g.group_two,
+		       g.group_three,
+		       g.item_name,
+		       g.flup_group_id,
+		       g.record_type
+		  from tb_flup_group g, tb_flup_item_response r, tb_flup_name_dict d
+		 where g.flup_group_id = r.flup_group_id
+		   and r.flup_name_id = d.flup_name_id
+		   and g.use_state = 1
+		   and d.use_state = 1
+		   and r.use_state = 1
+           and d.flup_name_id =#{_parameter}
+	</select>
+	
+	
+	<select id="findPreview" parameterType="java.lang.String" resultMap="FlupItemResponseResult">
+      select
+      g.flup_group_id,
+      g.group_one ,
+      g.group_two ,
+      g.group_three ,
+      g.item_name,
+      g.record_type,
+      g.data_type,
+      g.item_required,
+      r.show_no
+      from tb_flup_group g,tb_flup_item_response r,tb_flup_name_dict d
+      where g.flup_group_id=r.flup_group_id and r.flup_name_id=d.flup_name_id
+      and r.use_state=1 and g.use_state=1
+      and d.flup_name_id=#{_parameter}
+      order by to_number(r.show_no) asc
+	</select>
+	
+	<select id="findFirst" parameterType="java.lang.String" resultType="com.linkonworks.df.vo.FlupGroup">
+		select  g.group_one "groupOne"
+      	from tb_flup_item fi,tb_flup_group g,tb_dict d,tb_flup_item_response r
+      where r.flup_item_code=fi.flup_item_code and r.flup_group_id=g.flup_group_id
+       and fi.record_type=d.input_code and r.flup_name_id=#{_parameter}
+       group by g.group_one
+	</select>
+	
+	<select id="findSecond" parameterType="java.lang.String" resultMap="FlupItemResponseResult">
+	select
+      g.group_two, 
+      g.group_three ,
+      d.name,
+      fi.item_name  
+      from tb_flup_item fi,tb_flup_group g,tb_dict d,tb_flup_item_response r
+      where r.flup_item_code=fi.flup_item_code and r.flup_group_id=g.flup_group_id
+       and fi.record_type=d.input_code  and  g.group_one=#{_parameter}
+       group by  g.group_two,g.group_three,d.name,fi.item_name
+	</select>
+	
+	
+	<delete id="deleteFlupItemResponse" parameterType="java.lang.String">
+		delete from tb_flup_item_response r where r.flup_name_id=#{_parameter}
+	</delete>
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_flup_item_response.nextval FROM DUAL
+		</selectKey>
+		insert into tb_flup_item_response(id,flup_name_id,flup_group_id,operate_date,employee_code,use_state,show_no) 
+			SELECT seq_tb_flup_item_response.NEXTVAL , A.* FROM (
+		<foreach collection="list" item="item"  index="index" separator="union">
+			select #{item.flupNameDict.flupNameId},#{item.flupGroup.flupGroupId},sysdate,#{item.employeeCode},#{item.useState},#{item.showNo} from dual
+		</foreach>
+		) A
+	</insert>
+	
+	
+	<update id="updateUseState" parameterType="java.util.List">
+		update tb_flup_item_response r set r.use_state='0',r.operate_date=sysdate
+		where  r.id in
+			<foreach index="index" item="item" collection="list" 
+				open="(" separator="," close=")" >
+				#{item}
+			</foreach>
+	</update>
+	
+	<update id="updateNormalUseState" parameterType="java.util.List">
+		update tb_flup_item_response r set r.use_state='1',r.operate_date=sysdate
+		where  r.id in
+			<foreach index="index" item="item" collection="list" 
+				open="(" separator="," close=")" >
+				#{item}
+			</foreach>
+	</update>
+	
+	<insert id="insert" parameterType="flupitemresponse">
+		insert into tb_flup_item_response(id,flup_name_id,flup_group_id,flup_item_code,operate_date,employee_code)
+		values (seq_tb_flup_item_response.nextval,#{flupNameId},#{flupGroup.flupGroupId},#{flupItem.flupItemCode},sysdate,#{employeeCode})
+	</insert>
+	
+	
+	
+</mapper>

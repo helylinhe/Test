@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupAdviseDictDao">
+
+	<select id="getAll"  resultType="flupadvisedict">
+		select d.id "id",
+			   d.evaluate_name "evaluateName",
+			   d.evaluate_content "evaluateContent" 
+		from
+		tb_flup_advise_dict d
+	</select>
+</mapper>

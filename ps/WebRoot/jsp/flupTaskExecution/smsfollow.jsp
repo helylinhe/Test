@@ -1,0 +1,388 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+	<title>上海市区域医疗行为监管平台</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+			<link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/default/easyui.css" />
+
+			<link rel="stylesheet" type="text/css"
+				href="<%=path%>/js/jquery-easyui-1.3.5/themes/icon.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/index.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/apssysframe.css" />
+			<link rel="stylesheet" type="text/css" href="<%=path%>/css/content.css" />
+			<script type="text/javascript" src="<%=path%>/js/jquery/jquery-1.7.2.min.js"></script>
+			<script language="javascript" type="text/javascript"
+				src="<%=path%>/js/My97DatePicker/WdatePicker.js"></script>
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/jquery.easyui.min.js"></script>
+				<script>var path='<%=path%>';</script>
+			<script type="text/javascript"
+				src="<%=path%>/js/jquery-easyui-1.3.5/locale/easyui-lang-zh_CN.js"></script>
+			<script type="text/javascript" src="<%=path%>/js/flupTaskExecution/smsfollow.js"></script>
+			<script type="text/javascript" src="<%=path%>/js/comment/comment.js"></script>
+			<style>
+				ul li span{padding-left:2%;}
+			</style>
+  </head>
+  
+  <body class="easyui-layout" fit="true">
+		<!-- Content Layout -->
+		<div style="border:0px; font-size: 12px;" onmouseup="keyMove(event)">
+			
+		
+			<div
+				style="width: 96%; height: 150px; margin-left: 10px; margin-top: 15px; min-width:1100px">
+				<fieldset style="border: 1px solid #6293BB;">
+					<legend>
+						信息随访记录查询
+					</legend>
+					<table width="100%">
+						<tr>
+							<td nowrap="nowrap" style="width: 10%">
+								&nbsp;病人编号：
+								<input type="text" style="width: 120px;border:1px solid #999;" id="patiSerial" />
+							</td>
+							<td nowrap="nowrap" style="width: 10%">
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;住&nbsp;院&nbsp;号：
+								<input type="text" style="width: 120px;border:1px solid #999;" id="inpatiNumber" />
+							</td>
+							<td nowrap="nowrap" style="width: 20%">
+								&nbsp;姓&nbsp;&nbsp;&nbsp;&nbsp;名：
+								<input type="text" style="width: 120px;border:1px solid #999;" id="name" />
+							</td>
+							<td>
+							&nbsp;病组名称：
+							<input style="width: 120px; border: 1px solid #999;" id="diagName"  onkeyup="keyDownGroup(this)">
+							<input type="hidden" id ="gdiagCode"/>
+							</td>
+						</tr>
+						<tr>
+							<td nowrap="nowrap">
+								&nbsp;所属科室：
+								<select style="width: 120px;" class="easyui-combobox" id="inDept">
+								</select>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;计划随访日期：
+								<input type="text" id="flupDateStart" style="width: 120px;border:1px solid #999;" />
+								-
+								<input type="text" id="flupDateEnd" style="width: 120px;border:1px solid #999;" />
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;随访方式：&nbsp;<select style="width: 120px;" class="easyui-combobox" id="flupWay">
+								</select>
+							</td>
+							<td nowrap="nowrap">
+							&nbsp;随访状态：&nbsp;<select style="width: 120px;" class="easyui-combobox" id="flupStatus">
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td nowrap="nowrap">
+								&nbsp;出院诊断：
+								<input type="text" style="width: 120px; border: 1px solid #999;" id="inHospDiag" onkeyup="keyDown(this)" />
+								<input type="hidden" id ="diagCode"/>
+							</td>
+							<td nowrap="nowrap">
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;出院日期：
+								<input type="text" id="outHospitalDateStart" style="width: 120px;border:1px solid #999;" />
+								-
+								<input type="text" id="outHospitalDateEnd" style="width: 120px;border:1px solid #999;" />
+							</td>
+							<td>
+							&nbsp;是否随访：&nbsp;<select style="width: 120px;" class="easyui-combobox" id="flupComplete">
+								<option selected="selected" value="0">未随访</option>
+								<option value="1">已随访</option>
+							</select>
+							</td>
+							<td nowrap="nowrap">
+								<a href="javascript:void(0);" class="easyui-linkbutton" icon="icon-search" onclick="javascript:serach()">查询</a>
+							</td>
+						</tr>
+					</table>
+				</fieldset>
+			</div>
+			
+			<div
+				style="width: 96%; height: auto; margin-left: 10px; margin-top: 15px;min-width:1100px" onmouseup="keyMove(event)">
+				<table style="width: 95%; height: auto;" cellspacing="0" cellpadding="0" >
+				
+					<tr>
+						<td nowrap="nowrap" width="10%">
+                        	复诊时间：&nbsp;<input type="text" class="easyui-datebox" id='sendDate' style="width: 120px;border:1px solid #999;" />
+                         </td>
+                          <td nowrap="nowrap">
+							
+							&nbsp;&nbsp;&nbsp;所属院区：
+							<select class="easyui-combobox" id="unitCode" style="width: 120px">
+								<option value='2'>南院</option>
+								<option value='1'>北院</option>
+							</select>
+							&nbsp;&nbsp;&nbsp;复诊科室：&nbsp;<input type='text' id='unitCodeName' onkeyup="keyDown2(this)"/>
+							<input type="hidden" id='unitCodeName2'/>
+			
+                         </td>
+					</tr>
+					<tr>
+						<td nowrap="nowrap" width="10%">
+                        	信息类别：
+							<select class="easyui-combobox" id="smsstyle" style="width: 120px">
+								<c:forEach items="${sessionScope.tb_dict }" var="list">
+									<c:if test="${list.codeType=='信息类别'}">
+										<option value="${list.name }">${list.name }</option>
+									</c:if>
+								</c:forEach>
+							</select>
+                            </td>
+                            <td nowrap="nowrap">
+							&nbsp;&nbsp; 短信内容：
+							<input type="text" style="width: 76%;" id="smscontent" onDblClick="opfast()" placeholder="双击选择快捷回复！" />
+                            </td>
+					</tr>
+				</table>
+
+</div>
+			</div>
+	<!-- 短信内容显示  -->
+			<div style="width:400px;height:100px;position: absolute; top: 77px; left: 300px;" class="easyui-panel" id="smsfast_div">
+				  <div id="smsfast_tab" class="easyui-datagrid"></div> 
+			</div>
+			<!-- 短信信息随访数据显示 -->
+			<div style="width: 96%; margin-left: 10px; margin-top: 5px;min-width:1100px">
+				<div id="blxx_list_tab"></div>
+			</div>
+			<!-- 出院诊断 -->
+			<div
+				style="width: 210px; height: 100px; position: absolute; "
+				class="easyui-panel" id="confast_div">
+				<div id="confast_tab" class="easyui-datagrid"></div>
+			</div>
+			<!-- 复诊科室 -->
+			<div style="width: 210px; height: 100px; position: absolute; "
+				 class="easyui-panel" id="zyzd_div2">
+			<div id="zyzd_tab2" class="easyui-datagrid"></div>
+			<!-- 病组名称 -->
+			
+	</div> 
+	<div
+				style="width: 220px; height: 100px; position: absolute;"
+				class="easyui-panel" id="confast_div_group">
+				<div id="confast_tab_group" class="easyui-datagrid" style="width: 218px; height: 98px;"></div>
+			</div>
+	<!-- 慢病类型弹出层 -->
+	<div class="easyui-window" title="慢病类型" style="height: 600px;width:1000px;/*border:1px solid #0E2D5F*/;" data-options="iconCls:'icon-save',modal:true,closed:true" id="chronic_disease">
+		<div style="float: left;width:55%;margin:2%;" onmouseup="keyMove(event)">
+			<div>
+				<table>
+					<tr>
+						<td>姓名：</td>
+						<td><input type="text" name=""/></td>
+						<td>病人编号：</td>
+						<td><input type="text" name=""/></td>
+					</tr>
+					<tr>
+						<td>性别：</td>
+						<td><input type="text" name=""/></td>
+						<td>年龄：</td>
+						<td><input type="text" name=""/></td>
+					</tr>
+				</table>
+			</div>
+			<div>
+				<ul>
+				<li style="border-bottom: 1px solid #0E2D5F;border-top: 1px solid #0E2D5F">
+					<ul>
+						<li>
+							<span>高血压</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="普厉"/>普厉</span>
+							<span><input type="checkbox" name="" value="沙坦"/>沙坦</span>
+							<span><input type="checkbox" name="" value="B阻"/>B阻</span>
+							<span><input type="checkbox" name="" value="Ca吉"/>Ca吉</span>
+							<span><input type="checkbox" name="" value="厉尿"/>厉尿</span>
+							<span><input type="checkbox" name="" value="其他"/>其他</span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>糖尿病</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="双厉"/>双厉</span>
+							<span><input type="checkbox" name="" value="璜脲"/>璜脲</span>
+							<span><input type="checkbox" name="" value="糖酶"/>糖酶</span>
+							<span><input type="checkbox" name="" value="胰岛素"/>胰岛素</span>
+							<span><input type="checkbox" name="" value="噻珪烷"/>噻珪烷</span>
+							<span><input type="checkbox" name=""  value="其他"/>其他</span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>血脂异常</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="LDL高"/>LDL高</span>
+							<span><input type="checkbox" name="" value="TC高"/>TC高</span>
+							<span><input type="checkbox" name="" value="他汀"/>他汀</span>
+							<span><input type="checkbox" name="" value="贝特"/>贝特</span>
+							<span><input type="checkbox" name="" value="普厉"/>普厉</span>
+							<span><input type="checkbox" name="" value="其他"/>其他</span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>冠心病</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="心闷痛"/>心闷痛</span>
+							<span><input type="checkbox" name="" value="放射痛"/>放射痛</span>
+							<span><input type="checkbox" name="" value="ASP"/>ASP</span>
+							<span><input type="checkbox" name="" value="硝酸脂"/>硝酸脂</span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>卒中</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="脑出血"/>脑出血</span>
+							<span><input type="checkbox" name="" value="脑梗死"/>脑梗死</span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>TAI</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li style="padding-left: 8%;">
+							<span><input type="checkbox" name="" value="偏侧麻木/无力"/>偏侧麻木/无力</span>
+							<span><input type="checkbox" name="" value="语言障碍"/>语言障碍</span>
+							<span><input type="checkbox" name="" value="近日有无发作"/>近日有无发作</span>
+							<span>上次距今发作:<input type="text" name="" value="" style="width:14%;" /></span>
+						</li>
+					</ul>
+				</li>
+				<li style="border-bottom: 1px solid #0E2D5F;">
+					<ul>
+						<li>
+							<span>血压</span>
+							<span><input type="radio" name="" value=""/>是</span>
+						</li>
+						<li>
+							<span>血压(SBP/DBP):</span>
+							<span>座位<input style="width:16%;" type="text" name="" value=""/></span>
+							<span>卧位<input style="width:16%;" type="text" name="" value=""/></span>
+							<span>立位<input style="width:16%;" type="text" name="" value=""/></span>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		  </div>
+		</div>
+		<div style="float: left;width:40%;">
+			<div style="float: left;width:45%;margin:2%;">
+			  <ul>
+				<li style="border: 1px solid #0E2D5F;margin:2%">
+					<ul>
+						<li>
+							<span>家族史</span>
+						</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value="高血压"/>高血压</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value="糖尿病"/>糖尿病</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value="高血脂"/>高血脂</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value="心梗"/>心梗</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value="脑卒中"/>脑卒中</li>
+					</ul>
+				</li>
+				<li style="border: 1px solid #0E2D5F;margin:2%">
+					<ul>
+						<li>
+							<span>相关情况:</span>
+							
+						</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>肝胀病史</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>现患肝病</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>哮喘史</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>吸烟</li>
+						<li style="padding-left: 8%;">饮酒背数/日<input type="text" name="" value="" style="width:50px;"/>杯</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>其他动脉硬化</li>
+						<li style="padding-left: 8%;"><input type="checkbox" name="" value=""/>动脉厚快</li>
+					</ul>
+				</li>
+			</ul>
+			</div>
+			<div style="float: left;width:45%;">
+				<ul>
+					<li style="border: 1px solid #0E2D5F;margin:2%">
+					<ul>
+						<li>
+							<span>体检</span>
+						</li>
+						<li style="padding-left: 8%;">臀围(cm):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">腰围(cm):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">身高(cm):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">体重(kg):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">搏脉(次):<input type="text" name="" value="" style="width:16%;"/></li>
+					</ul>
+				 </li>
+					<li style="border: 1px solid #0E2D5F;margin:2%">
+					<ul>
+						<li>
+							<span>血压</span>
+						</li>
+						<li style="padding-left: 8%;">SBP:<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">DBP:<input type="text" name="" value="" style="width:16%;"/></li>
+						
+					</ul>
+				 </li>
+				<li style="border: 1px solid #0E2D5F;margin:2%">
+					 <ul>
+						<li>
+							<span>血糖</span>
+						</li>
+						<li style="padding-left: 8%;">HbA1C:<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">空腹(FTP):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">耐量(OGTT):<input type="text" name="" value="" style="width:16%;"/></li>
+					</ul>
+			  </li>
+				<li style="border: 1px solid #0E2D5F;margin:2%">
+					 <ul>
+						<li>
+							<span>血脂</span>
+						</li>
+						<li style="padding-left: 8%;">TC(总胆固醇):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">LDLC(低密度):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">HDLC(高密度):<input type="text" name="" value="" style="width:16%;"/></li>
+						<li style="padding-left: 8%;">TG(甘油三脂):<input type="text" name="" value="" style="width:16%;"/></li>
+					</ul>
+			    </li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	</body>
+</html>

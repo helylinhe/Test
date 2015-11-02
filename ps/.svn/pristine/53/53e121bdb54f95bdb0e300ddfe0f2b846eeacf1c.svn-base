@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PrivsDao">
+
+		<select id="getPrivsByMenuCode" parameterType="java.lang.String" resultType="privs">
+			select p.privs_id "privsID",
+		       p.privs_name "privsName",
+		       p.privs_type "privsType",
+		       p.prog_name "progName",
+		       p.menu_code "menuCode",
+		       p.memo "memo"
+ 			from tb_privs p where p.menu_code=#{_parameter}
+		</select>
+		
+		<insert id="insert" parameterType="privs">
+			insert into tb_privs(privs_id,privs_name,privs_type,menu_code,prog_name,memo)
+       		values(seq_tb_privs.nextval,#{privsName},#{privsType},#{menuCode},#{progName},#{memo})
+		</insert>
+	
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PatiFlupRuleDao">
+
+	<resultMap type="patifluprule" id="patiFlupRuleResult">
+		<id property="id" column="id"/>
+		<result property="patiSerial" column="pati_serial"/>
+		<result property="inpatiNumber" column="inpati_number"/>
+		<result property="inpatiSerialNumber" column="inpati_serial_number"/>
+		<result property="name" column="name"/>
+		<result property="flupMobile" column="flup_mobile"/>
+		<result property="deptCode" column="dept_code"/>
+		<result property="flupObject" column="flup_object"/>
+		<result property="flupType" column="flup_way"/>
+		<result property="deptCode" column="dept_code"/>
+		<result property="flupPeriod" column="flup_period"/>
+		<result property="flupDoctor" column="flup_doctor"/>
+		<result property="planedFlupDate" column=""/>
+		<result property="age" />
+	</resultMap>
+	
+	<select id="findPageList" parameterType="page" resultType="patifluprule">
+		select 
+		   r.pati_serial "patiSerial",
+		   r.inpati_number "inpatiNumber",
+	       r.inpati_serial_number "inpatiSerialNumber",
+	       r.name "name",
+	       F_GET_PATI_AGE( r.pati_serial,  r.inpati_number) "age",
+	       r.flup_mobile "flupMobile",
+	       F_GET_DEPT_NAME(r.dept_code) "deptCode",
+	       diag.out_hosp_diag "outHospDiag",
+	       r.flup_object "flupObject",
+	       r.flup_way "flupWay",
+	       r.flup_type "flupType",
+	       r.flup_period "flupPeriod",
+	       to_char(task.flup_date, 'yyyy-mm-dd')  "flupDate",
+	       to_char(task.flup_plan_date, 'yyyy-mm-dd')  "flupPlanDate",
+	       F_GET_EMPLOYEE_NAME(task.flup_doctor_code) "flupDoctorCode"
+       from tb_pati_flup_rule r,tb_pati p,tb_inpati_diag diag,tb_flup_task task
+       where p.inpati_number=r.inpati_number and diag.inpati_number=p.inpati_number
+      and task.inpati_number=r.inpati_number and task.flup_complete=1
+      <if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+      	and r.inpati_number=#{params.inpatiNumber}
+      </if>
+      <if test="params.inpatiSerialNumber!='' and params.inpatiSerialNumber!=null">
+      	and r.inpati_serial_number=#{params.inpatiSerialNumber}
+      </if>
+	</select>
+	
+	<update id="update" parameterType="map">
+		update tb_pati_flup_rule set flup_mobile=#{flupMobile} where inpati_number=#{inpatiNumber} and pati_serial=#{patiSerial}
+	</update>
+	
+	
+	<select id="flupRuleInfo" parameterType="java.util.Map" resultMap="patiFlupRuleResult">
+		select  r.inpati_number "inpatiNumber",  
+	        	r.inpati_serial_number "inpatiSerialNumber",
+			    r.name "name",
+			    r.flup_status "flupStatus",
+			    r.flup_way "flupWay",
+			    r.flup_type "flupType",
+			    r.flup_period "flupPeriod",
+			    to_char(t.flup_plan_date,'yyyy-mm-dd') "flup_plan_date",
+			    r.flup_object  "flupObject",
+			    r.flup_mobile  "flupMobile",
+			    r.flup_doctor "flupDoctor"
+   	from tb_pati_flup_rule r ,tb_flup_task t
+   where t.inpati_number=r.inpati_number
+   <if test="inpatiNumber!=null and inpatiNumber!=''">
+      	and r.inpati_number=#{inpatiNumber}
+      </if>
+      <if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+      	and r.inpati_serial_number=#{inpatiSerialNumber}
+      </if>
+	</select>
+
+</mapper>

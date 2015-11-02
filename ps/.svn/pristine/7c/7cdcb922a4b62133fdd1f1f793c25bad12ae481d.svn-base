@@ -1,0 +1,1171 @@
+
+$(function() {
+	$.post(path+"/patidiseasedetailaction!loadHosptialConfig.action",function (data){
+		var html="";
+			for(var i=0;i<data.length;i++){
+				html+="<option value='"+data[i].unitCode+"'>"
+				html+=data[i].hosShortName
+				html+="</option>";
+			}
+			$("#unitCode").html(html);
+},'json');
+	
+	$('#outHospitalDateStart').val("");
+	$('#outHospitalDateStart').click(function() {
+		WdatePicker( {
+			minDate : '{%y-80}-%M-%d',
+			readOnly : true
+		});
+	});
+
+	$('#outHospitalDateEnd').val("");
+	$('#outHospitalDateEnd').click(function() {
+		WdatePicker( {
+			minDate : '{%y-80}-%M-%d',
+			readOnly : true
+		});
+	});
+	
+	// 检验详细
+
+	$('#jyDivDetail').datagrid({
+		collapsible : true,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		singleSelect : true,
+		title : '检验详细',
+		columns : [ [ {
+			field : 'itemName',
+			title : '检验名称',
+			width : 200,
+			align : 'center'
+		}, {
+			field : 'inspectName',
+			title : '项目名称',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'inspectResult',
+			title : '检验结果',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'referScale',
+			title : '参考范围',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'resultUnit',
+			title : '结果单位',
+			width : 100,
+			align : 'center'
+		} ] ],
+	});
+	$('#birth_date').val(getNowFormatDate());
+	setposition();
+	$("#dept_div").panel('close');
+	createDeptTable();
+	$('#search').click(function() {
+		var dept_code="";
+		if($('#search_dept_name').val()==""){
+			dept_code="";
+		}else{
+			dept_code=$('#search_dept_code').val();
+		}
+		var param = {
+			"map.flupStatus" : $('#search_flup_status').combobox('getValue'),
+			"map.deptCode" : dept_code,
+			"map.name" : $('#search_name').val(),
+			'map.outHospitalDateStart': $("#outHospitalDateStart").val(),
+			'map.outHospitalDateEnd': $("#outHospitalDateEnd").val(),
+			"map.inpatiNumber" : $('#search_inpati_number').val(),
+			"map.patiSerial":$('#search_pati_serial').val()
+		}
+		loadData(path + '/patiAction!queryPages.action', 'blm_grid', param);
+	});
+	$('#search_dept_name').keyup(function(){
+		var param = {
+				'map.deptName' : $('#search_dept_name').val(),
+		}
+		loadData(path+'/departmentaction!execute.action',
+				'dept_tab', param);
+	});
+	createTable();
+	selectTime();
+	$.post(path + '/payTypeAction!queryAll.action', {
+		'' : ''
+	}, function(data) {
+		if (data != null) {
+			$('#billing_name').empty();
+			var ops = '';
+			for ( var i = 0; i < data.length; i++) {
+				ops += '<option value="' + data[i].billingName + '">'
+						+ data[i].billingName + '</option>';
+			}
+			$('#billing_name').append(ops);
+		}
+	}, 'json')
+	
+	
+	$.post(path + '/patiAction!query.action', {
+		'' : ''
+	}, function(data) {
+		if (data != null) {
+			$('#race').empty();
+			var ops = '<option value="">请选择</option>';
+			for ( var i = 0; i < data.length; i++) {
+				ops += '<option value="' + data[i].nationName + '">'
+						+ data[i].nationName + '</option>';
+			}
+			$('#race').append(ops);
+		}
+	}, 'json')
+});
+
+
+function createTable() {
+	$('#blm_grid').datagrid( {
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		singleSelect : true,
+		title : '病例管理',
+		fitColumns : true,
+		fit:true,
+        nowrap: false,  
+        striped: true,  
+		pagination : true,
+		pageSize : 10,
+		pageList : [ 10,20],
+		
+		hideColumn: [ [ {
+			field : 'familyNumber',
+			title : '电话',
+			width : 40,
+			align : 'center',
+			},
+		{
+			field : 'relationMobileNumber',
+			title : '手机',
+			width : 40,
+			align : 'center',
+		},
+		]],
+		
+		frozenColumns : [ [ {
+			field : 'ck',
+			checkbox : true
+		}, {
+			field : 'patiSerial',
+			title : '病人编号',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'inpatiNumber',
+			title : '住院号',
+			width : 80,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'name',
+			title : '姓名',
+			width : 80,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		} ] ],
+		columns : [ [ {
+			field : 'gender',
+			title : '性别',
+			width : 40,
+			align : 'center',
+			formatter : function(val, rec) {
+			switch(val){
+			case "1":
+				return "男";
+				break;
+			case "2":
+				return "女";
+				break;
+			  }
+			}
+		}, {
+			field : 'age',
+			title : '年龄',
+			width : 40,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'relationName',
+			title : '联系人',
+			width : 50,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'department',
+			title : '所属科室',
+			width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'diag',
+			title : '主要诊断',
+			width : 150,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'billingCode',
+			title : '付费方式',
+			width : 60,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'flupStatus',
+			title : '随访状态',
+			width : 80,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'flupWay',
+			title : '随访方式',
+			width : 60,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'outHospitalDate',
+			title : '出院日期',
+			width : 70,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val.substring(0,10);;
+			}
+		} ] ],
+		toolbar : [  
+		{
+			text : '查看详情',
+			iconCls : 'icon-edit',
+			handler : function() {
+			var rows = $('#blm_grid').datagrid('getSelected');
+			if(rows==''){
+				 $.messager.alert('提示','选中一行在进行查看！','info');
+				 return;
+			}
+			
+			parent.loadBingDetail(rows.patiSerial,rows.inpatiNumber,rows.inpatiSerialNumber);
+			}
+		},'-',{
+			 text:'调阅检查',
+		     iconCls:'icon-search',
+			 handler:function() {
+			 var row = $("#blm_grid").datagrid("getSelected");
+			 findJC(row);
+        }
+		},"-",{
+			 text:'调阅检验',
+		     iconCls:'icon-search',
+			 handler:function() {
+			 var row = $("#blm_grid").datagrid("getSelected");
+		     findJY(row);
+        }
+	},"-",{
+		 text:'调阅电子病历',
+	     iconCls:'icon-search',
+		 handler:function() {
+		 var row = $("#blm_grid").datagrid("getSelected");
+		 findBL(row);
+		 }
+	},"-",{
+		 text:'打印随访表',
+	     iconCls:'icon-print',
+		 handler:function() {
+		 var row = $("#blm_grid").datagrid("getSelected");
+		 findDY(row);
+		 }
+	}
+		],onDblClickRow:
+		    function( rowIndex, rowData ){
+		     parent.loadBingDetail(rowData.patiSerial,rowData.inpatiNumber,rowData.inpatiSerialNumber);
+	     }
+	});
+	loadData(path + '/patiAction!queryPages.action', 'blm_grid', null);
+}
+function getNowFormatDate() {
+	var day = new Date();
+	var Year = 0;
+	var Month = 0;
+	var Day = 0;
+	var CurrentDate = "";
+	Year = day.getFullYear();// 支持IE和火狐浏览器.
+	Month = day.getMonth() + 1;
+	Day = day.getDate();
+	CurrentDate += Year + "-";
+	if (Month >= 10) {
+		CurrentDate += Month;
+	} else {
+		CurrentDate += "0" + Month + "-";
+	}
+	if (Day >= 10) {
+		CurrentDate += Day;
+	} else {
+		CurrentDate += "0" + Day;
+	}
+	return CurrentDate;
+}
+function setposition() {
+	var position = $("#search_dept_name").offset();
+	$("#dept_div").offset( {
+		top : position.top + 20,
+		left : position.left
+	});
+}
+function openDeptTable(){
+	$("#dept_div").panel('open');
+}
+
+function openAdd(){
+	$("#binli_manager").window("open");
+}
+function add_close(){
+	$("#binli_manager").window("close");
+	clear();
+}
+function createDeptTable(){
+	$('#dept_tab').datagrid({
+		collapsible : false,
+		remoteSort : false,
+		idField : 'deptCode',
+		singleSelect : true,
+		pageSize : 20,
+		fitColumns : true,
+		hideColumn : [ [ {
+			field : 'deptCode',
+			title : '部门编号',
+			width : 100,
+			align : 'left',
+			formatter : function(val, rec) {
+				return val;
+			}
+		} ] ],
+		columns:[[{
+			field : 'deptName',
+			title : '部门名称',
+			width : 140,
+			align : 'left',
+			formatter : function(val, rec) {
+				return val;
+			}
+		},{
+			field : 'unitCode',
+			title : '所属院区',
+			width : 60,
+			align : 'left',
+			formatter : function(val, rec) {
+			switch(val){
+			case "2":
+				return '南院区';
+				break;
+			case "1":
+				return '北院区';
+				break;
+			default:
+				return '无'
+				break;
+			}
+			}
+		}]],
+		onClickRow : function(index, row) {
+			$("#search_dept_code").val(row.deptCode);
+			$("#search_dept_name").val(row.deptName);
+			$("#dept_div").panel('close');
+		}
+	});
+	/*loadData(path+'/departmentaction!execute.action',
+			'dept_tab', null);
+	*/
+	$.post(path+'/departmentaction!queryUserDept.action',function (data){
+		var blm_datapatient_data={"total":data[0].totalRecord,"rows":data[0].rows};
+		$("#dept_tab").datagrid('loadData',blm_datapatient_data);
+	},'json');
+}
+function add() {
+	if ($('#addForm').form('validate')) {
+		var idNo='';
+		if($('#certificate_type').combobox('getValue')=='身份证'&&$('#certificate_number').val()!=''){
+			idNo=$('#certificate_number').val();
+			var reg=/^[1-9]{1}[0-9]{14}$|^[1-9]{1}[0-9]{16}([0-9]|[xX])$/;
+			if(!reg.test($('#certificate_number').val())){
+				$.messager.alert('提示', '请输入正确的身份证号码!', 'info');
+				return false;
+			}
+		}else if($('#certificate_type').combobox('getValue')=='护照'&&$('#certificate_number').val()!=''){
+			var reg=/^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$/;
+			if(!reg.test($('#certificate_number').val())){
+				$.messager.alert('提示', '请输入正确的护照!', 'info');
+				return false;
+			}
+		}
+		var parm = {
+			'pati.patiSerial' : $('#pati_serial').val(),
+			'pati.inpatiNumber' : $('#inpati_number').val(),
+			'pati.medicalInsuranceCode' : $('#medical_insurance_code').val(),
+			'pati.billingName' : $('#billing_name').val(),
+			'pati.name' : $('#name').val(),
+			'pati.gender' : $('input[name="gender"]:checked').val(),
+			'pati.age' : $('#age').val(),
+			'pati.birthState' : $('input[name="birth_state"]:checked').val(),
+			'pati.birthAddr' : $('#birth_addr').val(),
+			'pati.birthWeight' : $('#birth_weight').val(),
+			'pati.birthDate' : $('#birth_date').val(),
+			'pati.country' : $('#country').val(),
+			'pati.race' : $('#race').val(),
+			'pati.certificateType' : $('#certificate_type').combobox('getValue'),
+			'pati.certificateNumber' : $('#certificate_number').val(),
+			'pati.idNo':idNo,
+			'pati.mobileNumber' : $('#mobile_number').val(),
+			'pati.familyNumber' : $('#family_number').val(),
+			'pati.professionTitle' : $('#profession_title').val(),
+			'pati.married' : $('input[name="married"]:checked').val(),
+			'pati.currentAddr' : $('#current_addr').val(),
+			'pati.currentPostcode' : $('#current_postcode').val(),
+			'pati.accountAddr' : $('#account_addr').val(),
+			'pati.accountPostcode' : $('#account_postcode').val(),
+			'pati.relationName' : $('#relation_name').val(),
+			'pati.relation' : $('#relation').combobox('getValue'),
+			'pati.relationMobileNumber' : $('#relation_mobile_number').val(),
+			'pati.sameFamilyInpatNumber' : $('#same_family_inpat_number').val(),
+			'pati.inpatiTimes' : $('#inpati_times').val(),
+			'pati.currentInpatiSerial' : $('#current_inpati_serial').val(),
+			'pati.unitCode' : $('#unit_code').val(),
+			'pati.dataFrom' : $('#data_from').val(),
+			'pati.flupMobile':$('#flup_mobile').val()
+		}
+		$.post(path + '/patiAction!addPati.action', parm, function(data) {
+			if (data.ok == '1') {
+				$.messager.alert('提示', '操作成功!', 'info');
+				loadData(path + '/patiAction!queryPages.action', 'blm_grid', null);
+				clear();
+				add_close();
+				$("#blm_grid").datagrid("clearSelections");
+			}
+		}, 'json');
+	}
+}
+function selectTime() {
+	$('#birth_date').click(function() {
+		WdatePicker( {
+			maxDate : '%y-%M-%d'
+		});
+	});
+}
+
+function updatePati(){
+	var rows = $('#blm_grid').datagrid('getSelections');
+	if ($('#updForm').form('validate')) {
+		var idNo='';
+		if($('#upd_certificate_type').combobox('getValue')=='身份证'&&$('#upd_certificate_number').val()!=''){
+			idNo=$('#upd_certificate_number').val();
+			var reg=/^[1-9]{1}[0-9]{14}$|^[1-9]{1}[0-9]{16}([0-9]|[xX])$/;
+			if(!reg.test($('#upd_certificate_number').val())){
+				$.messager.alert('提示', '请输入正确的身份证号码!', 'info');
+				return false;
+			}
+		}else if($('#upd_certificate_type').combobox('getValue')=='护照'&&$('#upd_certificate_number').val()!=''){
+			var reg=/^1[45][0-9]{7}|G[0-9]{8}|P[0-9]{7}|S[0-9]{7,8}|D[0-9]+$/;
+			if(!reg.test($('#upd_certificate_number').val())){
+				$.messager.alert('提示', '请输入正确的护照!', 'info');
+				return false;
+			}
+		}
+		var parm = {
+				'pati.patiSerial':rows[0].patiSerial,
+				'pati.inpatiNumber':rows[0].inpatiNumber,
+				'pati.id':rows[0].id,
+				'pati.flupMobile':$('#upd_flup_mobile').val(),
+				'pati.certificateType':$('#upd_certificate_type').combobox(
+				'getValue'),
+				'pati.idNo':idNo,
+				'pati.certificateNumber':$('#upd_certificate_number').val(),
+				'pati.relationName':$('#upd_relation_name').val(),
+				'pati.relation':$('#upd_relation').combobox('getValue'),
+				'pati.relationMobileNumber':$('#upd_relation_mobile_number').val(),
+				'pati.currentAddr':$('#upd_current_addr').val(),
+				'pati.currentPostcode':$('#upd_current_postcode').val(),
+				'pati.mobileNumber':$('#upd_mobile_number').val(),
+				'pati.familyNumber':$('#upd_family_number').val()	
+		}
+		$.post(path + '/patiAction!updPati.action',parm,function(data){
+			if(data.ok=='1'){
+					$.messager.alert('提示', '操作成功!', 'info');
+					$("#binli_update").window("close");
+					loadData(path + '/patiAction!queryPages.action', 'blm_grid', null);
+					$('#upd_flup_mobile').val('');
+					$('#upd_certificate_number').val('');
+					$('#upd_relation_name').val('');
+					$('#upd_relation_mobile_number').val('');
+					$('#upd_current_addr').val('');
+					$('#upd_current_postcode').val('');
+					$('#upd_mobile_number').val('');
+					$('#upd_family_number').val('');
+					$('#blm_grid').datagrid('clearSelections');
+			}
+		},'json');
+	}
+}
+function upd_close(){
+	$("#binli_update").window("close");
+}
+function setValue(rows){
+	$('#upd_flup_mobile').val(rows[0].flupMobile);
+	$('#upd_certificate_type').combobox('setValue', rows[0].certificateType);
+	$('#upd_certificate_number').val(rows[0].certificateNumber);
+	$('#upd_relation_name').val(rows[0].relationName);
+	$('#upd_relation').combobox('setValue', rows[0].relation);
+	$('#upd_relation_mobile_number').val(rows[0].relationMobileNumber);
+	$('#upd_current_addr').val(rows[0].currentAddr);
+	$('#upd_current_postcode').val(rows[0].currentPostcode);
+	$('#upd_mobile_number').val(rows[0].mobileNumber);
+	$('#upd_family_number').val(rows[0].familyNumber);
+}
+function clear(){
+	$('#chief_doctor').val('');
+	$('#attend_doctor').val('');
+	$('#inpati_doctor').val('');
+	$('#in_hospital_date').val('');
+	$('#out_hospital_date').val('');
+	$('#in_dept').val('');
+	$('#inpati_times').val('');
+	$('#in_hospital_dates').val('');
+	$('#out_ward').val('');
+	$('#name').val('');
+	$('#pati_serial').val('');
+	$('#inpati_number').val('');
+	$('#inpati_serial_number').val('');
+	$('#medical_insurance_code').val('');
+	$('#billing_code').val('');
+	$('#age').val('');
+	$('#birth_addr').val('');
+	$('#birth_weight').val('');
+	$('#birth_date').val('');
+	$('#country').val('');
+	$('#race').val('');
+	$('#certificate_number').val('');
+	$('#mobile_number').val('');
+	$('#family_number').val('');
+	$('#profession_title').val('');
+	$('#current_addr').val('');
+	$('#current_postcode').val('');
+	$('#account_addr').val('');
+	$('#account_postcode').val('');
+	$('#relation_name').val('');
+	$('#relation_mobile_number').val('');
+	$('#same_family_inpat_number').val('');
+	$('#current_inpati_serial').val('');
+	$('#unit_code').val('');
+	$('#birth_state').val('');
+	$('#in_hospital_weight').val('');
+	$('#flup_mobile').val('');
+}
+window.setInterval(closePanel, 1000);
+function closePanel(){
+    if(document.activeElement.id!='search_dept_name'){
+    	$("#dept_div").panel('close');
+    }
+}
+function getNowFormatDate(){
+    var day = new Date();
+    var Year = 0;
+    var Month = 0;
+    var Day = 0;
+    var CurrentDate = "";
+    Year= day.getFullYear();//支持IE和火狐浏览器.
+    Month= day.getMonth()+1;
+    Day = day.getDate();
+    CurrentDate += Year+"-";
+    if (Month >= 10 ){
+     CurrentDate += Month;
+    }
+    else{
+     CurrentDate += "0" + Month+"-";
+    }
+    if (Day >= 10 ){
+     CurrentDate += Day ;
+    }
+    else{
+     CurrentDate += "0" + Day ;
+    }
+   return CurrentDate;
+ } 
+
+
+
+
+//调阅检查
+function findJC(row){
+	 if(row==null){
+		 $.messager.alert('提示','选中一行在进行调阅！','info');
+		 return;
+	 }
+	$("#jc_html").panel("open"); 
+	 setInfo('c',row);
+  createCheckTable();
+  var param = {
+				'map.inpatiSerialNumber' : row.inpatiSerialNumber,
+			    'map.patiSerial':row.patiSerial,
+			    'map.inpatiNumber':row.inpatiNumber
+			}
+  loadData(path + '/checkAction!queryPages.action',
+				'jcDiv', param);	
+	
+}
+
+//调阅检验
+function findJY(row){
+	 if(row==null){
+		 $.messager.alert('提示','选中一行在进行调阅！','info');
+		 return;
+	 }
+	$("#jy_html").panel("open"); 
+	setInfo('y',row);
+	createInspectTable();
+ var param = {
+				'map.inpatiSerialNumber' : row.inpatiSerialNumber,
+			    'map.patiSerial':row.patiSerial,
+			    'map.inpatiNumber':row.inpatiNumber
+			}
+ loadData(path + '/inspectAction!queryInspectPages.action',
+			'jyDiv', param);
+ 		$('#jyDivDetail').datagrid('loadData',{ total: 0, rows: [] });
+}
+
+//病历检验
+function findBL(row){
+	 if(row==null){
+		 $.messager.alert('提示','选中一行在进行调阅！','info');
+		 return;
+	 }
+	var unitCodeValue = row.unitCode;
+	if(unitCodeValue!=null && unitCodeValue=="1"){
+		window.open('http://172.31.10.122:8080/EMRView/main.html?mpi=hm_'+row.patiSerial);
+	}else{
+		$("#bl_html").panel("open"); 
+		setInfo('b',row);
+		createBlTable();
+		var param={'map.patientId':row.patiSerial,
+				   'map.visitId':row.inpatiSerialNumber,
+				   'map.unitCode':"2"};
+		loadData(path+"/fileIndexAction!findFileIndex.action",'bl_Div',param);
+	}
+}
+
+
+/*****
+ * 打印随访表信息
+ * @return
+ */
+function findDY(row){
+	
+	if(row==null){
+		 $.messager.alert('提示','选中一行在进行打印随访表信息！','info');
+		 return;
+	 }
+	
+	$('#dy_html').panel("open");
+	setInfo('d',row);
+	$("#Patientname").val(row.patiSerial);
+	$("#topatiSerial").val(row.inpatiNumber);
+	$("#toPatientname").val(row.name);
+	$("#toage").val(row.age);
+	$("#todepartment").val(row.department);
+	$("#togender").val(row.gender==1?'男':'女');
+	$("#tofamilyNumber").val(row.familyNumber);
+	$("#torelationMobileNumber").val(row.relationMobileNumber);
+	/***
+	 * 创建随访表面
+	 */
+	printFlupName();
+	var param={'map.patientId':row.patiSerial,//病人编号
+			   'map.visitId':row.inpatiSerialNumber,//住院流水号
+			   'map.inpatiNumber':row.inpatiNumber//住院号
+			   };
+	$.post(path+'/inspectAction!printFollow.action',param,function (data){
+		$('#dy_Div').datagrid('loadData', data);
+		
+	},'json');
+}
+
+//检验信息
+function createInspectTable() {
+	$('#jyDiv').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		singleSelect : true,
+		pageSize : 10,
+		pageList : [10, 20, 50 ],
+		pagination : true,
+		title : '检验信息',
+		columns : [ [ {
+				field : 'itemName',
+				title : '检验名称',
+				width : 220,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+				}
+			},{
+			field : 'inspectDate',
+			title : '检验日期',
+			width : 70,
+			align : 'center'
+		} ] ],
+		onClickRow : function(rowIndex, rowData) {
+			getInspectDetail(rowData);
+		}
+	});
+}
+// 检查表
+function createCheckTable() {
+	$('#jcDiv').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		nowrap:false,
+		rownumbers : true,
+		singleSelect : true,
+		pageSize : 10,
+		pageList : [ 10, 20, 30, 40 ],
+		pagination : true,
+		title : '检查详情',
+		frozenColumns : [ [ {
+			field : 'examItem',
+			title : '项目名称',
+			width : 100,
+			align : 'center'
+		}, 
+		    {
+			field : 'inspectDate',
+			title : '申请日期',
+			width : 80,
+			align : 'center'
+		} ] ],
+		columns : [ [  {
+			field : 'description',
+			title : '检查结果',
+			width : 750,
+			align : 'left'
+		},{
+			field : 'imageUrl',
+			title : '结果调阅',
+			width : 100,
+			align : 'left',
+			formatter : function(value,row,index) {
+				if(value!=null && value!=''){
+				    return "<input type='button'  value='调阅'/>";
+				 }else{
+					 return "";
+				 }
+			}
+		}] ],
+		onClickCell: function(rowIndex, field, value){
+			if(field=="imageUrl"){
+				var rows=$('#jcDiv').datagrid('getRows');  
+				var param = {"url":rows[rowIndex].imageUrl};
+				$.post(path+'/patiAction!readImage.action',param,function (data){
+					
+				})
+			}
+		}
+	});
+}
+//创建电子病历
+function createBlTable(){
+	$('#bl_Div').datagrid( {
+		method : 'get',
+		collapsible : true,
+		remoteSort : false,
+		rownumbers : false,
+		singleSelect : true,
+		idField : 'id',
+		pagination : true,
+		pageSize : 10,
+		pageList : [ 10, 20,30 ],
+		columns : [ [
+		  	{
+			field : 'fileNo',
+			title : '文件编号',
+			width : 150,
+			align : 'left',
+			hidden:true
+		},{
+			field : 'id',
+			title : '病例Id',
+			width : 150,
+			align : 'left',
+			hidden:true
+		}, {
+			field : 'patientId',
+			title : '病人编号',
+			width : 150,
+			align : 'left',
+			hidden:true
+		},{
+			field : 'visitId',
+			title : '住院流水号',
+			width : 150,
+			align : 'left',
+			hidden:true
+		} ,{
+			field : 'topic',
+			title : '主题',
+			width : 250,
+			align : 'left',
+		} ,{
+			field : 'creatorName',
+			title : '创建医生',
+			width : 150,
+			align : 'left',
+		} ,{
+			field : 'createDateTime',
+			title : '创建时间',
+			width : 150,
+			align : 'left',
+		} ,{
+			field : 'caozuo',
+			title : '调阅',
+			width : 150,
+			align : 'left',
+			formatter : function(value,row,index) {
+				
+				return "<input type='button' onclick=\"getFileIndexShow('"+row.fileNo+"','"+row.patientId+"','"+row.visitId+"')\" value='显示'/>";
+			}
+		}  ] ],
+		
+		/*onClickCell: function(rowIndex, field, value){
+			if(field=="caozuo"){
+				var rows=$('#bl_Div').datagrid('getRows');  
+				getFileIndexShow(rows[rowIndex]);
+			}
+		}*/
+	});
+	
+}
+
+/***
+ * 打印随访表明
+ */
+function printFlupName(){
+	var flupId;
+	var flupNames;
+	$('#dy_Div').datagrid( {
+		method : 'get',
+		collapsible : true,
+		remoteSort : false,
+		rownumbers : false,
+		singleSelect : true,
+		idField : 'flupNameId',
+		columns : [ [
+		  	{
+			field : 'flupNameId',
+			title : '表名',
+			width : 100,
+			align : 'left',
+			hidden:true,
+			formatter : function(value,row,index) {
+				flupId=value;
+				return value;
+				
+			}
+		} ,{
+			field : 'flupName',
+			title : '表名',
+			width : 250,
+			align : 'left',
+			formatter : function(value,row,index) {
+				flupNames=value;
+				return value;
+				
+			}
+		},{
+			field : 'caozuo',
+			title : '打印',
+			width : 150,
+			align : 'left',
+			formatter : function(value,row,index) {
+				return"<input type='button'  value='打印' onclick=\"printInfo('"+flupId+"','"+flupNames+"','')\"/>";
+				
+				
+				
+			}
+		}  ,
+		
+		] ]
+	});
+	
+}
+
+//打印呀
+function printInfo(flupId,flupNames)
+{
+						
+						
+						$("#flupNameId").val(flupId);
+						$("#flupnames").val(flupNames);
+						
+						$("#Patientname").val($("#toPatientname").val());
+						$("#Patgender").val($("#togender").val());
+						$("#Patage").val($("#toage").val());
+						$("#PatpatiSerial").val($("#topatiSerial").val());
+						$("#PatfamilyNumber").val($("#tofamilyNumber").val());
+						$("#PatrelationMobileNumber").val($("#torelationMobileNumber").val());
+						$("#Patdepartment").val($("#todepartment").val());
+						$("#showButton").val("");
+						
+						$("#exportFlupName").submit();
+	/*if(data!=null){
+		
+		$.post(
+				path+"/flupitemresponseaction!findPreviewGroup.action",
+				{
+					flupNameId : data,
+					showButton : ""
+				},
+				function (data)
+				{
+					if(data == 'error'){
+						$.messager.alert('警告！','服务器异常！','error');
+						retrun;
+					}else{
+						
+						$("#flupName").val(data);
+						$("#flupnames").val(flupNames);
+						$("#exportFlupName").submit();
+						
+					}
+				},"html"
+			);
+	}*/
+	
+}
+
+function setInfo(type,row){//rowData.patiSerial,rowData.inpatiNumber,rowData.inpatiSerialNumber
+	$("#"+type+"inpatiNumber").html(row.inpatiNumber);
+	$("#"+type+"name").html(row.name);
+	$("#"+type+"patiSerial").html(row.patiSerial);
+	$("#"+type+"inpatiSerialNumber").html(row.inpatiSerialNumber);
+}
+
+/****
+*查询病人电子病例信息
+*
+*/
+function getFileIndexShow(fileNo,patientId,visitId){
+	$.ajax({
+	      type: "post",
+	      url: path+"/fileIndexAction!findFileIndexShow.action",
+	      dataType : "text",
+	      async : false,//使AJax同步 
+	      data:{"fileIndex.patientId":patientId,
+	      	"fileIndex.visitId":visitId,
+	      	"fileIndex.fileNo":fileNo,
+	      	"fileIndex.unitCode":"2"},
+	      success: function(d){
+			window.setTimeout("openFile('" + d + "')", 400);
+	      }
+	    }); 
+}
+
+function openFile(data) {
+
+	var objChild = window.open(data);
+	/*parent.arrFileIndex[parent.size] = objChild;
+	parent.size++;*/
+}
+
+
+function createHighcharts(data, title, name) {
+	var categories = new Array();
+	var seriesDate = new Array();
+	var text = '';
+	var titleText = '';
+	if (data.length == 0) {
+		categories.push('');
+		seriesDate.push('');
+		text = '无图像';
+		titleText = '';
+	} else {
+		text = '参考范围:' + data[0].referScale;
+		//获取基准线的数值
+		var range=data[0].referScale.split('--');
+		if(range.length!=2){
+			range1=data[0].referScale.split('≤');
+			range2=data[0].referScale.split('≥');
+			range3=data[0].referScale.split('＜');
+			range4=data[0].referScale.split('＞');
+			if(range1[0]=='' || range3[0]=='')
+				range=[0,range1[1]];
+			else if(range2[0]=='' || range4[0]=='')
+				range=[range2[1],10000000000000];
+			else if(range3[0]=='')
+				range=[0,range1[1]];
+			else if(range4[0]=='')
+				range=[range4[1],10000000000000];
+		}
+		titleText = data[0].resultUnit;
+		for ( var i = 0; i < data.length; i++) {
+			categories.push(data[i].inspectDate);
+			seriesDate.push(parseFloat(data[i].inspectResult));
+		}
+	}
+
+	$('#container').highcharts({
+		chart : {
+			type : 'spline'
+		},
+		title : {
+			text : title
+		},
+		subtitle : {
+			text : text
+		},
+		xAxis : {
+			categories : categories,
+			labels : {
+				step : 1
+			},
+			tickInterval : 1
+		},
+		yAxis : {
+			plotLines: [{   //一条延伸到整个绘图区的线，标志着轴中一个特定值。
+                color: 'red',
+                dashStyle: 'Dash', //Dash,Dot,Solid,默认Solid
+                width: 1.5,
+                value: range[0],  //y轴显示位置
+                zIndex: 4
+            },{   //一条延伸到整个绘图区的线，标志着轴中一个特定值。
+                color: 'red',
+                dashStyle: 'Dash', //Dash,Dot,Solid,默认Solid
+                width: 1.5,
+                value: range[1],  //y轴显示位置
+                zIndex: 4
+            }],
+			title : {
+				text : titleText
+			},
+			labels : {
+				formatter : function() {
+					return this.value;
+				}
+			}
+		},
+		tooltip : {
+			crosshairs : true,
+			shared : true
+		},
+		plotOptions : {
+			spline : {
+				marker : {
+					radius : 4,
+					lineColor : '#666666',
+					lineWidth : 1
+				}
+			}
+		},
+		series : [ {
+			name : name,
+			data : seriesDate
+		} ]
+	});
+
+}
+
+function getInspectDetail(row) {
+	$("#jyDivDetail").datagrid("unselectAll");
+	$.ajax({
+		type : "post",
+		url : path + '/inspectAction!queryInspectDetail.action',
+		dataType : "json",
+		data : {
+			"inspectId" : row.inspectId,
+			"itemCode" : row.itemCode
+		},
+		success : function(data) {
+			$('#jyDivDetail').datagrid({
+				collapsible : false,
+				remoteSort : false,
+				idField : 'id',
+				rownumbers : true,
+				singleSelect : true,
+				title : '检查详情',
+				columns : [ [ {
+					field : 'itemName',
+					title : '检验名称',
+					width : 200,
+					align : 'center',
+					formatter : function(val, rec) {
+						return val;
+					}
+				}, {
+					field : 'inspectName',
+					title : '项目名称',
+					width : 100,
+					align : 'center'
+				}, {
+					field : 'inspectResult',
+					title : '检验结果',
+					width : 80,
+					align : 'center'
+				}, {
+					field : 'referScale',
+					title : '参考范围',
+					width : 100,
+					align : 'center'
+				}, {
+					field : 'resultUnit',
+					title : '结果单位',
+					width : 85,
+					align : 'center'
+				} ] ],
+				onClickRow : function(rowIndex, rowData) {
+					var row = $("#jyDiv").datagrid("getSelected");
+					$.ajax({
+						type : "post",
+						url : path + '/inspectAction!queryHighChars.action',
+						dataType : "json",
+						data : {
+							"patiSerial" : row.patiSerial,
+							"itemName"   : row.itemName,
+							"reportItemCode" : rowData.reportItemCode
+						},
+						success : function(data) {
+							createHighcharts(data[0].rows, rowData.itemName, rowData.inspectName);
+						}
+					});
+				}
+			});
+
+			$('#jyDivDetail').datagrid("loadData", data[0].rows);
+		}
+	});
+}

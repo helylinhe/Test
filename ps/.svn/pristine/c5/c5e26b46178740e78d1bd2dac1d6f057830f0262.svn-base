@@ -1,0 +1,123 @@
+$(function(){
+	$.ajax({
+        type: "post",
+        dataType : "json",
+        url:path+'/employeeAction!loadCombobox.action',
+        success: function(data){
+       	 $('#deptCode').combogrid({    
+       		 panelWidth:200,    
+     	     idField:'deptCode',    
+     	     textField:'deptName',
+     	     data:data[0].deptCode,
+    		 columns:[[    
+    		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+    		           {field:'deptName',title:'科室名称',width:120},    
+    		           {field:'unitCode',title:'院区',width:50,
+    		        	   formatter : function(value,row,index) {
+    		   				if(value=='1'){return '北院';}
+    		   				if(value=='2'){return '南院';}
+    		   			     }
+    		        	 },    
+    		       ]] ,
+        	});
+       //	$('#deptCode').combobox('select', data[0].deptCode[0].deptCode);
+       	serach();
+        }
+});
+$('#emp_list_tab').datagrid( {
+	collapsible : false,
+	remoteSort : false,
+	idField : 'jobnum',
+	rownumbers : true,
+	singleSelect : false,
+	title : '员工信息',
+	pagination : true,
+	pageSize : 10,
+	fitColumns : true,
+	pageList : [ 10, 20,50],
+	frozenColumns : [ [ {
+		field : 'ck',
+		checkbox : true
+	} ] ],
+	hideColumn : [ [ {
+		field : 'jobnum',
+		title : '工号',
+		width : 100,
+		align : 'left',
+		formatter : function(val, rec) {
+			return val;
+		}
+	} ] ],
+	columns : [ [ {
+		field : 'jobnum',
+		title : '工号',
+		width : 100,
+		align : 'left',
+		formatter : function(val, rec) {
+			return val;
+		}
+	},{
+		field : 'name',
+		title : '姓名',
+		width : 150,
+		align : 'left',
+		formatter : function(val, rec) {
+			return val;
+		}
+	}, {
+		field : 'department',
+		title : '科室',
+		width : 350,
+		align : 'left',
+		formatter : function(val, rec) {
+			return val;
+		}
+	} 	
+	]],
+	toolbar : [{
+		text : '密码重置',
+		iconCls : 'icon-undo',
+		handler : function() {
+			var rows = $("#emp_list_tab").datagrid("getSelections");
+			if(rows.length==0){
+				$.messager.alert('提示', '请选中一项在进行重置!', 'info');
+			}else{
+				$.messager.confirm('确认','您确认要重置密码吗？',function(r){    
+				    if (r){    
+				    	  var jobnum = "";
+							 for ( var int = 0; int < rows.length; int++) {
+								jobnum += rows[int].jobnum +",";
+							}
+								$.ajax({
+							        type: "post",
+							        dataType : "json",
+							        data:{"employee.jobnum":jobnum},
+							        url:path+'/employeeAction!updatePwdAll.action',
+							        success: function(data){
+							        	$.messager.alert('提示', data[0].message, 'info');
+							        }
+							});   
+				    }    
+				});  
+			}
+		}
+	}]
+});	
+})
+
+function serach(){
+	var param = {
+			'map.jobnum' :$('#jobnum').val(),
+			'map.name' : $('#name').val(),
+			'map.deptCode' : $("#deptCode").combogrid("getValue"),
+		}
+	loadData(path+'/employeeAction!queryPages.action',
+			'emp_list_tab', param);
+}
+
+
+
+
+
+
+

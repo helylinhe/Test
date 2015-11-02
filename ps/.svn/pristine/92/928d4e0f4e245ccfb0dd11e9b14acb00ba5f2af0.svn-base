@@ -1,0 +1,63 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.FlupDetail;
+import com.linkonworks.df.vo.FlupModule;
+import com.linkonworks.df.vo.FlupTask;
+import com.linkonworks.df.vo.TeletePhone;
+
+public interface FlupTaskService {
+	public List<FlupTask> findPageList(Page page);
+	List<Employee> findALlEmployees(Map<String , Object> map);
+	public int update(FlupTask flupTask);
+	//修改患者属性表
+	public int updatePatiFlup(FlupTask flupTask);
+	//修改患者属性表（患者属性为病故）
+    int updateflupPlan(FlupTask flupTask);
+	public List<FlupTask> getFlupTask(Page page);
+	public List<FlupTask> findflFlupTasksInfo(FlupTask flupTask);
+	public FlupTask findInfoById(String id);
+	public FlupTask  findFlupTask(Map map);
+	public int updateFlupTask(FlupTask fluptask);
+	public List<FlupModule> getFlupModule(String smsstyle);
+	public int addFlupDetail(FlupDetail flupDetail);
+	public List<FlupDetail> getByIdQuery(String id);
+	public int updateProperty(FlupTask f);
+
+	//根据联系方式查询号码
+	
+	public TeletePhone getPhoneByType(TeletePhone t);
+	
+	 //修改联系电话 修改tb_flup_task表 批量修改 以后未随访的记录
+	 int  updateFTask(FlupTask flupTask);
+    //修改联系电话 修改tb_pati_flup_rule表随访电话
+	int  updatePFTask(FlupTask flupTask);
+	//修改联系电话 修改tb_pati表 根据电话
+	 int  updatePati(TeletePhone flupTask);
+	//调整计划属性页面的分页方法
+	 public List<FlupTask> findPageListPlan(Page page);
+	//获取随访计划
+	public List<FlupTask> findPlan(FlupTask flupTask);
+	
+	public List<FlupTask> findPlan2(FlupTask flupTask);
+	
+	public int updatePlan(FlupTask flupTask);
+	 //停止随访计划
+	 public int stopPlan(FlupTask flupTask);
+	//根据停止的随访计划删除未随访的任务
+public int delteTask(FlupTask flupTask);
+	 //修改随访规则
+	 public int updateRuleGz(FlupTask flupTask);
+	 //修改随访计划
+	 public int updatePlanJh(FlupTask flupTask);
+	 //修改随访任务
+	 public int updateTaskRw(FlupTask flupTask);
+	 //添加随访计划
+	 public int addPlanJh(List<FlupTask> list);
+	 
+	 public int stoptask(FlupTask flupTask);
+}

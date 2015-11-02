@@ -1,0 +1,132 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.ServletActionContext;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.FileIndexService;
+import com.linkonworks.df.busi.service.FlupDynamicService;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.busi.utils.MobileWardUtil;
+import com.linkonworks.df.vo.DataImportRule;
+import com.linkonworks.df.vo.FileIndex;
+import com.linkonworks.df.vo.FlupDynamic;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class FileIndexAction extends ActionSupport{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2751332650489174047L;
+
+	private FileIndexService fileIndexService;
+	private FlupDynamicService flupDynamicService;
+	private Page<DataImportRule> page=new Page<DataImportRule>(); //参数传递(pageSize pageNumber)
+	private Map<String,String> map=new HashMap<String,String>(); //参数传递(筛选条件参数)
+	
+	private FileIndex fileIndex;
+	
+	public FlupDynamicService getFlupDynamicService() {
+		return flupDynamicService;
+	}
+
+	public void setFlupDynamicService(FlupDynamicService flupDynamicService) {
+		this.flupDynamicService = flupDynamicService;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public FileIndex getFileIndex() {
+		return fileIndex;
+	}
+
+	public void setFileIndex(FileIndex fileIndex) {
+		this.fileIndex = fileIndex;
+	}
+
+
+	public Page<DataImportRule> getPage() {
+		return page;
+	}
+
+
+	public void setPage(Page<DataImportRule> page) {
+		this.page = page;
+	}
+
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+
+	public FileIndexService getFileIndexService() {
+		return fileIndexService;
+	}
+
+
+	public void setFileIndexService(FileIndexService fileIndexService) {
+		this.fileIndexService = fileIndexService;
+	}
+
+//调阅电子病历
+	public String findFileIndex() {
+		page.setParams(map);
+		List<FileIndex> list =fileIndexService.findPageList(page);
+		Map<String, Object> json = new HashMap<String, Object>();
+		json.put("rows", list);
+		json.put("totalRecord", page.getTotalRecord());
+		json.put("totalPage", page.getTotalPage());
+		json.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(json);
+		return null;
+	}
+	//查询病人电子病例信息
+	public String findFileIndexShow() {
+		String urlString = MobileWardUtil.getPatiFileInfo(fileIndex.getPatientId(),fileIndex.getVisitId(),fileIndex.getFileNo(),fileIndex.getUnitCode());
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(urlString);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		/*Map<String, Object> json = new HashMap<String, Object>();
+		json.put("url", urlString);
+		JsonUtil.jsonData(json);*/
+		return null;
+	}
+	
+	//根据病人编号、住院编号、住院流水号查询随访项列表中的所有随访
+	public void findAllFlupDynamic(){
+		page.setParams(map);
+		List<FlupDynamic> list =flupDynamicService.findAllFlupDynamic(page);
+		Map<String, Object> json = new HashMap<String, Object>();
+		json.put("rows", list);
+		json.put("totalRecord", page.getTotalRecord());
+		json.put("totalPage", page.getTotalPage());
+		json.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(json);
+	}
+	
+	
+}

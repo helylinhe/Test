@@ -1,0 +1,22 @@
+package com.linkonworks.df.busi.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.FlupDynamic;
+import com.linkonworks.df.vo.FlupItemResponse;
+
+public interface FlupDynamicService {
+
+	//根据随病人编号、住院号、流水号获取该病人随访表的所有随访项随访项
+	public List<FlupItemResponse> findAllFlupDynamic(Map<String,String> map);
+	public void addFlupDynamic(Map<String,String> map);
+	public void removeFlupDynamic(Map<String,String> map);
+	
+	public List<FlupItemResponse> dynamicFlupItems(Map<String,String> map);
+	
+	public String addFlupItems(List<FlupDynamic> list);
+	
+	
+}

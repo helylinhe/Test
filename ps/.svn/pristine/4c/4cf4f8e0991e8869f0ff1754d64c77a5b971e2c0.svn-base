@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupItemDao">
+	<select id="getPageFlupItem" parameterType="page" resultType="flupitem">
+		select
+		tfi.flup_group_id "flupGroupId",
+		tfi.flup_item_code "flupItemCode",
+		tfi.item_name
+		"itemName",
+		tfi.item_show_no "itemShowNo",
+		tfi.record_type "recordType",
+		tfi.data_type "dataType",
+		tfi.dept_code "deptCode",
+		tfi.diag_code
+		"diagCode",
+		tfi.diag_name
+		"diagName",
+		to_char(tfi.log_date,'yyyy-mm-dd') "logDate",
+		F_GET_EMPLOYEE_NAME(tfi.employee_code) "employeeCode",
+	    tfg.group_one "groupOne",
+	    tfg.group_two "groupTwo",
+	    tfg.group_three
+	    "groupThree",
+	    td.name "recordName",
+	    f_get_dept_name(tfi.dept_code) "deptName"
+	    from tb_flup_item tfi 
+	    left join
+	    tb_flup_group tfg
+	    on
+	    tfi.flup_group_id=tfg.flup_group_id
+	    left join
+	    tb_dict td
+	    on 
+	    tfi.record_type=td.input_code
+	    where 1=1
+	    and
+	    tfi.del_state=0
+		<if test="params.flupItemCode!=null and params.flupItemCode!=''">
+			and flup_item_code=#{params.flupItemCode}
+		</if>
+		<if test="params.itemName!=null and params.itemName!=''">
+			and item_name=#{params.itemName}
+		</if>
+		<if test="params.recordType!=null and params.recordType!=''">
+			and record_type=#{params.recordType}
+		</if>
+		<if test="params.groupOne!=null and params.groupOne!=''">
+			and group_one=#{params.groupOne}
+		</if>
+		<if test="params.groupTwo!=null and params.groupTwo!=''">
+			and group_two=#{params.groupTwo}
+		</if>
+		<if test="params.groupThree!=null and params.groupThree!=''">
+			and group_three=#{params.groupThree}
+		</if>
+		order by tfi.log_date desc
+	</select>
+	<insert id="insert" parameterType="flupitem">
+		insert into tb_flup_item
+		(
+		flup_group_id,
+		flup_item_code,
+		item_name,
+		item_show_no,
+		record_type,
+		dept_code,
+		diag_code,
+		diag_name,
+		log_date,
+		employee_code,
+		data_type
+		)
+		values(
+		#{flupGroupId},
+		seq_tb_flup_item.nextval,
+		#{itemName},
+		#{itemShowNo},
+		#{recordType},
+		#{deptCode},
+		#{diagCode},
+		#{diagName},
+		SYSDATE,
+		#{employeeCode},
+		#{dataType}
+		)
+	</insert>
+	<delete id="delete" parameterType="map">
+		update tb_flup_item set
+		del_state=1 where flup_item_code=#{flupItemCode}
+	</delete>
+	<update id="update" parameterType="flupitem">
+		update tb_flup_item set
+		flup_group_id=#{flupGroupId},
+		item_name=#{itemName},
+		item_show_no=#{itemShowNo},
+		record_type=#{recordType},
+		data_type=#{dataType},
+		dept_code=#{deptCode},
+		diag_code=#{diagCode},
+		diag_name=#{diagName},
+		log_date=SYSDATE
+		where flup_item_code=#{flupItemCode}
+	</update>
+	
+	
+	
+	
+</mapper>

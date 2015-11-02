@@ -1,0 +1,162 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DiseaseNameDictService;
+import com.linkonworks.df.busi.utils.SessionData;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.DiseaseNameDict;
+import com.linkonworks.df.vo.FlupNameDict;
+import com.opensymphony.xwork2.ActionSupport;
+
+
+
+public class DiseaseNameDictAction extends ActionSupport{
+	
+	
+		
+	private Page<DiseaseNameDict> page = new Page<DiseaseNameDict>(); //参数传递(pageSize pageNumber)
+	private Map<String,String> map = new HashMap<String,String>(); //参数传递(筛选条件参数)
+	private DiseaseNameDictService diseaseNameDictService;
+	
+
+
+
+
+	
+	/**
+	 * 查询疾病指标
+	 */
+	public String execute(){
+		//加载表格数据
+		page.setParams(map);
+		Map userMap=new HashMap();
+		userMap.put("rows",diseaseNameDictService.getDiseaseNameDict(page));
+		userMap.put("totalRecord",page.getTotalRecord());
+		userMap.put("totalPage", page.getTotalPage());
+		userMap.put("pageNo", page.getPageNo());
+		JSON json=JSONArray.fromObject(userMap);
+		HttpServletResponse response=ServletActionContext.getResponse();
+		HttpServletRequest request = ServletActionContext.getRequest();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
+	/**
+	 * 修改疾病指标状态
+	 * @return
+	 */
+	public String updateState(){
+		DiseaseNameDict f = new DiseaseNameDict();
+		f.setUseState(map.get("useState"));
+		f.setDiseaseNameId(map.get("diseaseNameId"));
+		try {
+			int result = diseaseNameDictService.updateState(f);
+			if(result==1)
+				ServletActionContext.getResponse().getWriter().print("修改成功");
+			else
+				ServletActionContext.getResponse().getWriter().print("修改失败");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * 修改疾病指标
+	 * @return
+	 */
+	
+	public String updateDiseaseNameDict(){
+		 HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+ 		DiseaseNameDict f = new DiseaseNameDict();
+		f.setDeptCode(request.getParameter("deptCode"));
+		f.setDiseaseName(request.getParameter("diseaseName"));
+		f.setDiseaseNameId(request.getParameter("diseaseNameId"));
+		f.setEmployeeCode(SessionData.getEmployeeCode());
+		try {
+			int result = diseaseNameDictService.updateDiseaseNameDict(f);
+			if(result==1)
+				response.getWriter().print("success");
+			else
+				response.getWriter().print("error");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	
+	/**
+	 * 添加疾病指标
+	 * @return
+	 */
+	public String addDiseaseNameDict(){
+		 HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+		 DiseaseNameDict f = new DiseaseNameDict();
+		 f.setDeptCode(request.getParameter("deptCode"));
+		 f.setDiseaseName(request.getParameter("diseaseName"));
+		 f.setDiseaseNameSpell(request.getParameter("diseaseNameSpell"));
+		 f.setUseState("0"); //0表示疾病表可用  ， 1表示疾病表不可用
+		 f.setEmployeeCode(SessionData.getEmployeeCode());
+		 try {
+				int result = diseaseNameDictService.addDiseaseNameDict(f);
+				if(result==1)
+					response.getWriter().print("success");
+				else
+					response.getWriter().print("error");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		return null;
+	}
+	
+	
+	
+	public Page<DiseaseNameDict> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<DiseaseNameDict> page) {
+		this.page = page;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	public void setDiseaseNameDictService(
+			DiseaseNameDictService diseaseNameDictService) {
+		this.diseaseNameDictService = diseaseNameDictService;
+	}
+
+}

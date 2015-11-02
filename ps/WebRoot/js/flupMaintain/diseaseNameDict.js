@@ -1,0 +1,307 @@
+
+
+$(function(){
+
+
+/****
+ * 异布加载科室信息
+ */
+	$.ajax({
+        type: "post",
+        url: 'flupnamedictaction!loadCombobox.action',
+        dataType : "json",
+        success: function(data){
+        	$('#deptCode').combogrid({    
+        		 panelWidth:200,    
+         	     idField:'deptCode',    
+         	     textField:'deptName',
+         	     data:data[0].department,
+        		 columns:[[    
+        		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+        		           {field:'deptName',title:'科室名称',width:120},    
+        		           {field:'unitCode',title:'院区',width:50,
+        		        	   formatter : function(value,row,index) {
+        		   				if(value=='1'){return '北院';}
+        		   				if(value=='2'){return '南院';}
+        		   			     }
+        		        	 },    
+        		       ]] ,
+        	});
+        	$('#aDeptCode').combogrid({    
+        		 panelWidth:200,    
+         	     idField:'deptCode',    
+         	     textField:'deptName',
+         	     data:data[0].department,
+        		 columns:[[    
+        		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+        		           {field:'deptName',title:'科室名称',width:120},    
+        		           {field:'unitCode',title:'院区',width:50,
+        		        	   formatter : function(value,row,index) {
+        		   				if(value=='1'){return '北院';}
+        		   				if(value=='2'){return '南院';}
+        		   			     }
+        		        	 },    
+        		       ]] ,
+        	});
+        	$('#uDeptCode').combogrid({    
+        		 panelWidth:200,    
+         	     idField:'deptCode',    
+         	     textField:'deptName',
+         	     data:data[0].department,
+        		 columns:[[    
+        		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+        		           {field:'deptName',title:'科室名称',width:120},    
+        		           {field:'unitCode',title:'院区',width:50,
+        		        	   formatter : function(value,row,index) {
+        		   				if(value=='1'){return '北院';}
+        		   				if(value=='2'){return '南院';}
+        		   			     }
+        		        	 },    
+        		       ]] ,
+        	});
+        	}
+        	
+	
+        });
+
+
+//点击查询数据
+$("#queryInfo").click(function(){
+	loadData(path+'/diseaseNameDictAction.action','flupNameDict_table',{'map.deptCode': $('#deptCode').combobox("getValue"),'map.diseaseName':$("#diseaseName").val()});  
+});
+
+/*****
+ * 表格显示数据
+ */
+	  var currentIndex=-1;
+			 $('#flupNameDict_table').datagrid( {
+					method:'get',
+					collapsible : false,
+					remoteSort : false,
+					idField : 'diseaseNameId',
+					rownumbers : true,
+					title:'疾病指标信息',
+					queryParams : '',
+					singleSelect : true,
+				    pagination : true,
+					pageSize:10,
+                    pageList:[10,20],
+					frozenColumns:[[
+						{
+						field : 'diseaseName',
+						title : '疾病指标类名称',
+						width : 100,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},
+					{
+						field : 'deptName',
+						title : '所属科室',
+						width : 150,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'operateDate',
+						title : '操作日期',
+						width : 350,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'employeeCode',
+						title : '操作医生',
+						width : 70,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					}
+					,{
+						field : 'useState',
+						title : '状态',
+						width : 50,
+						align : 'center',
+						formatter : function(val,rec) {
+							return val=='0' ? "<b style='color:blue'>可用</b>" : "<b style='color:red'>不可用</b>";
+						}
+					}	
+					,{
+						field : 'useStateBt',
+						title : '操作',
+						width : 70,
+						align : 'center',
+						formatter : function(value,row,index) {
+							return value=='1' ?  "<input type='button' value='开启' onclick='updateState("+row.diseaseNameId+",0)'/>" : "<input type='button' value='关闭' onclick='updateState("+row.diseaseNameId+",1)'/>";
+						}
+					}				
+					]], toolbar:[
+						 {
+							 text:'新增',
+							 iconCls:'icon-add',
+							 handler:function()
+							 {
+								 //新增随访记录
+							 	$("#add_sftable_html").window("open");
+							 	
+							 	/*****
+							 	 * 清除一些信息
+							 	 */
+							 	$("#aDiseaseName").val("");
+							 	$("#aDiseaseNameSpell").val("");
+							 	$("#aDeptCode").combogrid("setValue","");
+							 }
+                         },'-',	
+					     {
+							 text:'修改',
+							 iconCls:'icon-edit',
+							 handler:function(){
+										        if(currentIndex==-1)
+										        {
+													$.messager.alert('提示', '请选择需要修改的项!', 'info');
+													return false;
+												} else 
+												{
+													$("#update_sftable_html").window("open");
+													var rows = $("#flupNameDict_table").datagrid("getSelections");
+													$("#uDiseaseName").val(rows[0].diseaseName);
+													$("#uDiseaseNameId").val(rows[0].diseaseNameId);
+													$("#uDeptCode").combogrid("setValue",rows[0].deptCode);
+													
+												}
+							 }
+                        }
+					],onDblClickRow: function (index, row){
+					       
+					},onClickRow:function(index,row){
+					   currentIndex=index;
+					}
+             });  
+			 loadData(path+'/diseaseNameDictAction.action','flupNameDict_table',{'map.deptCode': $('#deptCode').combobox("getValue")});   
+            /***
+             * 指标进行修改
+             */
+             $("#update").click(function(){
+             	var diseaseName = $('#uDiseaseName').val();//指标类名称
+             	var diseaseNameId = $('#uDiseaseNameId').val();
+             	var rows= $('#flupNameDict_table').datagrid("getSelections");
+             	var deptCode = $('#uDeptCode').combogrid("getValue");//所属科室
+             	if(diseaseName=='' || diseaseName==null || diseaseName.length==0){
+             			 $.messager.alert('警告！','疾病指标类名称不能为空！','error');
+             			 return;
+             	}
+             	if(deptCode=='' || deptCode==null || deptCode.length==0){
+             			 $.messager.alert('警告！','所属科室不能为空！','error');
+             			 return;
+             	}
+             	/****
+    			 * 修改后定位具体的页数
+    			 */
+    			var options = $('#flupNameDict_table').datagrid('getPager').data("pagination").options;  
+    			var curr = options.pageNumber; 
+             	$.messager.confirm('修改疾病指标','确认修改？',function(r){
+             		if(r){
+				             		$.post(
+										path+"/diseaseNameDictAction!updateDiseaseNameDict.action",
+										{
+											 deptCode : deptCode,
+											 diseaseName : diseaseName,
+											 diseaseNameId : diseaseNameId
+										},
+										function(data){
+											if(data == 'success'){
+												$.messager.alert('消息','修改成功','info');
+												$('#update_sftable_html').dialog('close')
+												loadData(path+'/diseaseNameDictAction.action','flupNameDict_table',{'map.diseaseName': $('#diseaseName').val(),'map.deptCode': $('#deptCode').combobox("getValue"),'page.pageNo':curr});
+											}else{
+												$.messager.alert('消息','此项随访项已经存在','error');
+											}
+											
+										},"text"
+										
+									);
+             		}
+             	});
+             	
+             });
+             
+    /****
+     * 指标表保存
+     */
+             
+             $('#sava').click(function(){
+             	var diseaseName = $('#aDiseaseName').val();
+             	var diseaseNameSpell = $('#aDiseaseNameSpell').val();
+             	var deptCode = $('#aDeptCode').combogrid("getValue");
+             	if(diseaseName=='' || diseaseName== null || diseaseName.length==0){
+             			 $.messager.alert('警告！','疾病指标类名称不能为空！','error');
+             			 return;
+             	}
+             	if(diseaseNameSpell=='' || diseaseNameSpell== null || diseaseNameSpell.length==0){
+             			 $.messager.alert('警告！','疾病指标名称首拼不能为空！','error');
+             			 return;
+             	}
+             	if(deptCode=='' || deptCode==null || deptCode.length==0){
+             			 $.messager.alert('警告！','所属科室不能为空！','error');
+             			 return;
+             	}
+             	
+             	$.messager.confirm('添加疾病指标','确认添加？',function(r){
+             			if(r){
+				             		$.post(
+										path+"/diseaseNameDictAction!addDiseaseNameDict.action",
+										{
+											 deptCode : deptCode,
+											 diseaseName : diseaseName,
+											 diseaseNameSpell : diseaseNameSpell
+										},
+										function(data){
+											if(data == 'success'){
+												$.messager.alert('提示', '添加成功!', 'info');
+												$('#add_sftable_html').dialog('close')
+												query();
+											}else{
+												$.messager.alert('提示', '此项随访项已经存在!', 'info');
+											}
+										},"text"
+										
+									);
+             		}
+             	});
+             	
+             	
+             });
+          
+});
+
+function query(){
+	loadData(path+'/diseaseNameDictAction.action','flupNameDict_table',{'map.diseaseName': $('#diseaseName').val(),'map.deptCode': $('#deptCode').combobox("getValue")});
+}
+
+
+
+/*
+  修改状态
+*/
+function updateState(id,value){
+	$.messager.confirm('info','确认修改状态？',function(r){
+		if(r){
+			$.post(
+			path+"/diseaseNameDictAction!updateState.action",
+			{
+				"map.useState" : value,
+				"map.diseaseNameId" : id 
+			},
+			function(data){
+				$.messager.alert('消息',data,'info');
+				query();
+			},'text'
+			);
+		}
+	});
+	
+} 	

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	
+
+	<typeAliases>
+		<typeAlias alias="user" type="com.linkonworks.df.vo.User" />
+		<typeAlias alias="page" type="com.linkonworks.df.busi.comment.Page" />
+		<typeAlias alias="flupitem" type="com.linkonworks.df.vo.FlupItem" />
+		<typeAlias alias="flupnamedict" type="com.linkonworks.df.vo.FlupNameDict" />
+		<typeAlias alias="flupgroup" type="com.linkonworks.df.vo.FlupGroup" />
+		<typeAlias alias="flupitemresponse" type="com.linkonworks.df.vo.FlupItemResponse" />
+		<typeAlias alias="dict" type="com.linkonworks.df.vo.Dict" />
+		<typeAlias alias="flupmodule" type="com.linkonworks.df.vo.FlupModule" />
+		<typeAlias alias="diagKnowledge" type="com.linkonworks.df.vo.DiagKnowledge" />
+		<typeAlias alias="blacklist" type="com.linkonworks.df.vo.BlackList" />
+		<typeAlias alias="dataimportrule" type="com.linkonworks.df.vo.DataImportRule" />
+		<typeAlias alias="employee" type="com.linkonworks.df.vo.Employee" />
+
+		<typeAlias alias="inpatidiag" type="com.linkonworks.df.vo.InpatiDiag" />
+		<typeAlias alias="patioperate" type="com.linkonworks.df.vo.PatiOperate" />
+		<typeAlias alias="pati" type="com.linkonworks.df.vo.Pati" />
+		<typeAlias alias="inspect" type="com.linkonworks.df.vo.Inspect" />
+		<typeAlias alias="check" type="com.linkonworks.df.vo.Check" />
+		<typeAlias alias="fluptask" type="com.linkonworks.df.vo.FlupTask" />
+		<typeAlias alias="department" type="com.linkonworks.df.vo.Department" />
+		<typeAlias alias="flupadvisedict" type="com.linkonworks.df.vo.FlupAdviseDict" />
+		<typeAlias alias="mobileflup" type="com.linkonworks.df.vo.MobileFlup" />
+		<typeAlias alias="reportName" type="com.linkonworks.df.vo.ReportName" />
+		<typeAlias alias="inpatidiag" type="com.linkonworks.df.vo.InpatiDiag" />
+		<typeAlias alias="patioperate" type="com.linkonworks.df.vo.PatiOperate" />
+		<typeAlias alias="pati" type="com.linkonworks.df.vo.Pati" />
+		<typeAlias alias="inspect" type="com.linkonworks.df.vo.Inspect" />
+		<typeAlias alias="check" type="com.linkonworks.df.vo.Check" />
+		<typeAlias alias="fluptask" type="com.linkonworks.df.vo.FlupTask" />
+		<typeAlias alias="department" type="com.linkonworks.df.vo.Department" />
+		<typeAlias alias="paytype" type="com.linkonworks.df.vo.PayType" />
+
+
+
+		<typeAlias alias="tree" type="com.linkonworks.df.vo.Tree" />
+		<typeAlias alias="role" type="com.linkonworks.df.vo.Role" />
+		<typeAlias alias="sysmenudefi" type="com.linkonworks.df.vo.SysMenuDefi" />
+		<typeAlias alias="roleprivs" type="com.linkonworks.df.vo.RolePrivs" />
+		<typeAlias alias="patifluprule" type="com.linkonworks.df.vo.PatiFlupRule" />
+		<typeAlias alias="privs" type="com.linkonworks.df.vo.Privs" />
+		<typeAlias alias="flupdetail" type="com.linkonworks.df.vo.FlupDetail" />
+		<typeAlias alias="loginlog" type="com.linkonworks.df.vo.LoginLog" />
+		<typeAlias alias="nationdict" type="com.linkonworks.df.vo.NationDict" />
+		<typeAlias alias="medicalhistory" type="com.linkonworks.df.vo.MedicalHistory" />
+		<typeAlias alias="diseaseItem" type="com.linkonworks.df.vo.DiseaseItem" />
+		<typeAlias alias="diseaseItemTemplate" type="com.linkonworks.df.vo.DiseaseItemTemplate"/>
+		<typeAlias alias="diseaseNameDict" type="com.linkonworks.df.vo.DiseaseNameDict"/>
+		<typeAlias alias="diseaseItem" type="com.linkonworks.df.vo.DiseaseItem"/>
+		<typeAlias alias="patidiseasedetail" type="com.linkonworks.df.vo.PatiDiseaseDetail"/>
+		<typeAlias alias="exportresponse" type="com.linkonworks.df.vo.ExportResponse"/>
+		
+		
+
+	</typeAliases>
+	
+	
+
+	<plugins>
+		<plugin interceptor="com.linkonworks.df.busi.comment.PageInterceptor">
+			<property name="databaseType" value="oracle" />
+		</plugin>
+	</plugins>
+	
+	
+
+	<mappers>
+		<mapper
+			resource="com/linkonworks/df/busi/dao/mapper/AssistApplyRecordMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/CheckMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/CountryDictMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DepartmentMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiagKnowledgeMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiagnosisDictMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DictDaoMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/EmployeeDaoMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupAdviseDictMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupDetailMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupGroupMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupItemMapper.xml" />
+		<mapper
+			resource="com/linkonworks/df/busi/dao/mapper/FlupItemResponseMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupModuleMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupNameDictMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiFlupRuleMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/HospitalConfigMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/InpatiDiagMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/InspectMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/LoginLogMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/MobileFlupMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/NationDictMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/OutpatiDiagMapper.xml" />
+		<mapper
+			resource="com/linkonworks/df/busi/dao/mapper/PatiConsultRecordMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiOperateMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PrivsMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/ReplyDetailMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/RoleMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/RolePrivsMapper.xml" />
+		<!--
+			<mapper
+			resource="com/linkonworks/df/busi/dao/mapper/userDaoMapper.xml"/>
+		-->
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/UserPrivsMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiOperateMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/UserRoleMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/BlackListMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DataImportRuleMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/SysMenuDefiMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FlupTaskMapper.xml" />
+
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PayTypeMapper.xml" />
+
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiagGroupMapper.xml" />
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/MedicalHistoryMapper.xml" />
+
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiseaseItemTemplateMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiseaseItemMapper.xml" />
+		
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DiseaseNameDict.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiDiseaseDictMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiDiseaseDetailMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/ReportDataMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/ReturnTaskMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PatiReturnRuleMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FileIndexMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/FirstTreatMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/KetiReportMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/PlatformTradelogMapper.xml"/>
+		<mapper resource="com/linkonworks/df/busi/dao/mapper/DynamicReportMapper.xml"/>
+	</mappers>
+
+</configuration>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.linkonworks.df.busi.dao.DynamicReportDao">
+	<select id="pageReportItems" parameterType="page" resultType="java.util.Map">
+	select A.f_select   "groupName",
+       A.c_select   "itemName",
+       A.table_name "tableName"
+  		from (select 'inpati_number' f_select,
+               '患者基本信息' c_select,
+               'tb_pati' table_name
+          from dual
+        union all
+        select 'pati_serial', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'billing_name', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'name', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'unit_code', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'in_hospital_date', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select 'inpati_serial_number', '患者基本信息', 'tb_pati' table_name
+          from dual
+        union all
+        select distinct (d.item_name),
+                        d.report_item_name,
+                        'tb_inspect_detail' table_name
+          from tb_inspect_detail d
+         inner join tb_inspect e
+            on d.inspect_id = e.inspect_id
+          <if test="list!=null and list!=''">
+            and e.dept_code  in
+            <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+              #{item.deptCode}
+            </foreach>
+          </if>
+          union all
+		select distinct (k.exam_class), k.exam_sub_class, 'tb_check'
+		from tb_check k
+		where 1 = 1  
+	    <if test="list!=null and list!=''">
+				and k.dept_code  in
+				<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+				</foreach>
+		</if>
+		 ) A
+	</select>
+	
+	
+	<select id="pageRightReportItems" parameterType="java.lang.String" resultType="exportresponse">
+		select r.group_name "groupName",r.item_name "itemName",r.table_name "tableName" from tb_export_response r
+		where r.dept_table_id=#{_parameter}
+	</select>
+	
+	
+	<select id="findReportName" parameterType="java.util.List" resultType="reportName">
+		select t.report_name "reportName",t.id "id" from tb_report_name t where t.status=1 
+		<if test="list!=null and list!=''">
+			and t.dept_code in 
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+			</foreach>
+		</if>
+	</select>
+	
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_export_response.nextval FROM DUAL
+		</selectKey>
+		insert into tb_export_response(id,group_name,item_name,table_name,dept_table_id)
+			SELECT seq_tb_flup_item_response.NEXTVAL , A.* FROM (
+		<foreach collection="list" item="item"  index="index" separator="union">
+			select #{item.groupName},#{item.itemName},#{item.tableName},#{item.deptNameId} from dual
+		</foreach>
+		) A
+	</insert>
+	<delete id="deleteBatch" parameterType="java.lang.String">
+		delete from tb_export_response r where r.dept_table_id=#{_parameter}
+	</delete>
+	
+	
+	
+	<select id="getReportItems" parameterType="java.lang.String" resultType="exportresponse">
+		select r.item_name "itemName" from tb_export_response r
+			where  r.dept_table_id in
+  				(select n.id from tb_report_name n where n.dept_code=#{_parameter})
+	</select>
+	
+	<select id="findReportItems" parameterType="page" resultType="java.util.Map">
+		
+	  select z.name "name",
+	    to_char(z.OUT_HOSPITAL_DATE,'yyyy-MM-dd') "outHospitalDate",
+	    to_char(z.in_hospital_date,'yyyy-MM-dd') "inHospitalDate",
+	    decode(z.gender,1,'男',2,'女',null) "gender",
+	    f_get_pt_pati_age(x.pati_serial,x.inpati_number) "age",
+	    x.pati_serial "patiSerial",
+	    x.inpati_number "inpatiNumber",
+	    x.inpati_serial_number "inpatiSerialNumber",
+	   ${params.columns}
+	   from (select
+	    pati_serial,inpati_number,inpati_serial_number,${params.columnsInspect}
+	    from(select A.*,diag.out_hospital_date
+	    from (select t.id,
+	    t.pati_serial, t.inpati_number,
+	    t.inpati_serial_number,d.item_name,
+	    d.report_item_name,d.inspect_result
+	    from tb_inspect t,
+	    tb_inspect_detail d
+	    where t.inspect_id = d.inspect_id) A,
+	    tb_inpati_diag diag
+	    where A.pati_serial = diag.pati_serial
+	    and
+	    A.inpati_number = diag.inpati_number
+	    and A.inpati_serial_number =
+	    diag.inpati_serial_number
+	     <if test="list!=null and list!=''">
+				and diag.out_dept  in
+				<foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+					#{item.deptCode}
+				</foreach>
+		</if>
+	    ) group by pati_serial,inpati_number,inpati_serial_number) x inner
+	    join
+	    TB_INPATI_DIAG z on x.pati_serial=z.pati_serial and
+	    x.inpati_number=z.inpati_number
+	    and
+	    x.inpati_serial_number=z.inpati_serial_number
+	</select>
+	
+</mapper>

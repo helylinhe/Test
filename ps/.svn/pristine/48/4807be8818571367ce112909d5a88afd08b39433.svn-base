@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupDynamicDao">
+<!-- 根据随病人编号、住院号、流水号获取该病人随访表的所有随访项随访项 -->
+	<select id="findAllFlupDynamic" parameterType="page" resultType="flupDynamic">
+		select A.flup_group_id flupGroupId,
+       A.item_name     itemName,
+       A.group_one     groupOne,
+       A.group_two     groupTow,
+       A.record_type   recordType
+  from (SELECT c.flup_group_id,
+               c.item_name,
+               c.group_one,
+               c.group_two,
+               decode(c.record_type,'fx', '复选', 'dx', '单选','wb', '文本','') record_type
+          from tb_pati_flup_rule a
+         inner join tb_flup_item_response b
+            on a.flup_table_name_id = b.flup_name_id
+         inner join tb_flup_group c
+            on b.flup_group_id = c.flup_group_id
+         where a.pati_serial = #{params.patiSerial}
+           and a.inpati_number = #{params.inpatiNumber}
+           and inpati_serial_number = #{params.inpatiSerialNumber}) A
+	</select>
+	<!-- 根据随访次数、随访时间、患者编号查询随访项 -->
+	<select id="findFlupDynamic" parameterType="page" resultType="flupDynamic">
+		
+	</select>
+	<!-- 修改随访模板 -->
+	<update id="editFlupDynamic" parameterType="page">
+		
+	</update>
+	<!--  -->
+	<insert id="addFlupDynamic" parameterType="page">
+		
+	</insert>
+	
+</mapper>

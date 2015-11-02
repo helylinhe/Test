@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupNameDictDao">
+
+
+    <select id="findByDeptCode" parameterType="java.util.List" resultType="flupnamedict" >
+		select 
+			t.flup_name_id flupNameId, t.flup_name flupName,
+       		t.flup_type flupType,t.dept_code deptCode,t.diag_code diagCode,
+       		t.diag_name diagName,t.operate_date operateDate,
+       		t.employee_code employeeCode
+  		from tb_flup_name_dict t
+ 		where t.use_state = 1
+ 		<if test="list!=null and list.size()>0">
+ 			and t.dept_code in
+ 			<foreach index="index" item="item" collection="list" 
+				open="(" separator="," close=")" >
+				#{item}
+			</foreach>
+ 		</if>
+	</select>
+ 
+ 
+	<select id="getFlupNameDict" parameterType="page" resultType="flupnamedict">
+		select 
+		a.flup_name_id "flupNameId",
+		a.flup_name "flupName",
+		a.flup_type "flupType",
+		a.dept_code "deptCode",
+		f_get_dept_name(a.dept_code) "deptName",
+		a.diag_name "diagName",
+    	a.diag_code "diagCode",
+		to_char(a.operate_date,'yyyy-mm-dd') "operateDate",
+		b.name   "employeeCode",
+		a.use_state "useState",
+		c.unit_code "unitCode",
+		a.use_state "buttonUseState"
+		from tb_flup_name_dict a left join tb_employee b on a.employee_code=b.jobnum left join tb_department c on a.dept_code= c.dept_code 
+		where 1=1
+		<if test="params.flupName!=null and params.flupName!=''">
+		   and a.flup_name like '%${params.flupName}%'
+		</if>
+		<if test="params.diagName!=null and params.diagName!=''">
+		   and a.diag_code=#{params.diagName}
+		</if>
+		<if test="params.flupType!=null and params.flupType!=''">
+		   and a.flup_type=#{params.flupType}
+		</if>	
+		<if test="list!=null">
+	    and a.dept_code in
+		   <foreach collection="list" index="index" item="item" 
+		   		open="(" close=")" separator=",">
+	  	   	  #{item.deptCode}
+	  	   </foreach>
+	 </if>	
+	 order by a.operate_date desc
+	</select>
+	
+	
+	<insert id="savaFlupNameDict" parameterType="flupNameDict">
+	 	insert into 	tb_flup_name_dict(flup_name_id,flup_name,flup_type,diag_name,dept_code,employee_code,operate_date,use_state,diag_code)  
+		 values(seq_tb_flup_name_dict.nextval,#{flupName},#{flupType},#{diagName},#{deptCode},#{employeeCode},sysdate,1,#{diagCode})
+	</insert>
+	
+	
+	<update id="updateFlupNameDict" parameterType="flupNameDict">
+		
+		update tb_flup_name_dict set 
+			flup_name = #{flupName},
+			flup_type = #{flupType},
+			diag_name = #{diagName},
+			dept_code = #{deptCode},
+			diag_code = #{diagCode},
+			employee_code = #{employeeCode},
+			operate_date = sysdate
+		where 
+			flup_name_id = #{flupNameId}
+	</update>
+	<update id="updateState" parameterType="flupNameDict">
+		
+		update tb_flup_name_dict set use_state=#{useState} where flup_name_id=#{flupNameId}
+	</update>
+	
+</mapper>

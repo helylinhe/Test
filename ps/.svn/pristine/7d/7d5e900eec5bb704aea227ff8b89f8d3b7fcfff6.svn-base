@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+
+	<bean id="userService" class="com.linkonworks.df.busi.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+
+
+	<bean id="flupNameDictService"
+		class="com.linkonworks.df.busi.service.impl.FlupNameDictServiceImpl">
+		<property name="flupNameDictDao" ref="flupNameDictDao"></property>
+	</bean>
+
+	<bean id="flupItemService"
+		class="com.linkonworks.df.busi.service.impl.FlupItemServiceImpl">
+		<property name="flupItemDao" ref="flupItemDao"></property>
+	</bean>
+
+	<bean id="flupItemReponseService"
+		class="com.linkonworks.df.busi.service.impl.FlupItemResponseServiceImpl">
+		<property name="flupItemResponseDao" ref="flupItemResponseDao"></property>
+	</bean>
+
+	<bean id="flupGroupService"
+		class="com.linkonworks.df.busi.service.impl.FlupGroupServiceImpl">
+		<property name="flupGroupDao" ref="flupGroupDao"></property>
+	</bean>
+	<!-- 随访知识库 -->
+	<bean id="diagKnowledgeService"
+		class="com.linkonworks.df.busi.service.impl.DiagKnowledgeServiceImpl">
+		<property name="diagKnowledgeDao" ref="diagKnowledgeDao"></property>
+	</bean>
+	<bean id="flupModuleService"
+		class="com.linkonworks.df.busi.service.impl.FlupModuleServiceImpl">
+		<property name="flupModuleDao" ref="flupModuleDao"></property>
+	</bean>
+
+	<bean id="blackListService"
+		class="com.linkonworks.df.busi.service.impl.BlackListServiceImpl">
+		<property name="blackListDao" ref="blackListDao"></property>
+	</bean>
+
+	<!-- 字典 Service -->
+	<bean id="dictService" class="com.linkonworks.df.busi.service.impl.DictServiceImpl">
+		<property name="dictDao" ref="dictDao"></property>
+	</bean>
+
+	<!-- Employee Service -->
+	<bean id="employeeService" class="com.linkonworks.df.busi.service.impl.EmployeeServiceImpl">
+		<property name="employeeDao" ref="employeeDao"></property>
+	</bean>
+	
+
+	
+	<bean id="inpatiDiagService" class="com.linkonworks.df.busi.service.impl.InpatiDiagServiceImpl">
+		<property name="inpatiDiagDao" ref="inpatiDiagDao"></property>
+	</bean>
+	
+	<bean id="patiOperateService" class="com.linkonworks.df.busi.service.impl.PatiOperateServiceImpl">
+		<property name="patiOperateDao" ref="patiOperateDao"></property>
+	</bean>
+	
+	
+	<bean id="checkService" class="com.linkonworks.df.busi.service.impl.CheckServiceImpl">
+		<property name="checkDao" ref="checkDao"></property>
+	</bean>
+	
+	<bean id="inspectService" class="com.linkonworks.df.busi.service.impl.InspectServiceImpl">
+		<property name="inspectDao" ref="inspectDao"></property>
+	</bean>
+	
+	
+	<bean id="nationDictService" class="com.linkonworks.df.busi.service.impl.NationDictServiceImpl">
+		<property name="nationDictDao" ref="nationDictDao"></property>
+	</bean>
+	
+	
+	<bean id="patiService" class="com.linkonworks.df.busi.service.impl.PatiServiceImpl">
+		<property name="patiDao" ref="patiDao"></property>
+	</bean>
+
+	<!-- 字典 Service -->
+	<bean id="dataImportRuleService" class="com.linkonworks.df.busi.service.impl.DataImportRuleServiceImpl">
+		<property name="dataImportRuleDao" ref="dataImportRuleDao"></property>
+	</bean>
+	<bean id="departmentService" class="com.linkonworks.df.busi.service.impl.DepartmentServiceImpl">
+		<property name="departmentDao" ref="departmentDao"></property>
+	</bean>
+	
+
+	<!-- 随访查询 -->
+	<bean id="flupTaskService" class="com.linkonworks.df.busi.service.impl.FlupTaskServiceImpl">
+		<property name="flupTaskDao" ref="flupTaskDao"></property>
+	</bean>
+	
+
+	<!-- 角色Service -->
+	<bean id="roleService" class="com.linkonworks.df.busi.service.impl.RoleServiceImpl">
+		<property name="roleDao" ref="roleDao"></property>
+	</bean>
+	
+	<!-- 菜单Service -->
+	<bean id="sysMenuDefiService" class="com.linkonworks.df.busi.service.impl.SysMenuDefiServiceImpl">
+		<property name="sysMenuDefiDao" ref="sysMenuDefiDao"></property>
+	</bean>
+	
+	
+	<!-- 角色权限Service -->	
+	<bean id="rolePrivsService" class="com.linkonworks.df.busi.service.impl.RolePrivsServiceImpl">
+		<property name="rolePrivsDao" ref="rolePrivsDao"></property>
+	</bean>
+	
+	<!-- 权限Service -->	
+	<bean id="privsService" class="com.linkonworks.df.busi.service.impl.PrivsServiceImpl">
+		<property name="privsDao" ref="privsDao"></property>
+	</bean>
+	
+	<!-- 随访属性Service -->	
+	<bean id="patiFlupRuleService" class="com.linkonworks.df.busi.service.impl.PatiFlupRuleImpl">
+		<property name="patiFlupRuleDao" ref="patiFlupRuleDao"></property>
+	</bean>
+
+	
+	
+	<!-- 随访评价字典Service -->
+	<bean id="flupAdviseDictService" class="com.linkonworks.df.busi.service.impl.FlupAdviseDictServiceImpl">
+		<property name="flupAdivseDictDao" ref="flupAdviseDictDao"></property>
+	</bean>
+	
+	<!-- 电话随访Service -->
+	<bean id="mobileFlupService" class="com.linkonworks.df.busi.service.impl.MobileFlupServiceImpl">
+		<property name="mobileFlupDao" ref="mobileFlupDao"></property>
+	</bean>
+
+	<!-- 付费方式 -->
+    <bean id="payTypeService" class="com.linkonworks.df.busi.service.impl.PayTypeServiceImpl">
+		<property name="payTypeDao" ref="payTypeDao"></property>
+	</bean>
+	
+	<!-- 诊断组维护 -->
+    <bean id="diagGroupService" class="com.linkonworks.df.busi.service.impl.DiagGroupServiceImpl">
+		<property name="diagGroupDao" ref="diagGroupDao"></property>
+	</bean>
+	
+	<!-- ICD10 -->
+	<bean id="medicalHistoryService" class="com.linkonworks.df.busi.service.impl.MedicalHistoryServiceImpl">
+		<property name="medicalHistoryDao" ref="medicalHistoryDao"></property>
+	</bean>
+
+	
+
+	<bean id="diseaseItemTemplateService" class="com.linkonworks.df.busi.service.impl.DiseaseItemTemplateServiceImpl">
+		<property name="diseaseItemTemplateDao" ref="diseaseItemTemplateDao"></property>
+	</bean>
+
+
+    <!-- 疾病维护 -->
+    <bean id="diseaseItemService" class="com.linkonworks.df.busi.service.impl.DiseaseItemServiceImpl">
+		<property name="diseaseItemDao" ref="diseaseItemDao"></property>
+	</bean>
+
+	
+
+	<bean id="diseaseNameDictService" class="com.linkonworks.df.busi.service.impl.DiseaseNameDictServiceImpl">
+		<property name="diseaseNameDictDao" ref="diseaseNameDictDao"></property>
+	</bean>
+
+
+	<!-- 病例 -->
+	<bean id="patiDiseaseDictService" class="com.linkonworks.df.busi.service.impl.PatiDiseaseDictServiceImpl">
+		<property name="patiDiseaseDictDao" ref="patiDiseaseDictDao"></property>
+	</bean>
+	
+	<bean id="patiDiseaseDetailService" class="com.linkonworks.df.busi.service.impl.PatiDiseaseDetailServiceImpl">
+		<property name="patiDiseaseDetailDao" ref="patiDiseaseDetailDao"></property>
+	</bean>
+
+	<!-- 数据导出EXCEL -->
+	<bean id="reportDataService" class="com.linkonworks.df.busi.service.impl.ReportDataServiceImpl">
+		<property name="reportDataDao" ref="reportDataDao"></property>
+	</bean>
+	
+	<bean id="patiReturnRuleService" class="com.linkonworks.df.busi.service.impl.PatiReturnRuleServiceImpl">
+		<property name="patiReturnRuleDao" ref="patiReturnRuleDao"></property>
+	</bean>
+
+	<bean id="returnTaskService" class="com.linkonworks.df.busi.service.impl.ReturnTaskServiceImpl">
+		<property name="returnTaskDao" ref="returnTaskDao"></property>
+	</bean>
+	
+	<bean id="fileIndexService" class="com.linkonworks.df.busi.service.impl.FileIndexServiceImpl">
+		<property name="fileIndexDao" ref="fileIndexDao"></property>
+	</bean>
+	
+	
+	<bean id="firstTreatService" class="com.linkonworks.df.busi.service.impl.FirstTreatServiceImpl">
+		<property name="firstTreatDao" ref="firstTreatDao"></property>
+	</bean>
+	<bean id="ketiReportService" class="com.linkonworks.df.busi.service.impl.KetiReportServiceImpl">
+		<property name="ketiReportDao" ref="ketiReportDao"></property>
+	</bean>
+	
+	<bean id="platformTradelogService" class="com.linkonworks.df.busi.service.impl.PlatformTradelogServiceImpl">
+		<property name="platformTradelogDao" ref="platformTradelogDao"></property>
+	</bean>
+
+</beans>

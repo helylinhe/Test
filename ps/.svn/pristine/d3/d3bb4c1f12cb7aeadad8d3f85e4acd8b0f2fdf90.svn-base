@@ -1,0 +1,68 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DynamicReportDao;
+import com.linkonworks.df.busi.service.DynamicReportService;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.ExportResponse;
+import com.linkonworks.df.vo.ReportName;
+
+public class DynamicReportServiceImpl implements DynamicReportService {
+
+	private DynamicReportDao dynamicReportDao;
+
+	public DynamicReportDao getDynamicReportDao() {
+		return dynamicReportDao;
+	}
+
+	public void setDynamicReportDao(DynamicReportDao dynamicReportDao) {
+		this.dynamicReportDao = dynamicReportDao;
+	}
+
+	@Override
+	public List<Map<String, String>> pageReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageReportItems(page);
+	}
+
+	@Override
+	public List<ReportName> findReportName(List<Department> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportName(list);
+	}
+
+	@Override
+	public List<ExportResponse> pageRightReportItems(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageRightReportItems(tableNameId);
+	}
+
+	@Override
+	public int insertBatch(List<ExportResponse> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.insertBatch(list);
+	}
+
+	@Override
+	public List<ExportResponse> getReportItems(String deptCode) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.getReportItems(deptCode);
+	}
+
+	@Override
+	public int deleteBatch(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.deleteBatch(tableNameId);
+	}
+
+	@Override
+	public List<Map<String, String>> findReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportItems(page);
+	}
+	
+	
+}

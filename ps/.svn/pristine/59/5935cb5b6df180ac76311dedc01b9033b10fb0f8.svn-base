@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PatiDao">
+
+	<resultMap type="pati" id="patiResult">
+		<id property="id" column="id" />
+		<result property="inpatiNumber" column="inpati_number" />
+		<result property="inpatiTimes" column="inpati_times" />
+		<result property="name" column="name" />
+		<result property="age" column="age" />
+		<result property="gender" column="gender" />
+		<result property="birthDate" column="birth_date" />
+		<result property="patiSerial" column="pati_serial" />
+		<result property="certificateType" column="certificate_type" />
+		<result property="certificateNumber" column="certificate_number" />
+		<result property="mobileNumber" column="mobile_number" />
+		<result property="familyNumber" column="family_number" />
+		<result property="relation" column="relation" />
+		<result property="currentAddr" column="current_addr" />
+		<result property="relationName" column="relation_name" />
+		<result property="billingCode" column="billing_code" />
+		<result property="billingName" column="billing_name"/>
+		<result property="relationMobileNumber" column="relation_mobile_number" />
+		<result property="totalMoney" column="total_money"/>
+		<result property="charityAidMoney" column="charity_aid_money"/>
+		<result property="operationDoctorCode" column="operationDoctorCode"/>
+		<association property="inpatiDiag" column="inpati_number"
+			javaType="inpatidiag" resultMap="inpatiNumberResult"></association>
+	</resultMap>
+	<resultMap type="inpatidiag" id="inpatiNumberResult">
+		<id property="id" column="id" />
+		<result property="department" column="out_dept" />
+		<result property="attendDoctor" column="attend_doctor" />
+		<result property="inHospitalDate" column="in_hospital_date" />
+		<result property="inHospitalDates" column="in_hospital_dates" />
+		<result property="chiefDoctor" column="chief_doctor" />
+		<result property="outHospitalDate" column="out_hospital_date" />
+		<result property="inpatiDoctor" column="inpati_doctor" />
+		<result property="inHospDiag" column="in_hospital_dates" />
+		<result property="diagSituation" column="diag_situation"/>
+		<result property="diag" column="diag" />
+		<association property="patiOperate" column="inpati_number"
+			javaType="patioperate">
+			<result property="operationName" column="operation_name" />
+			<result property="operationDoctorCode" column="operation_doctor_code" />
+			<result property="operationDate" column="operation_date" />
+		</association>
+
+	</resultMap>
+
+
+	<select id="checkPati" parameterType="map" resultType="pati">
+		select *
+		from tb_pati where 1=1
+		<if test="patiSerial!=null and patiSerial!=''">
+			and pati_Serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and inpati_number=#{inpatiNumber}
+		</if>
+	</select>
+
+
+	<insert id="insert" parameterType="pati">
+		insert into
+		tb_pati
+		(
+		id,
+		pati_serial,
+		inpati_number,
+		medical_insurance_code,
+		billing_name,
+		name,
+		gender,
+		age,
+		birth_state,
+		birth_addr,
+		birth_weight,
+		birth_date,
+		country,
+		race,
+		certificate_type,
+		certificate_number,
+		mobile_number,
+		family_number,
+		profession_title,
+		married,
+		current_addr,
+		current_postcode,
+		account_addr,
+		account_postcode,
+		relation_name,
+		relation,
+		relation_mobile_number,
+		same_family_inpat_number,
+		inpati_times,
+		current_inpati_serial,
+		unit_code,
+		data_source,
+		generate_date,
+		flup_mobile,
+		employee_code,
+		id_no
+		)
+		values(
+		seq_tb_pati.nextval,
+		#{patiSerial},
+		#{inpatiNumber},
+		#{medicalInsuranceCode},
+		#{billingName},
+		#{name},
+		#{gender},
+		#{age},
+		#{birthState},
+		#{birthAddr},
+		#{birthWeight},
+		to_date(#{birthDate},'YYYY/MM/DD'),
+		#{country},
+		#{race},
+		#{certificateType},
+		#{certificateNumber},
+		#{mobileNumber},
+		#{familyNumber},
+		#{professionTitle},
+		#{married},
+		#{currentAddr},
+		#{currentPostcode},
+		#{accountAddr},
+		#{accountPostcode},
+		#{relationName},
+		#{relation},
+		#{relationMobileNumber},
+		#{sameFamilyInpatNumber},
+		#{inpatiTimes},
+		#{currentInpatiSerial},
+		#{unitCode},
+		'1',
+		SYSDATE,
+		#{flupMobile},
+		#{employeeCode},
+		#{idNo}
+		)
+</insert>
+
+
+
+	<select id="getPatiInfo" parameterType="java.util.Map"
+		resultMap="patiResult">
+		select p.id,
+		p.pati_serial,
+		p.inpati_number,
+		nvl2(p.inpati_times,p.inpati_times,1) "inpati_times",
+	    F_GET_DEPT_NAME(diag.out_dept) "out_dept",
+	    F_GET_EMPLOYEE_NAME(diag.attend_doctor) "attend_doctor" ,
+	    p.billing_name "billing_name",
+	    to_char(diag.in_hospital_date ,'yyyy-mm-dd') "in_hospital_date",
+	    F_GET_EMPLOYEE_NAME(diag.chief_doctor) "chief_doctor",
+	    p.name,
+	    decode(p.gender,'1','男','2','女') "gender",
+	    to_char(diag.out_hospital_date,'yyyy-mm-dd') "out_hospital_date",
+	    F_GET_EMPLOYEE_NAME(diag.inpati_doctor) "inpati_doctor",
+	    F_GET_PATI_AGE(p.pati_serial, p.inpati_number) "age",
+	    to_char(p.birth_date,'yyyy-mm-dd') "birth_date",
+	    diag.in_hospital_dates,
+	    diag.diag,
+	    diag.diag_situation,
+	    p.certificate_type,
+	    p.certificate_number,
+	    p.mobile_number,
+	    p.family_number,
+	    p.relation,
+	    p.relation_mobile_number,
+	    p.current_addr,
+	    p.relation_name,
+	    diag.total_money,
+	    diag.charity_aid_money,
+	    F_GET_OPERATE_NAME(diag.pati_serial,diag.inpati_serial_number) operationDoctorCode
+	    from tb_pati
+	    p,tb_inpati_diag diag
+	    where
+	    diag.inpati_number=p.inpati_number 
+	    and p.pati_serial=#{patiSerial} 
+	    and p.inpati_number=#{inpatiNumber}
+		
+	</select>  
+	<select id="getPagePati" parameterType="page" resultType="pati"><!--
+		select
+		tp.id "id",
+		tp.pati_serial "patiSerial",
+		tp.inpati_number
+		"inpatiNumber",
+		td.inpati_serial_number "inpatiSerialNumber",
+		f_get_flup_mobile (tp.pati_serial,tp.inpati_number) "flupMobile",
+		tp.certificate_type
+		"certificateType",
+		tp.certificate_number "certificateNumber",
+		tp.relation_name
+		"relationName",
+		tp.relation "relation",
+		tp.relation_mobile_number
+		"relationMobileNumber",
+		tp.mobile_number
+		"mobileNumber",
+		tp.family_number "familyNumber",
+		tp.CURRENT_ADDR
+		"currentAddr",
+		tp.current_postcode "currentPostcode",
+		tp.name "name",
+		tp.gender
+		"gender",
+		trunc((trunc(SYSDATE)- trunc(tp.birth_date))/365) "age",
+		td.diag "diag",
+		td.out_hosp_diag
+		"outHospDiag",
+		td.out_hosp_diag_other
+		"outHospDiagOther",
+		F_GET_FLUP_STATUS(r.flup_status) "flupStatus",
+		F_GET_FLUP_WAY(r.flup_way) "flupWay",
+		td.out_hospital_date
+		"outHospitalDate",
+		f_get_dept_name(td.out_dept)
+		"department",
+		tp.billing_name
+		"billingCode",
+		tp.data_source "dataFrom"
+		from tb_pati tp
+		left join (select d.*, row_number() over (partition by d.pati_serial order
+		by d.inpati_serial_number desc ) rn from tb_inpati_diag d ) td on
+		tp.pati_serial =td.pati_serial
+		left join tb_pati_flup_rule r
+		on td.pati_serial=r.pati_serial and td.inpati_serial_number =
+		r.inpati_serial_number
+		where 1=1
+		and
+		tp.del_state=0
+		and td.rn = 1
+		<if test="params.flupStatus!=null and params.flupStatus!=''">
+			and r.flup_status like '%'||#{params.flupStatus}||'%'
+		</if>
+		<if test="params.patiSerial!=null and params.patiSerial!=''">
+			and tp.pati_serial like '%'||#{params.patiSerial}||'%'
+		</if>
+		<if test="params.deptCode!=null and params.deptCode!=''">
+			and r.dept_code like '%'||#{params.deptCode}||'%'
+		</if>
+		<if test="params.name!=null and params.name!=''">
+			and tp.name like '%'||#{params.name}||'%'
+		</if>
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and tp.inpati_number like '%'||#{params.inpatiNumber}||'%'
+		</if>
+		order by td.out_hospital_date desc
+	-->
+		select
+		tp.id "id",
+		tp.pati_serial "patiSerial",
+		tp.inpati_number
+		"inpatiNumber",
+		td.inpati_serial_number "inpatiSerialNumber",
+		r.flup_mobile "flupMobile",
+		tp.certificate_type
+		"certificateType",
+		tp.certificate_number "certificateNumber",
+		tp.relation_name
+		"relationName",
+		tp.relation "relation",
+		tp.relation_mobile_number
+		"relationMobileNumber",
+		tp.mobile_number
+		"mobileNumber",
+		tp.family_number "familyNumber",
+		tp.CURRENT_ADDR
+		"currentAddr",
+		tp.current_postcode "currentPostcode",
+		tp.name "name",
+		tp.gender
+		"gender",
+		F_GET_PATI_AGE(tp.pati_serial,tp.inpati_number) "age",
+		td.diag "diag",
+		td.out_hosp_diag
+		"outHospDiag",
+		td.out_hosp_diag_other
+		"outHospDiagOther",
+		F_GET_FLUP_STATUS(r.flup_status) "flupStatus",
+		F_GET_FLUP_WAY(r.flup_way) "flupWay",
+		td.out_hospital_date
+		"outHospitalDate",
+		f_get_dept_name(td.out_dept)
+		"department",
+		tp.billing_name
+		"billingCode",
+		tp.data_source "dataFrom"
+		from tb_pati tp
+		left join (select d.*, row_number() over (partition by d.inpati_serial_number,d.inpati_number order
+		by d.inpati_serial_number,d.inpati_number desc ) rn from tb_inpati_diag d ) td on
+		tp.pati_serial =td.pati_serial
+		left join tb_pati_flup_rule r
+		on td.pati_serial=r.pati_serial and td.inpati_serial_number =
+		r.inpati_serial_number
+		where 1=1
+		and
+		tp.del_state=0
+		and td.rn = 1
+		<if test="params.flupStatus!=null and params.flupStatus!=''">
+			and r.flup_status like '%'||#{params.flupStatus}||'%'
+		</if>
+		<if test="params.patiSerial!=null and params.patiSerial!=''">
+			and tp.pati_serial like '%'||#{params.patiSerial}||'%'
+		</if>
+		<if test="params.deptCode!=null and params.deptCode!=''">
+			and r.dept_code like '%'||#{params.deptCode}||'%'
+		</if>
+		<if test="params.name!=null and params.name!=''">
+			and tp.name like '%'||#{params.name}||'%'
+		</if>
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and tp.inpati_number like '%'||#{params.inpatiNumber}||'%'
+		</if>
+		order by td.out_hospital_date desc
+		
+	</select>
+	<delete id="delete" parameterType="list">
+        <![CDATA[
+            update tb_pati set del_state=1 where id in
+        ]]>
+		<foreach collection="list" item="ids" open="(" separator=","
+			close=")">
+			#{ids} 
+         </foreach>
+	</delete>
+	<update id="update" parameterType="pati">
+		update tb_pati set
+		flup_mobile=#{flupMobile},
+		certificate_type=#{certificateType},
+		certificate_number=#{certificateNumber},
+		relation_name=#{relationName},
+		relation=#{relation},
+		relation_mobile_number=#{relationMobileNumber},
+		mobile_number=#{mobileNumber},
+		family_number=#{familyNumber},
+		CURRENT_ADDR=#{currentAddr},
+		current_postcode=#{currentPostcode},
+	    id_no=#{idNo}
+		where
+		id=#{id}
+	</update>
+	
+	
+	<select id="historyInfo" parameterType="page" resultType="map">
+		select 
+		    A.id "id",
+		    A.flup_table_name_id   "flupTableNameId",
+		    A.flup_plan_date "flupPlanDate",
+		    A.name "name",
+		    A.age "age",
+		    A.gender "gender",
+		    A.inpati_number "inpatiNumber",
+		    A.inpati_serial_number "inpatiSerialNumber",
+		    A.pati_serial "patiSerial",
+		    A.out_hosp_diag "outHospDiag",
+		    A.total_money "totalMoney",
+		    A.charity_aid_money "charityAidMoney",
+		    o.operation_name "operationName",
+		    o.operation_doctor_code
+		    "operationDoctorCode",
+		    A.doctorName "doctorName",
+		    A.flup_result "flupResult",
+            A.flup_failre "flupFailre",
+		    o.operation_prognosis "operationPrognosis"
+		    from (select
+		    to_char(t.flup_plan_date,'yyyy-mm-dd') flup_plan_date,
+		    p.name,
+		    p.gender,
+		    F_GET_PATI_AGE(p.pati_serial, p.inpati_number)  age,
+		    diag.out_hosp_diag,
+		    diag.total_money,
+		    diag.charity_aid_money,
+		    diag.inpati_serial_number,
+		    diag.inpati_number,
+		    diag.pati_serial,
+		    t.id,
+		    t.flup_table_name_id,
+		    t.flup_result,
+            t.flup_failre,
+		    F_GET_EMPLOYEE_NAME(t.flup_doctor_code) doctorName
+		    from tb_pati p,
+		    tb_flup_task t, tb_inpati_diag diag
+		    where p.inpati_number =t.inpati_number
+		    and p.pati_serial = t.pati_serial
+		    and diag.pati_serial =
+		    t.pati_serial
+		    and diag.inpati_serial_number =
+		    t.inpati_serial_number
+		    and
+		    t.flup_complete = 1
+		    <if test="params.inpatiNumber!='' and params.inpatiNumber!=null">
+				and p.inpati_number  = #{params.inpatiNumber}
+	       </if>
+			<if test="params.medicalInsuranceCode!='' and params.medicalInsuranceCode!=null">
+				and p.medical_insurance_code = #{params.medicalInsuranceCode}
+	       </if>
+		    ) A
+		    left join tb_pati_operate o
+		    on o.inpati_number = A.inpati_number
+		    and
+		    o.inpati_serial_number = A.inpati_serial_number
+		
+	</select>
+	
+</mapper>

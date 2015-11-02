@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.linkonworks.df.busi.dao.FileIndexDao">
+
+	<select id="findPageList" parameterType="page" resultType="com.linkonworks.df.vo.FileIndex"> 
+	select f.id id,
+       f.patient_id patientId,
+       f.visit_id visitId,
+       f.file_no fileNo,
+       f.file_name fileName,
+       f.topic topic,
+       f.creator_name creatorName,
+       f.creator_id creatorId,
+       to_char(f.create_date_time, 'yyyy-mm-dd')  createDateTime,
+       f.last_modify_date_time lastModifyDateTime,
+       f.unit_code unitCode
+  from tb_file_index f
+	 where f.patient_id =  #{params.patientId}
+   and f.visit_id = #{params.visitId} and  f.unit_code=#{params.unitCode}
+   order by f.file_no
+	</select>
+	
+</mapper>

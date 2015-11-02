@@ -1,0 +1,51 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>My JSP 'monitor.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<!--
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	-->
+
+  </head>
+  
+  <body>
+    	---------操作系统--------------------<br/>
+    	操作系统内核=x86<br/>
+    	操作描述=Microsoft Windows Vista<br/>
+    	系统类型=Win32<br/>
+    	系统卖主=Microsoft<br/>
+    	系统名称=Windows Vista<br/>
+    	系统版本=Vista<br/>
+    	版本号=6.1<br/>
+    	
+    	
+    	-----------cpu-----------------------<br/>
+    	服务器ip地址172.31.10.177<br/>
+    	CPU总量mhz=1995<br/>
+    	vendor=Intel<br/>
+    	cache size=-1<br/>
+    	User=2.9%<br/>
+    	Sys=7.6%<br/>
+    	CPU总量mhz=1995<br/>
+    	vendor=Intel<br/>
+    	cache size=-1<br/>
+    	User=2.9%<br/>
+    	Sys=7.6%<br/>
+    	
+    	
+  </body>
+</html>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DepartmentDao">
+
+	<select id="getDepartment" parameterType="page" resultType="department">
+		select
+		dept_code "deptCode",
+		dept_smp_name "deptSmpName",
+		dept_name
+		"deptName",
+		dept_status "deptStatus",
+		medical_insurance_code
+		"medicalInsuranceCode",
+		medical_insurance_name "medicalInsuranceName",
+		dept_same_code "deptSameCode",
+		unit_code "unitCode",
+		CLINIC_ATTR_name "clinicAttrName",
+		OUTP_OR_INP_name "outpOrInpName",
+		dept_summary deptSummary,
+		expert_dept expertDept,
+		flup_dept flupDept
+		<!--
+			(case when unit_code is not null then (case when unit_code=1 then
+			'北院' else '南院' end) else unit_code end) "unitCode"
+		-->
+		from tb_department where 1=1
+		<if test="params.deptCode!=null and params.deptCode!=''">
+			and dept_code = #{params.deptCode}
+				</if>
+		<if test="params.deptName!=null and params.deptName!=''">
+			and dept_name like '%'||#{params.deptName}||'%'
+		</if>
+		<if test="params.unitCode!=null and params.unitCode!=''">
+			and unit_code = #{params.unitCode}
+		</if>
+	</select>
+
+
+	<select id="getPageDepartment" parameterType="page" resultType="department">
+		select
+		dept_code "deptCode",
+		dept_smp_name "deptSmpName",
+		dept_name
+		"deptName",
+		dept_status "deptStatus",
+		medical_insurance_code
+		"medicalInsuranceCode",
+		medical_insurance_name "medicalInsuranceName",
+		dept_same_code "deptSameCode",
+		unit_code "unitCode"
+		from tb_department where 1=1
+		<if test="params.deptCode!=null and params.deptCode!=''">
+			and dept_code in
+			<foreach collection="params.deptCode" item="ids" open="("
+				separator="," close=")">
+				#{ids} 
+         </foreach>
+		</if>
+		<if test="params.deptName!=null and params.deptName!=''">
+			and dept_name like '%'||#{params.deptName}||'%'
+		</if>
+	</select>
+
+
+	<update id="updateDepartment" parameterType="department">
+		update tb_department
+		set
+		dept_code=#{deptCode},
+		dept_name=#{deptName},
+		dept_status=#{deptStatus},
+		medical_insurance_code=#{medicalInsuranceCode},
+		medical_insurance_name=#{medicalInsuranceName},
+		dept_same_code=#{deptSameCode},
+		dept_summary =#{deptSummary},
+		expert_dept =#{expertDept},
+		flup_dept =#{flupDept},
+		unit_code=#{unitCode}
+		where
+		dept_code=#{deptCode}
+	</update>
+
+	<insert id="savaDepartment" parameterType="department">
+		insert into
+		tb_department(dept_code,dept_name,dept_status,medical_insurance_code,medical_insurance_name,dept_same_code,unit_code,dept_smp_name,dept_summary,expert_dept,flup_dept)
+		values(#{deptCode},#{deptName},#{deptStatus},#{medicalInsuranceCode},#{medicalInsuranceName},#{deptSameCode},#{unitCode},#{deptName},#{deptSummary},#{expertDept},#{flupDept})
+	</insert>
+
+	<select id="queryAll" parameterType="department">
+		select * from tb_department
+	</select>
+	
+	<select id="queryAll2" resultType="department">
+		select dept_code "deptCode",dept_name "deptName",unit_code "unitCode",input_code "inputCode" from tb_department where outp_or_inp_name like '%门诊%' and clinic_attr_name='临床' 
+	</select>
+
+	<select id="findById" resultType="department" parameterType="java.util.List">
+		select
+		dept_code "deptCode",
+		dept_name "deptName",
+		unit_code "unitCode"
+		from tb_department
+		where 1=1 and dept_status=0
+		<if test="list!=null and list.size()>0">
+			and dept_code in
+			<foreach index="index" item="item" collection="list" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="getFlupDepartment" resultType="department" parameterType="java.util.List">
+		select
+		dept_code "deptCode",
+		dept_name "deptName",
+		unit_code "unitCode"
+		from tb_department
+		where 1=1 and dept_status=0 and flup_dept ='1'
+		<if test="list!=null and list.size()>0">
+			and dept_code in
+			<foreach index="index" item="item" collection="list" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+	
+</mapper>

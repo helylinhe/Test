@@ -1,0 +1,105 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DynamicReportDao;
+import com.linkonworks.df.busi.service.DynamicReportService;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.ExportResponse;
+import com.linkonworks.df.vo.ReportName;
+
+public class DynamicReportServiceImpl implements DynamicReportService {
+
+	private DynamicReportDao dynamicReportDao;
+
+	public DynamicReportDao getDynamicReportDao() {
+		return dynamicReportDao;
+	}
+
+	public void setDynamicReportDao(DynamicReportDao dynamicReportDao) {
+		this.dynamicReportDao = dynamicReportDao;
+	}
+
+	@Override
+	public List<Map<String, String>> pageReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageReportItems(page);
+	}
+
+	@Override
+	public List<ReportName> findReportName(List<Department> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportName(list);
+	}
+
+	@Override
+	public List<ExportResponse> pageRightReportItems(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.pageRightReportItems(tableNameId);
+	}
+
+	@Override
+	public int insertBatch(List<ExportResponse> list) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.insertBatch(list);
+	}
+
+	@Override
+	public List<ExportResponse> getReportItems(String deptCode) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.getReportItems(deptCode);
+	}
+
+	@Override
+	public int deleteBatch(String tableNameId) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.deleteBatch(tableNameId);
+	}
+
+	@Override
+	public List<Map<String, String>> findReportItems(Page page) {
+		// TODO Auto-generated method stub
+		return dynamicReportDao.findReportItems(page);
+	}
+	@Override
+	public List<Map<String, String>> pageReport(Page page) {
+		List<Map<String, String>> list=new ArrayList<Map<String,String>>();
+		try {
+			list=dynamicReportDao.pageReport(page);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@Override
+	public void editReport(ReportName reportName) {
+		try {
+			dynamicReportDao.editReport(reportName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void addReport(ReportName reportName) {
+		try {
+			dynamicReportDao.addReport(reportName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void editStatus(ReportName reportName) {
+		try {
+			dynamicReportDao.editStatus(reportName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+}

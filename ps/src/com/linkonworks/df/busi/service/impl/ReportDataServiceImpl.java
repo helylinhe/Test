@@ -1,0 +1,1447 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import net.sf.ehcache.search.parser.MCriteria.Simple;
+
+import org.apache.poi.hssf.record.FontRecord;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.Region;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.FlupItemResponseDao;
+import com.linkonworks.df.busi.dao.ReportDataDao;
+import com.linkonworks.df.busi.service.ReportDataService;
+import com.linkonworks.df.busi.utils.FlupItemResponseTableView;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.FlupGroup;
+import com.linkonworks.df.vo.FlupItemResponse;
+import com.linkonworks.df.vo.FlupNameDict;
+import com.linkonworks.df.vo.MobileFlup;
+
+public class ReportDataServiceImpl implements ReportDataService {
+
+	private ReportDataDao reportDataDao;
+	private FlupItemResponseDao flupItemResponseDao;
+
+	@Override
+	public HSSFWorkbook exportReportData(Map<String, Object> map) {
+
+		String reportName = (String) map.get("reportName");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String d = sdf.format(new Date());
+
+		// 创建一个workbook
+
+		HSSFWorkbook qubbb = new HSSFWorkbook();
+		HSSFCellStyle style = qubbb.createCellStyle(); // 样式对象
+		style.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直
+		style.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平
+		style.setBorderBottom(HSSFCellStyle.BORDER_THIN);// 下边框
+		style.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
+		style.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
+		style.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
+		style.setWrapText(true);
+		// 创建一个sheet
+		HSSFSheet sheet = qubbb.createSheet("随访报表结果");
+		HSSFRow rowTitle = sheet.createRow(0);
+		HSSFCell cellTitel = rowTitle.createCell(0);
+		HSSFFont f = qubbb.createFont();
+		HSSFCellStyle s = qubbb.createCellStyle();
+		f.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		s.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+		s.setBorderBottom(HSSFCellStyle.BORDER_THIN);// 下边框
+		s.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
+		s.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
+		s.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
+		f.setFontHeightInPoints((short) 11);// 字号
+		s.setFont(f);
+		if (map.get("flupNameId") != null && !map.get("flupNameId").equals("")) {
+			String titleName = map.get("flupTableName").toString();
+
+			cellTitel.setCellStyle(s);
+			cellTitel.setCellValue(titleName);
+			// 获取随访项
+			List<FlupGroup> groups = reportDataDao.flupItems(map.get(
+					"flupNameId").toString());
+			// 可以设置跨行，跨列显示
+			sheet.addMergedRegion(new CellRangeAddress(0, 0, 0,
+					(groups.size() + 16) + 1));
+			// 创建行
+			HSSFRow row = sheet.createRow(1);
+			HSSFCell cell = row.createCell(0);
+			cell.setCellStyle(s);
+			cell.setCellValue("基本信息");
+			// 可以设置跨行，跨列显示
+			sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
+			HSSFCell cell_style = row.createCell(1);
+			cell_style.setCellStyle(s);
+			cell_style = row.createCell(2);
+			cell_style.setCellStyle(s);
+			HSSFCell cell1 = row.createCell(6);
+			cell1.setCellStyle(s);
+			cell1.setCellValue("院内信息");
+			sheet.addMergedRegion(new CellRangeAddress(1, 1, 6, 13));
+
+			HSSFCell cell2 = row.createCell(14);
+			cell2.setCellStyle(s);
+			cell2.setCellValue("随访项");
+			sheet.addMergedRegion(new CellRangeAddress(1, 1, 14,
+					(groups.size() + 14)));
+
+			HSSFCell cell3 = row.createCell((groups.size() + 14));
+			cell3.setCellStyle(s);
+			cell3.setCellValue("说明");
+			sheet.addMergedRegion(new CellRangeAddress(1, 1,
+					(groups.size() + 14), (groups.size() + 16)));
+
+			/*
+			 * 创建列名称
+			 */
+
+			HSSFRow row1 = sheet.createRow(2);
+
+			HSSFCell patiNumber = row1.createCell(0);
+			patiNumber.setCellStyle(s);
+			patiNumber.setCellValue("住院号");
+			HSSFCell name = row1.createCell(1);
+			name.setCellStyle(s);
+			name.setCellValue("姓名");
+			HSSFCell gender = row1.createCell(2);
+			gender.setCellStyle(s);
+			gender.setCellValue("性别");
+			HSSFCell age = row1.createCell(3);
+			age.setCellStyle(s);
+			age.setCellValue("年龄");
+			HSSFCell address = row1.createCell(4);
+			address.setCellStyle(s);
+			address.setCellValue("籍贯");
+			HSSFCell phone = row1.createCell(5);
+			phone.setCellStyle(s);
+			phone.setCellValue("联系方式");
+			HSSFCell billName = row1.createCell(6);
+			billName.setCellStyle(s);
+			billName.setCellValue("医保");
+			HSSFCell inHospitalDate = row1.createCell(7);
+			inHospitalDate.setCellStyle(s);
+			inHospitalDate.setCellValue("入院日期");
+			HSSFCell outHospitalDate = row1.createCell(8);
+			outHospitalDate.setCellStyle(s);
+			outHospitalDate.setCellValue("出院日期");
+			HSSFCell flupDate = row1.createCell(9);
+			flupDate.setCellStyle(s);
+			flupDate.setCellValue("随访日期");
+
+			HSSFCell diag = row1.createCell(10);
+			diag.setCellStyle(s);
+			diag.setCellValue("病情诊断");
+			HSSFCell operationName = row1.createCell(11);
+			operationName.setCellStyle(s);
+			operationName.setCellValue("手术名称");
+			HSSFCell totalMoney = row1.createCell(12);
+			totalMoney.setCellStyle(s);
+			totalMoney.setCellValue("总费用");
+			HSSFCell sution = row1.createCell(13);
+			sution.setCellStyle(s);
+			sution.setCellValue("手术预后");
+			HSSFCell doctor = row1.createCell(14);
+			doctor.setCellStyle(s);
+			doctor.setCellValue("主刀医生");
+			HSSFCell money = row1.createCell(15);
+			money.setCellStyle(s);
+			money.setCellValue("慈善救助 ");
+
+			// 生成动态随访项
+			for (int i = 0; i < groups.size(); i++) {
+
+				HSSFCell flupItemCell = row1.createCell(16 + i);
+				flupItemCell.setCellStyle(s);
+				flupItemCell.setCellValue(groups.get(i).getGroupName());
+
+			}
+
+			/****
+			 * 随访结果和随访说明列的显示
+			 */
+			HSSFCell result = row1.createCell(16 + groups.size());
+			result.setCellStyle(s);
+			result.setCellValue("随访结果");
+
+			HSSFCell explain = row1.createCell(17 + groups.size());
+			explain.setCellStyle(s);
+			explain.setCellValue("随访说明");
+
+			int currentrows = 2;
+			int currentcells = 16;
+			/*
+			 * 
+			 * 处理excel Body部分
+			 */
+
+			List<Map<String, Object>> list = reportDataDao.reportDate(map);
+			for (int i = 0; i < list.size(); i++) {
+				currentrows++;
+				HSSFRow rows = sheet.createRow(currentrows);
+				Map<String, Object> hashMap = list.get(i);
+
+				HSSFCell cells0 = rows.createCell(0);
+				cells0.setCellStyle(style);
+				cells0.setCellValue(hashMap.get("INPATI_NUMBER").toString());
+
+				HSSFCell cells1 = rows.createCell(1);
+				cells1.setCellStyle(style);
+				cells1.setCellValue(hashMap.get("NAME").toString());
+
+				HSSFCell cells2 = rows.createCell(2);
+				cells2.setCellStyle(style);
+				if (hashMap.get("GENDER").toString().equals("2")) {
+					cells2.setCellValue("女");
+				} else {
+					cells2.setCellValue("男");
+				}
+
+				HSSFCell cells3 = rows.createCell(3);
+				cells3.setCellStyle(style);
+				cells3.setCellValue(hashMap.get("AGE").toString());
+
+				HSSFCell cells4 = rows.createCell(4);
+				cells4.setCellStyle(style);
+				if (hashMap.get("CURRENT_ADDR") != null) {
+					cells4.setCellValue(hashMap.get("CURRENT_ADDR").toString());
+				} else {
+					cells4.setCellValue("");
+				}
+
+				HSSFCell cells5 = rows.createCell(5);
+				cells5.setCellStyle(style);
+				if (hashMap.get("FLUP_MOBILE") != null) {
+					cells5.setCellValue(hashMap.get("FLUP_MOBILE").toString());
+				} else {
+					cells5.setCellValue("");
+				}
+
+				HSSFCell cells6 = rows.createCell(6);
+				cells6.setCellStyle(style);
+				cells6.setCellValue(hashMap.get("BILLING_NAME").toString());
+
+				HSSFCell cells7 = rows.createCell(7);
+				cells7.setCellStyle(style);
+				cells7.setCellValue(hashMap.get("IN_HOSPITAL_DATE").toString());
+
+				HSSFCell cells8 = rows.createCell(8);
+				cells8.setCellStyle(style);
+				cells8
+						.setCellValue(hashMap.get("OUT_HOSPITAL_DATE")
+								.toString());
+
+				HSSFCell cells9 = rows.createCell(9);
+				cells9.setCellStyle(style);
+				if (hashMap.get("FLUP_DATE") != null) {
+					cells9.setCellValue(hashMap.get("FLUP_DATE").toString());
+				} else {
+					cells9.setCellValue("");
+				}
+
+				HSSFCell cells10 = rows.createCell(10);
+				cells10.setCellStyle(style);
+				if (hashMap.get("OUT_HOSP_DIAG") != null) {
+					cells10.setCellValue(hashMap.get("OUT_HOSP_DIAG")
+							.toString());
+				} else {
+					cells10.setCellValue("");
+				}
+
+				HSSFCell cells11 = rows.createCell(11);
+				cells11.setCellStyle(style);
+				if (hashMap.get("OPERATION_NAME") != null) {
+					cells11.setCellValue(hashMap.get("OPERATION_NAME")
+							.toString());
+				} else {
+					cells11.setCellValue("");
+				}
+
+				HSSFCell cells12 = rows.createCell(12);
+				cells12.setCellStyle(style);
+				if (hashMap.get("TOTAL_MONEY") != null) {
+					cells12.setCellValue(hashMap.get("TOTAL_MONEY").toString());
+				} else {
+					cells12.setCellValue("");
+				}
+
+				HSSFCell cells13 = rows.createCell(13);
+				cells13.setCellStyle(style);
+				if (hashMap.get("OPERATION_PROGNOSIS") != null) {
+					cells13.setCellValue(hashMap.get("OPERATION_PROGNOSIS")
+							.toString());
+				} else {
+					cells13.setCellValue("");
+				}
+
+				HSSFCell cells14 = rows.createCell(14);
+				cells14.setCellStyle(style);
+				if (hashMap.get("OPERATION_DOCTOR_CODE") != null) {
+					cells14.setCellValue(hashMap.get("OPERATION_DOCTOR_CODE")
+							.toString());
+				} else {
+					cells14.setCellValue("");
+				}
+
+				HSSFCell cells15 = rows.createCell(15);
+				cells15.setCellStyle(style);
+				if (hashMap.get("CHARITY_AID_MONEY") != null) {
+					cells15.setCellValue(hashMap.get("CHARITY_AID_MONEY")
+							.toString());
+				} else {
+					cells15.setCellValue("");
+				}
+
+				Map<String, String> param = new HashMap<String, String>();
+				param.put("patiSerial", hashMap.get("PATI_SERIAL").toString());
+				param.put("inpatiNumber", hashMap.get("INPATI_NUMBER")
+						.toString());
+				param.put("id", hashMap.get("ID").toString());
+				param.put("flupNameId", map.get("flupNameId").toString());
+				List<MobileFlup> mobileFlups = reportDataDao
+						.findMobileItems(param);
+				for (int j = 0; j < groups.size(); j++) {
+					boolean flag = false;
+					for (int z = 0; z < mobileFlups.size(); z++) {
+						if (mobileFlups.get(z).getRecordType() != null
+								&& mobileFlups.get(z).getRecordType().equals(
+										groups.get(j).getRecordType())) {
+							if (mobileFlups.get(z).getRecordType().equals("wb")) {
+								if (mobileFlups.get(z).getItemName().equals(
+										groups.get(j).getGroupName())) {
+									rows.createCell(currentcells).setCellValue(
+											mobileFlups.get(z).getItemValue());
+									currentcells++;
+									flag = true;
+									break;
+								} else {
+									continue;
+								}
+							} else if (mobileFlups.get(z).getRecordType()
+									.equals("fx")) {
+								if (mobileFlups.get(z).getItemName().equals(
+										groups.get(j).getGroupName())) {
+									rows.createCell(currentcells).setCellValue(
+											mobileFlups.get(z).getItemValue());
+									currentcells++;
+									flag = true;
+									break;
+								} else {
+									continue;
+								}
+							} else {
+
+								if (mobileFlups.get(z).getGroupTwo() != null
+										&& !mobileFlups.get(z).getGroupTwo()
+												.equals("")) {
+									if (mobileFlups.get(z).getGroupTwo()
+											.equals(
+													groups.get(j)
+															.getGroupName())) {
+										rows
+												.createCell(currentcells)
+												.setCellValue(
+														mobileFlups.get(z)
+																.getItemValue());
+										currentcells++;
+										flag = true;
+										break;
+									} else {
+										continue;
+									}
+								} else {
+									if (mobileFlups.get(z).getGroupOne()
+											.equals(
+													groups.get(j)
+															.getGroupName())) {
+										rows
+												.createCell(currentcells)
+												.setCellValue(
+														mobileFlups.get(z)
+																.getItemValue());
+										currentcells++;
+										flag = true;
+										break;
+									} else {
+										continue;
+									}
+								}
+
+							}
+
+						} else {
+							continue;
+						}
+
+					}
+					if (!flag) {
+						rows.createCell(currentcells).setCellValue("");
+						currentcells++;
+					}
+
+				}
+				currentcells = 16;
+
+				HSSFCell cellsResult = rows.createCell((groups.size() + 16));
+				cellsResult.setCellStyle(style);
+				if (hashMap.get("FLUP_RESULT") != null) {
+					cellsResult.setCellValue(hashMap.get("FLUP_RESULT")
+							.toString());
+				} else {
+					cellsResult.setCellValue("");
+				}
+				HSSFCell cellsExplain = rows
+						.createCell((groups.size() + 16) + 1);
+				cellsExplain.setCellStyle(style);
+				if (hashMap.get("FLUP_FAILRE") != null) {
+					cellsExplain.setCellValue(hashMap.get("FLUP_FAILRE")
+							.toString());
+				} else {
+					cellsExplain.setCellValue("");
+				}
+			}
+			HSSFRow rowsTotal = sheet.createRow(3 + (list.size()));
+			HSSFCell cellsExplainTotal = rowsTotal.createCell(0);
+			HSSFCell cellDate = rowsTotal.createCell(16);
+			cellDate.setCellValue(d);
+			HSSFCell cellReportName = rowsTotal.createCell(17);
+			cellReportName.setCellStyle(s);
+			cellReportName.setCellValue(reportName);
+			cellsExplainTotal.setCellStyle(s);
+			cellsExplainTotal.setCellValue("合计导出人数：" + list.size());
+			cellDate.setCellStyle(s);
+
+		} else {
+
+			/*****
+			 * 
+			 * 进行判断
+			 */
+			List<Map<String, Object>> list = reportDataDao.reportDate(map);
+			if (list.size() > 1) {
+				boolean flagInpatiNumer = false;
+				for (int z = 0; z < list.size(); z++) {
+					if ((z + 1) < list.size()) {
+						if (!list.get(z).get("INPATI_NUMBER").equals(
+								list.get(z + 1).get("INPATI_NUMBER"))) {
+							flagInpatiNumer = true;
+							break;
+						}
+					}
+				}
+				if (flagInpatiNumer) {
+					HSSFFont f2 = qubbb.createFont();
+					f2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+					HSSFCellStyle s2 = qubbb.createCellStyle(); // 样式对象
+					s2.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);// 垂直
+					s2.setAlignment(HSSFCellStyle.ALIGN_CENTER);// 水平
+					s2.setBorderBottom(HSSFCellStyle.BORDER_THIN);// 下边框
+					s2.setBorderLeft(HSSFCellStyle.BORDER_THIN);// 左边框
+					s2.setBorderRight(HSSFCellStyle.BORDER_THIN);// 右边框
+					s2.setBorderTop(HSSFCellStyle.BORDER_THIN);// 上边框
+					f2.setFontHeightInPoints((short) 16);// 字号
+					s2.setFont(f2);
+					cellTitel.setCellStyle(s2);
+					cellTitel.setCellValue("病人随访信息表");
+					// 获取随访项
+
+					// 可以设置跨行，跨列显示
+					sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 17));
+					// 创建行
+					HSSFRow row = sheet.createRow(1);
+					HSSFCell cell = row.createCell(0);
+					cell.setCellStyle(s);
+					cell.setCellValue("基本信息");
+					// 可以设置跨行，跨列显示
+					sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
+
+					HSSFCell cell1 = row.createCell(6);
+					cell1.setCellStyle(s);
+					cell1.setCellValue("院内信息");
+					sheet.addMergedRegion(new CellRangeAddress(1, 1, 6, 14));
+					
+
+					/*
+					 * 创建列名称
+					 */
+
+					HSSFRow row1 = sheet.createRow(2);
+					HSSFCell patiNumber = row1.createCell(0);
+					patiNumber.setCellStyle(s);
+					patiNumber.setCellValue("住院号");
+					HSSFCell name = row1.createCell(1);
+					name.setCellValue("姓名");
+					name.setCellStyle(s);
+					HSSFCell gender = row1.createCell(2);
+					gender.setCellValue("性别");
+					gender.setCellStyle(s);
+					HSSFCell age = row1.createCell(3);
+					age.setCellStyle(s);
+					age.setCellValue("年龄");
+					HSSFCell address = row1.createCell(4);
+					address.setCellStyle(s);
+					address.setCellValue("籍贯");
+					HSSFCell phone = row1.createCell(5);
+					phone.setCellStyle(s);
+					phone.setCellValue("联系方式");
+					HSSFCell billName = row1.createCell(6);
+					billName.setCellStyle(s);
+					billName.setCellValue("医保");
+					HSSFCell inHospitalDate = row1.createCell(7);
+					inHospitalDate.setCellStyle(s);
+					inHospitalDate.setCellValue("入院日期");
+					HSSFCell outHospitalDate = row1.createCell(8);
+					outHospitalDate.setCellStyle(s);
+					outHospitalDate.setCellValue("出院日期");
+					HSSFCell flupDate = row1.createCell(9);
+					flupDate.setCellStyle(s);
+					flupDate.setCellValue("随访日期");
+
+					HSSFCell diag = row1.createCell(10);
+					diag.setCellValue("病情诊断");
+					diag.setCellStyle(s);
+					HSSFCell operationName = row1.createCell(11);
+					operationName.setCellValue("手术名称");
+					operationName.setCellStyle(s);
+					HSSFCell totalMoney = row1.createCell(12);
+					totalMoney.setCellValue("总费用");
+					totalMoney.setCellStyle(s);
+					HSSFCell sution = row1.createCell(13);
+					sution.setCellValue("手术预后");
+					sution.setCellStyle(s);
+					HSSFCell doctor = row1.createCell(14);
+					doctor.setCellValue("主刀医生");
+					doctor.setCellStyle(s);
+					HSSFCell money = row1.createCell(15);
+					money.setCellValue("慈善救助 ");
+					money.setCellStyle(s);
+					
+				
+					HSSFCell cell3 = row1.createCell(16);
+					cell3.setCellValue("随访结果");
+					cell3.setCellStyle(s);
+
+					HSSFCell cell4 = row1.createCell(17);
+					cell4.setCellValue("随访说明");
+					cell4.setCellStyle(s);
+
+					int currentrows = 2;
+
+					/*
+					 * 
+					 * 处理excel Body部分
+					 */
+
+					for (int i = 0; i < list.size(); i++) {
+						currentrows++;
+						HSSFRow rows = sheet.createRow(currentrows);
+						Map<String, Object> hashMap = list.get(i);
+
+						HSSFCell cells0 = rows.createCell(0);
+						cells0.setCellStyle(style);
+						cells0.setCellValue(hashMap.get("INPATI_NUMBER")
+								.toString());
+
+						HSSFCell cells1 = rows.createCell(1);
+						cells1.setCellStyle(style);
+						cells1.setCellValue(hashMap.get("NAME").toString());
+
+						HSSFCell cells2 = rows.createCell(2);
+						cells2.setCellStyle(style);
+						if (hashMap.get("GENDER").toString().equals("2")) {
+							cells2.setCellValue("女");
+						} else {
+							cells2.setCellValue("男");
+						}
+
+						HSSFCell cells3 = rows.createCell(3);
+						cells3.setCellStyle(style);
+						cells3.setCellValue(hashMap.get("AGE").toString());
+
+						HSSFCell cells4 = rows.createCell(4);
+						cells4.setCellStyle(style);
+						if (hashMap.get("CURRENT_ADDR") != null) {
+							cells4.setCellValue(hashMap.get("CURRENT_ADDR")
+									.toString());
+						} else {
+							cells4.setCellValue("");
+						}
+
+						HSSFCell cells5 = rows.createCell(5);
+						cells5.setCellStyle(style);
+						if (hashMap.get("FLUP_MOBILE") != null) {
+							cells5.setCellValue(hashMap.get("FLUP_MOBILE")
+									.toString());
+						} else {
+							cells5.setCellValue("");
+						}
+
+						HSSFCell cells6 = rows.createCell(6);
+						cells6.setCellStyle(style);
+						cells6.setCellValue(hashMap.get("BILLING_NAME")
+								.toString());
+
+						HSSFCell cells7 = rows.createCell(7);
+						cells7.setCellStyle(style);
+						cells7.setCellValue(hashMap.get("IN_HOSPITAL_DATE")
+								.toString());
+
+						HSSFCell cells8 = rows.createCell(8);
+						cells8.setCellStyle(style);
+						cells8.setCellValue(hashMap.get("OUT_HOSPITAL_DATE")
+								.toString());
+
+						HSSFCell cells9 = rows.createCell(9);
+						cells9.setCellStyle(style);
+						if (hashMap.get("FLUP_DATE") != null) {
+							cells9.setCellValue(hashMap.get("FLUP_DATE")
+									.toString());
+						} else {
+							cells9.setCellValue("");
+						}
+
+						HSSFCell cells10 = rows.createCell(10);
+						cells10.setCellStyle(style);
+						if (hashMap.get("OUT_HOSP_DIAG") != null) {
+							cells10.setCellValue(hashMap.get("OUT_HOSP_DIAG")
+									.toString());
+						} else {
+							cells10.setCellValue("");
+						}
+
+						HSSFCell cells11 = rows.createCell(11);
+						cells11.setCellStyle(style);
+						if (hashMap.get("OPERATION_NAME") != null) {
+							cells11.setCellValue(hashMap.get("OPERATION_NAME")
+									.toString());
+						} else {
+							cells11.setCellValue("");
+						}
+
+						HSSFCell cells12 = rows.createCell(12);
+						cells12.setCellStyle(style);
+						if (hashMap.get("TOTAL_MONEY") != null) {
+							cells12.setCellValue(hashMap.get("TOTAL_MONEY")
+									.toString());
+						} else {
+							cells12.setCellValue("");
+						}
+
+						HSSFCell cells13 = rows.createCell(13);
+						cells13.setCellStyle(style);
+						if (hashMap.get("OPERATION_PROGNOSIS") != null) {
+							cells13.setCellValue(hashMap.get(
+									"OPERATION_PROGNOSIS").toString());
+						} else {
+							cells13.setCellValue("");
+						}
+
+						HSSFCell cells14 = rows.createCell(14);
+						cells14.setCellStyle(style);
+						if (hashMap.get("OPERATION_DOCTOR_CODE") != null) {
+							cells14.setCellValue(hashMap.get(
+									"OPERATION_DOCTOR_CODE").toString());
+						} else {
+							cells14.setCellValue("");
+						}
+
+						HSSFCell cells15 = rows.createCell(15);
+						cells15.setCellStyle(style);
+						if (hashMap.get("CHARITY_AID_MONEY") != null) {
+							cells15.setCellValue(hashMap.get(
+									"CHARITY_AID_MONEY").toString());
+						} else {
+							cells15.setCellValue("");
+						}
+
+						HSSFCell cellsResult = rows.createCell(16);
+						cellsResult.setCellStyle(style);
+						if (hashMap.get("FLUP_RESULT") != null) {
+							cellsResult.setCellValue(hashMap.get("FLUP_RESULT")
+									.toString());
+						} else {
+							cellsResult.setCellValue("");
+						}
+						HSSFCell cellsExplain = rows.createCell(17);
+						cellsExplain.setCellStyle(style);
+						if (hashMap.get("FLUP_FAILRE") != null) {
+							cellsExplain.setCellValue(hashMap
+									.get("FLUP_FAILRE").toString());
+						} else {
+							cellsExplain.setCellValue("");
+						}
+
+					}
+				} else {
+					// 获取随访项
+					List<FlupGroup> groups = reportDataDao.flupItems(list.get(0).get("FLUP_TABLE_NAME_ID").toString());
+					// 可以设置跨行，跨列显示
+					sheet.addMergedRegion(new CellRangeAddress(0, 0, 0,
+							(groups.size() + 16) + 1));
+					// 创建行
+					HSSFRow row = sheet.createRow(1);
+					HSSFCell cell = row.createCell(0);
+					cell.setCellStyle(s);
+					cell.setCellValue("基本信息");
+					// 可以设置跨行，跨列显示
+					sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
+					HSSFCell cell_style = row.createCell(1);
+					cell_style.setCellStyle(s);
+					cell_style = row.createCell(2);
+					cell_style.setCellStyle(s);
+					HSSFCell cell1 = row.createCell(6);
+					cell1.setCellStyle(s);
+					cell1.setCellValue("院内信息");
+					sheet.addMergedRegion(new CellRangeAddress(1, 1, 6, 13));
+
+					HSSFCell cell2 = row.createCell(14);
+					cell2.setCellStyle(s);
+					cell2.setCellValue("随访项");
+					sheet.addMergedRegion(new CellRangeAddress(1, 1, 14,
+							(groups.size() + 14)));
+
+					HSSFCell cell3 = row.createCell((groups.size() + 14));
+					cell3.setCellStyle(s);
+					cell3.setCellValue("说明");
+					sheet.addMergedRegion(new CellRangeAddress(1, 1,
+							(groups.size() + 14), (groups.size() + 16)));
+
+					/*
+					 * 创建列名称
+					 */
+
+					HSSFRow row1 = sheet.createRow(2);
+
+					HSSFCell patiNumber = row1.createCell(0);
+					patiNumber.setCellStyle(s);
+					patiNumber.setCellValue("住院号");
+					HSSFCell name = row1.createCell(1);
+					name.setCellStyle(s);
+					name.setCellValue("姓名");
+					HSSFCell gender = row1.createCell(2);
+					gender.setCellStyle(s);
+					gender.setCellValue("性别");
+					HSSFCell age = row1.createCell(3);
+					age.setCellStyle(s);
+					age.setCellValue("年龄");
+					HSSFCell address = row1.createCell(4);
+					address.setCellStyle(s);
+					address.setCellValue("籍贯");
+					HSSFCell phone = row1.createCell(5);
+					phone.setCellStyle(s);
+					phone.setCellValue("联系方式");
+					HSSFCell billName = row1.createCell(6);
+					billName.setCellStyle(s);
+					billName.setCellValue("医保");
+					HSSFCell inHospitalDate = row1.createCell(7);
+					inHospitalDate.setCellStyle(s);
+					inHospitalDate.setCellValue("入院日期");
+					HSSFCell outHospitalDate = row1.createCell(8);
+					outHospitalDate.setCellStyle(s);
+					outHospitalDate.setCellValue("出院日期");
+					HSSFCell flupDate = row1.createCell(9);
+					flupDate.setCellStyle(s);
+					flupDate.setCellValue("随访日期");
+
+					HSSFCell diag = row1.createCell(10);
+					diag.setCellStyle(s);
+					diag.setCellValue("病情诊断");
+					HSSFCell operationName = row1.createCell(11);
+					operationName.setCellStyle(s);
+					operationName.setCellValue("手术名称");
+					HSSFCell totalMoney = row1.createCell(12);
+					totalMoney.setCellStyle(s);
+					totalMoney.setCellValue("总费用");
+					HSSFCell sution = row1.createCell(13);
+					sution.setCellStyle(s);
+					sution.setCellValue("手术预后");
+					HSSFCell doctor = row1.createCell(14);
+					doctor.setCellStyle(s);
+					doctor.setCellValue("主刀医生");
+					HSSFCell money = row1.createCell(15);
+					money.setCellStyle(s);
+					money.setCellValue("慈善救助 ");
+
+					// 生成动态随访项
+					for (int i = 0; i < groups.size(); i++) {
+
+						HSSFCell flupItemCell = row1.createCell(16 + i);
+						flupItemCell.setCellStyle(s);
+						flupItemCell.setCellValue(groups.get(i).getGroupName());
+
+					}
+
+					/****
+					 * 随访结果和随访说明列的显示
+					 */
+					HSSFCell result = row1.createCell(16 + groups.size());
+					result.setCellStyle(s);
+					result.setCellValue("随访结果");
+
+					HSSFCell explain = row1.createCell(17 + groups.size());
+					explain.setCellStyle(s);
+					explain.setCellValue("随访说明");
+
+					int currentrows = 2;
+					int currentcells = 16;
+					/*
+					 * 
+					 * 处理excel Body部分
+					 */
+
+					for (int i = 0; i < list.size(); i++) {
+						currentrows++;
+						HSSFRow rows = sheet.createRow(currentrows);
+						Map<String, Object> hashMap = list.get(i);
+
+						HSSFCell cells0 = rows.createCell(0);
+						cells0.setCellStyle(style);
+						cells0.setCellValue(hashMap.get("INPATI_NUMBER").toString());
+
+						HSSFCell cells1 = rows.createCell(1);
+						cells1.setCellStyle(style);
+						cells1.setCellValue(hashMap.get("NAME").toString());
+
+						HSSFCell cells2 = rows.createCell(2);
+						cells2.setCellStyle(style);
+						if (hashMap.get("GENDER").toString().equals("2")) {
+							cells2.setCellValue("女");
+						} else {
+							cells2.setCellValue("男");
+						}
+
+						HSSFCell cells3 = rows.createCell(3);
+						cells3.setCellStyle(style);
+						cells3.setCellValue(hashMap.get("AGE").toString());
+
+						HSSFCell cells4 = rows.createCell(4);
+						cells4.setCellStyle(style);
+						if (hashMap.get("CURRENT_ADDR") != null) {
+							cells4.setCellValue(hashMap.get("CURRENT_ADDR").toString());
+						} else {
+							cells4.setCellValue("");
+						}
+
+						HSSFCell cells5 = rows.createCell(5);
+						cells5.setCellStyle(style);
+						if (hashMap.get("FLUP_MOBILE") != null) {
+							cells5.setCellValue(hashMap.get("FLUP_MOBILE").toString());
+						} else {
+							cells5.setCellValue("");
+						}
+
+						HSSFCell cells6 = rows.createCell(6);
+						cells6.setCellStyle(style);
+						cells6.setCellValue(hashMap.get("BILLING_NAME").toString());
+
+						HSSFCell cells7 = rows.createCell(7);
+						cells7.setCellStyle(style);
+						cells7.setCellValue(hashMap.get("IN_HOSPITAL_DATE").toString());
+
+						HSSFCell cells8 = rows.createCell(8);
+						cells8.setCellStyle(style);
+						cells8
+								.setCellValue(hashMap.get("OUT_HOSPITAL_DATE")
+										.toString());
+
+						HSSFCell cells9 = rows.createCell(9);
+						cells9.setCellStyle(style);
+						if (hashMap.get("FLUP_DATE") != null) {
+							cells9.setCellValue(hashMap.get("FLUP_DATE").toString());
+						} else {
+							cells9.setCellValue("");
+						}
+
+						HSSFCell cells10 = rows.createCell(10);
+						cells10.setCellStyle(style);
+						if (hashMap.get("OUT_HOSP_DIAG") != null) {
+							cells10.setCellValue(hashMap.get("OUT_HOSP_DIAG")
+									.toString());
+						} else {
+							cells10.setCellValue("");
+						}
+
+						HSSFCell cells11 = rows.createCell(11);
+						cells11.setCellStyle(style);
+						if (hashMap.get("OPERATION_NAME") != null) {
+							cells11.setCellValue(hashMap.get("OPERATION_NAME")
+									.toString());
+						} else {
+							cells11.setCellValue("");
+						}
+
+						HSSFCell cells12 = rows.createCell(12);
+						cells12.setCellStyle(style);
+						if (hashMap.get("TOTAL_MONEY") != null) {
+							cells12.setCellValue(hashMap.get("TOTAL_MONEY").toString());
+						} else {
+							cells12.setCellValue("");
+						}
+
+						HSSFCell cells13 = rows.createCell(13);
+						cells13.setCellStyle(style);
+						if (hashMap.get("OPERATION_PROGNOSIS") != null) {
+							cells13.setCellValue(hashMap.get("OPERATION_PROGNOSIS")
+									.toString());
+						} else {
+							cells13.setCellValue("");
+						}
+
+						HSSFCell cells14 = rows.createCell(14);
+						cells14.setCellStyle(style);
+						if (hashMap.get("OPERATION_DOCTOR_CODE") != null) {
+							cells14.setCellValue(hashMap.get("OPERATION_DOCTOR_CODE")
+									.toString());
+						} else {
+							cells14.setCellValue("");
+						}
+
+						HSSFCell cells15 = rows.createCell(15);
+						cells15.setCellStyle(style);
+						if (hashMap.get("CHARITY_AID_MONEY") != null) {
+							cells15.setCellValue(hashMap.get("CHARITY_AID_MONEY")
+									.toString());
+						} else {
+							cells15.setCellValue("");
+						}
+
+						Map<String, String> param = new HashMap<String, String>();
+						param.put("patiSerial", hashMap.get("PATI_SERIAL").toString());
+						param.put("inpatiNumber", hashMap.get("INPATI_NUMBER")
+								.toString());
+						param.put("id", hashMap.get("ID").toString());
+						param.put("flupNameId", map.get("flupNameId").toString());
+						List<MobileFlup> mobileFlups = reportDataDao
+								.findMobileItems(param);
+						for (int j = 0; j < groups.size(); j++) {
+							boolean flag = false;
+							for (int z = 0; z < mobileFlups.size(); z++) {
+								if (mobileFlups.get(z).getRecordType() != null
+										&& mobileFlups.get(z).getRecordType().equals(
+												groups.get(j).getRecordType())) {
+									if (mobileFlups.get(z).getRecordType().equals("wb")) {
+										if (mobileFlups.get(z).getItemName().equals(
+												groups.get(j).getGroupName())) {
+											rows.createCell(currentcells).setCellValue(
+													mobileFlups.get(z).getItemValue());
+											currentcells++;
+											flag = true;
+											break;
+										} else {
+											continue;
+										}
+									} else if (mobileFlups.get(z).getRecordType()
+											.equals("fx")) {
+										if (mobileFlups.get(z).getItemName().equals(
+												groups.get(j).getGroupName())) {
+											rows.createCell(currentcells).setCellValue(
+													mobileFlups.get(z).getItemValue());
+											currentcells++;
+											flag = true;
+											break;
+										} else {
+											continue;
+										}
+									} else {
+
+										if (mobileFlups.get(z).getGroupTwo() != null
+												&& !mobileFlups.get(z).getGroupTwo()
+														.equals("")) {
+											if (mobileFlups.get(z).getGroupTwo()
+													.equals(
+															groups.get(j)
+																	.getGroupName())) {
+												rows
+														.createCell(currentcells)
+														.setCellValue(
+																mobileFlups.get(z)
+																		.getItemValue());
+												currentcells++;
+												flag = true;
+												break;
+											} else {
+												continue;
+											}
+										} else {
+											if (mobileFlups.get(z).getGroupOne()
+													.equals(
+															groups.get(j)
+																	.getGroupName())) {
+												rows
+														.createCell(currentcells)
+														.setCellValue(
+																mobileFlups.get(z)
+																		.getItemValue());
+												currentcells++;
+												flag = true;
+												break;
+											} else {
+												continue;
+											}
+										}
+
+									}
+
+								} else {
+									continue;
+								}
+
+							}
+							if (!flag) {
+								rows.createCell(currentcells).setCellValue("");
+								currentcells++;
+							}
+
+						}
+						currentcells = 16;
+
+						HSSFCell cellsResult = rows.createCell((groups.size() + 16));
+						cellsResult.setCellStyle(style);
+						if (hashMap.get("FLUP_RESULT") != null) {
+							cellsResult.setCellValue(hashMap.get("FLUP_RESULT")
+									.toString());
+						} else {
+							cellsResult.setCellValue("");
+						}
+						HSSFCell cellsExplain = rows
+								.createCell((groups.size() + 16) + 1);
+						cellsExplain.setCellStyle(style);
+						if (hashMap.get("FLUP_FAILRE") != null) {
+							cellsExplain.setCellValue(hashMap.get("FLUP_FAILRE")
+									.toString());
+						} else {
+							cellsExplain.setCellValue("");
+						}
+					}
+					HSSFRow rowsTotal = sheet.createRow(3 + (list.size()));
+					HSSFCell cellsExplainTotal = rowsTotal.createCell(0);
+					HSSFCell cellDate = rowsTotal.createCell(16);
+					cellDate.setCellValue(d);
+					HSSFCell cellReportName = rowsTotal.createCell(17);
+					cellReportName.setCellStyle(s);
+					cellReportName.setCellValue(reportName);
+					cellsExplainTotal.setCellStyle(s);
+					cellsExplainTotal.setCellValue("合计导出人数：" + list.size());
+					cellDate.setCellStyle(s);
+				}
+			} else {
+				// 获取随访项
+				List<FlupGroup> groups = reportDataDao.flupItems(list.get(0).get("FLUP_TABLE_NAME_ID").toString());
+				// 可以设置跨行，跨列显示
+				sheet.addMergedRegion(new CellRangeAddress(0, 0, 0,
+						(groups.size() + 16) + 1));
+				// 创建行
+				HSSFRow row = sheet.createRow(1);
+				HSSFCell cell = row.createCell(0);
+				cell.setCellStyle(s);
+				cell.setCellValue("基本信息");
+				// 可以设置跨行，跨列显示
+				sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 5));
+				HSSFCell cell_style = row.createCell(1);
+				cell_style.setCellStyle(s);
+				cell_style = row.createCell(2);
+				cell_style.setCellStyle(s);
+				HSSFCell cell1 = row.createCell(6);
+				cell1.setCellStyle(s);
+				cell1.setCellValue("院内信息");
+				sheet.addMergedRegion(new CellRangeAddress(1, 1, 6, 13));
+
+				HSSFCell cell2 = row.createCell(14);
+				cell2.setCellStyle(s);
+				cell2.setCellValue("随访项");
+				sheet.addMergedRegion(new CellRangeAddress(1, 1, 14,
+						(groups.size() + 14)));
+
+				HSSFCell cell3 = row.createCell((groups.size() + 14));
+				cell3.setCellStyle(s);
+				cell3.setCellValue("说明");
+				sheet.addMergedRegion(new CellRangeAddress(1, 1,
+						(groups.size() + 14), (groups.size() + 16)));
+
+				/*
+				 * 创建列名称
+				 */
+
+				HSSFRow row1 = sheet.createRow(2);
+
+				HSSFCell patiNumber = row1.createCell(0);
+				patiNumber.setCellStyle(s);
+				patiNumber.setCellValue("住院号");
+				HSSFCell name = row1.createCell(1);
+				name.setCellStyle(s);
+				name.setCellValue("姓名");
+				HSSFCell gender = row1.createCell(2);
+				gender.setCellStyle(s);
+				gender.setCellValue("性别");
+				HSSFCell age = row1.createCell(3);
+				age.setCellStyle(s);
+				age.setCellValue("年龄");
+				HSSFCell address = row1.createCell(4);
+				address.setCellStyle(s);
+				address.setCellValue("籍贯");
+				HSSFCell phone = row1.createCell(5);
+				phone.setCellStyle(s);
+				phone.setCellValue("联系方式");
+				HSSFCell billName = row1.createCell(6);
+				billName.setCellStyle(s);
+				billName.setCellValue("医保");
+				HSSFCell inHospitalDate = row1.createCell(7);
+				inHospitalDate.setCellStyle(s);
+				inHospitalDate.setCellValue("入院日期");
+				HSSFCell outHospitalDate = row1.createCell(8);
+				outHospitalDate.setCellStyle(s);
+				outHospitalDate.setCellValue("出院日期");
+				HSSFCell flupDate = row1.createCell(9);
+				flupDate.setCellStyle(s);
+				flupDate.setCellValue("随访日期");
+
+				HSSFCell diag = row1.createCell(10);
+				diag.setCellStyle(s);
+				diag.setCellValue("病情诊断");
+				HSSFCell operationName = row1.createCell(11);
+				operationName.setCellStyle(s);
+				operationName.setCellValue("手术名称");
+				HSSFCell totalMoney = row1.createCell(12);
+				totalMoney.setCellStyle(s);
+				totalMoney.setCellValue("总费用");
+				HSSFCell sution = row1.createCell(13);
+				sution.setCellStyle(s);
+				sution.setCellValue("手术预后");
+				HSSFCell doctor = row1.createCell(14);
+				doctor.setCellStyle(s);
+				doctor.setCellValue("主刀医生");
+				HSSFCell money = row1.createCell(15);
+				money.setCellStyle(s);
+				money.setCellValue("慈善救助 ");
+
+				// 生成动态随访项
+				for (int i = 0; i < groups.size(); i++) {
+
+					HSSFCell flupItemCell = row1.createCell(16 + i);
+					flupItemCell.setCellStyle(s);
+					flupItemCell.setCellValue(groups.get(i).getGroupName());
+
+				}
+
+				/****
+				 * 随访结果和随访说明列的显示
+				 */
+				HSSFCell result = row1.createCell(16 + groups.size());
+				result.setCellStyle(s);
+				result.setCellValue("随访结果");
+
+				HSSFCell explain = row1.createCell(17 + groups.size());
+				explain.setCellStyle(s);
+				explain.setCellValue("随访说明");
+
+				int currentrows = 2;
+				int currentcells = 16;
+				/*
+				 * 
+				 * 处理excel Body部分
+				 */
+
+				for (int i = 0; i < list.size(); i++) {
+					currentrows++;
+					HSSFRow rows = sheet.createRow(currentrows);
+					Map<String, Object> hashMap = list.get(i);
+
+					HSSFCell cells0 = rows.createCell(0);
+					cells0.setCellStyle(style);
+					cells0.setCellValue(hashMap.get("INPATI_NUMBER").toString());
+
+					HSSFCell cells1 = rows.createCell(1);
+					cells1.setCellStyle(style);
+					cells1.setCellValue(hashMap.get("NAME").toString());
+
+					HSSFCell cells2 = rows.createCell(2);
+					cells2.setCellStyle(style);
+					if (hashMap.get("GENDER").toString().equals("2")) {
+						cells2.setCellValue("女");
+					} else {
+						cells2.setCellValue("男");
+					}
+
+					HSSFCell cells3 = rows.createCell(3);
+					cells3.setCellStyle(style);
+					cells3.setCellValue(hashMap.get("AGE").toString());
+
+					HSSFCell cells4 = rows.createCell(4);
+					cells4.setCellStyle(style);
+					if (hashMap.get("CURRENT_ADDR") != null) {
+						cells4.setCellValue(hashMap.get("CURRENT_ADDR").toString());
+					} else {
+						cells4.setCellValue("");
+					}
+
+					HSSFCell cells5 = rows.createCell(5);
+					cells5.setCellStyle(style);
+					if (hashMap.get("FLUP_MOBILE") != null) {
+						cells5.setCellValue(hashMap.get("FLUP_MOBILE").toString());
+					} else {
+						cells5.setCellValue("");
+					}
+
+					HSSFCell cells6 = rows.createCell(6);
+					cells6.setCellStyle(style);
+					cells6.setCellValue(hashMap.get("BILLING_NAME").toString());
+
+					HSSFCell cells7 = rows.createCell(7);
+					cells7.setCellStyle(style);
+					cells7.setCellValue(hashMap.get("IN_HOSPITAL_DATE").toString());
+
+					HSSFCell cells8 = rows.createCell(8);
+					cells8.setCellStyle(style);
+					cells8
+							.setCellValue(hashMap.get("OUT_HOSPITAL_DATE")
+									.toString());
+
+					HSSFCell cells9 = rows.createCell(9);
+					cells9.setCellStyle(style);
+					if (hashMap.get("FLUP_DATE") != null) {
+						cells9.setCellValue(hashMap.get("FLUP_DATE").toString());
+					} else {
+						cells9.setCellValue("");
+					}
+
+					HSSFCell cells10 = rows.createCell(10);
+					cells10.setCellStyle(style);
+					if (hashMap.get("OUT_HOSP_DIAG") != null) {
+						cells10.setCellValue(hashMap.get("OUT_HOSP_DIAG")
+								.toString());
+					} else {
+						cells10.setCellValue("");
+					}
+
+					HSSFCell cells11 = rows.createCell(11);
+					cells11.setCellStyle(style);
+					if (hashMap.get("OPERATION_NAME") != null) {
+						cells11.setCellValue(hashMap.get("OPERATION_NAME")
+								.toString());
+					} else {
+						cells11.setCellValue("");
+					}
+
+					HSSFCell cells12 = rows.createCell(12);
+					cells12.setCellStyle(style);
+					if (hashMap.get("TOTAL_MONEY") != null) {
+						cells12.setCellValue(hashMap.get("TOTAL_MONEY").toString());
+					} else {
+						cells12.setCellValue("");
+					}
+
+					HSSFCell cells13 = rows.createCell(13);
+					cells13.setCellStyle(style);
+					if (hashMap.get("OPERATION_PROGNOSIS") != null) {
+						cells13.setCellValue(hashMap.get("OPERATION_PROGNOSIS")
+								.toString());
+					} else {
+						cells13.setCellValue("");
+					}
+
+					HSSFCell cells14 = rows.createCell(14);
+					cells14.setCellStyle(style);
+					if (hashMap.get("OPERATION_DOCTOR_CODE") != null) {
+						cells14.setCellValue(hashMap.get("OPERATION_DOCTOR_CODE")
+								.toString());
+					} else {
+						cells14.setCellValue("");
+					}
+
+					HSSFCell cells15 = rows.createCell(15);
+					cells15.setCellStyle(style);
+					if (hashMap.get("CHARITY_AID_MONEY") != null) {
+						cells15.setCellValue(hashMap.get("CHARITY_AID_MONEY")
+								.toString());
+					} else {
+						cells15.setCellValue("");
+					}
+
+					Map<String, String> param = new HashMap<String, String>();
+					param.put("patiSerial", hashMap.get("PATI_SERIAL").toString());
+					param.put("inpatiNumber", hashMap.get("INPATI_NUMBER")
+							.toString());
+					param.put("id", hashMap.get("ID").toString());
+					param.put("flupNameId", map.get("flupNameId").toString());
+					List<MobileFlup> mobileFlups = reportDataDao
+							.findMobileItems(param);
+					for (int j = 0; j < groups.size(); j++) {
+						boolean flag = false;
+						for (int z = 0; z < mobileFlups.size(); z++) {
+							if (mobileFlups.get(z).getRecordType() != null
+									&& mobileFlups.get(z).getRecordType().equals(
+											groups.get(j).getRecordType())) {
+								if (mobileFlups.get(z).getRecordType().equals("wb")) {
+									if (mobileFlups.get(z).getItemName().equals(
+											groups.get(j).getGroupName())) {
+										rows.createCell(currentcells).setCellValue(
+												mobileFlups.get(z).getItemValue());
+										currentcells++;
+										flag = true;
+										break;
+									} else {
+										continue;
+									}
+								} else if (mobileFlups.get(z).getRecordType()
+										.equals("fx")) {
+									if (mobileFlups.get(z).getItemName().equals(
+											groups.get(j).getGroupName())) {
+										rows.createCell(currentcells).setCellValue(
+												mobileFlups.get(z).getItemValue());
+										currentcells++;
+										flag = true;
+										break;
+									} else {
+										continue;
+									}
+								} else {
+
+									if (mobileFlups.get(z).getGroupTwo() != null
+											&& !mobileFlups.get(z).getGroupTwo()
+													.equals("")) {
+										if (mobileFlups.get(z).getGroupTwo()
+												.equals(
+														groups.get(j)
+																.getGroupName())) {
+											rows
+													.createCell(currentcells)
+													.setCellValue(
+															mobileFlups.get(z)
+																	.getItemValue());
+											currentcells++;
+											flag = true;
+											break;
+										} else {
+											continue;
+										}
+									} else {
+										if (mobileFlups.get(z).getGroupOne()
+												.equals(
+														groups.get(j)
+																.getGroupName())) {
+											rows
+													.createCell(currentcells)
+													.setCellValue(
+															mobileFlups.get(z)
+																	.getItemValue());
+											currentcells++;
+											flag = true;
+											break;
+										} else {
+											continue;
+										}
+									}
+
+								}
+
+							} else {
+								continue;
+							}
+
+						}
+						if (!flag) {
+							rows.createCell(currentcells).setCellValue("");
+							currentcells++;
+						}
+
+					}
+					currentcells = 16;
+
+					HSSFCell cellsResult = rows.createCell((groups.size() + 16));
+					cellsResult.setCellStyle(style);
+					if (hashMap.get("FLUP_RESULT") != null) {
+						cellsResult.setCellValue(hashMap.get("FLUP_RESULT")
+								.toString());
+					} else {
+						cellsResult.setCellValue("");
+					}
+					HSSFCell cellsExplain = rows
+							.createCell((groups.size() + 16) + 1);
+					cellsExplain.setCellStyle(style);
+					if (hashMap.get("FLUP_FAILRE") != null) {
+						cellsExplain.setCellValue(hashMap.get("FLUP_FAILRE")
+								.toString());
+					} else {
+						cellsExplain.setCellValue("");
+					}
+				}
+				HSSFRow rowsTotal = sheet.createRow(3 + (list.size()));
+				HSSFCell cellsExplainTotal = rowsTotal.createCell(0);
+				HSSFCell cellDate = rowsTotal.createCell(16);
+				cellDate.setCellValue(d);
+				HSSFCell cellReportName = rowsTotal.createCell(17);
+				cellReportName.setCellStyle(s);
+				cellReportName.setCellValue(reportName);
+				cellsExplainTotal.setCellStyle(s);
+				cellsExplainTotal.setCellValue("合计导出人数：" + list.size());
+				cellDate.setCellStyle(s);
+			}
+
+			HSSFRow rowsTotal = sheet.createRow(3 + (list.size()));
+			HSSFCell cellsExplainTotal = rowsTotal.createCell(0);
+			sheet.addMergedRegion(new CellRangeAddress(list.size() + 3, list
+					.size() + 3, 0, 15));
+			HSSFCell cellDate = rowsTotal.createCell(16);
+			cellDate.setCellValue(d);
+			HSSFCell cellReportName = rowsTotal.createCell(17);
+			cellReportName.setCellStyle(s);
+			cellReportName.setCellValue(reportName);
+			cellsExplainTotal.setCellStyle(s);
+			cellsExplainTotal.setCellValue("合计导出人数：" + list.size());
+			cellDate.setCellStyle(s);
+
+		}
+		return qubbb;
+	}
+
+	public ReportDataDao getReportDataDao() {
+		return reportDataDao;
+	}
+
+	public void setReportDataDao(ReportDataDao reportDataDao) {
+		this.reportDataDao = reportDataDao;
+	}
+
+	@Override
+	public List<Map<String, String>> pageList(Page<Object> page) {
+		// TODO Auto-generated method stub
+		return reportDataDao.pageList(page);
+	}
+
+	@Override
+	public List<FlupGroup> flupItems(String flupNameId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<FlupNameDict> loadFlupNameDict(List<Department> d) {
+		// TODO Auto-generated method stub
+		return reportDataDao.loadFlupNameDict(d);
+	}
+
+	public FlupItemResponseDao getFlupItemResponseDao() {
+		return flupItemResponseDao;
+	}
+
+	public void setFlupItemResponseDao(FlupItemResponseDao flupItemResponseDao) {
+		this.flupItemResponseDao = flupItemResponseDao;
+	}
+
+}

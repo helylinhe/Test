@@ -1,0 +1,319 @@
+$(function (){
+//	//加载院区信息
+	$.post(path+"/patidiseasedetailaction!loadHosptialConfig.action",function (data){
+		var html="";
+			for(var i=0;i<data.length;i++){
+				html+="<option value='"+data[i].unitCode+"'>"
+				html+=data[i].hosShortName
+				html+="</option>";
+			}
+			$("#unitCode").html(html);
+},'json');
+	patiList();
+	createTable();
+    document.getElementById("tdll").style.display = "none";
+
+	
+})
+
+
+/*******************************************************************************
+ * 点击查询按钮进行查询信息
+ */
+
+function searchInfo(){
+	$('#tab_pati').datagrid('unselectAll');
+	$('#doctoradvice_show').datagrid('unselectAll');
+	if($.trim($("#medicalInsuranceCode").val())=="" &&  $.trim($("#inpatiNumber").val())=="" && $.trim($("#serachname").val())==""){
+		$.messager.alert('信息提示','请填写信息进行查询','info');
+		return false;
+	}
+	var param={'map.medicalInsuranceCode':$("#medicalInsuranceCode").val(),'map.inpatiNumber':$("#inpatiNumber").val(),'map.name':$("#serachname").val(),'map.deptCode':$("#unitCode").val()};
+	/*$.post(path+'/inpatiDiagAction!doctoradvicequery.action',param,function (data){
+		if(data[0].rows[0]!=null){
+			$('#show_pati_html').window('open');
+			$('#tab_pati').datagrid('loadData',data[0].rows);
+		}
+		},'json');*/
+	$('#show_pati_html').window('open');
+	loadData(path+'/inpatiDiagAction!doctoradvicequery.action','tab_pati',param);
+	document.getElementById("tdll").style.display = "none";
+	
+	
+}
+function searchDoctor(){
+	var param={'map.patiSerial':$("#patiSerial2").val(),'map.inpatiSerialNumber':$("#inpatiSerialNumber2").val(),'map.repeatIndicator':$("#repeatIndicator").combobox('getValue'),'map.startDateTime':$("#startDateTime").val(),'map.stopDateTime':$("#stopDateTime").val()}
+	loadData(path+'/doctorAdviceAction!getDoctoradviceList.action','doctoradvice_show',param);
+}
+
+function patiList(){
+	$('#tab_pati').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		singleSelect : true,
+		fitColumns : true,
+		striped : true,
+		pagination : true,
+		title : '病人信息',
+		
+    hideColumn : [ [ {
+		field : 'patiSerial',
+		title : '病人编号',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	} ] ],
+	columns : [ [ {
+		field : 'inpatiNumber',
+		title : '住院号',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	},{
+		field : 'name',
+		title : '姓名',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	},{
+		field : 'inpatiSerialNumber',
+		title : '住院流水号',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	}, {
+		field : 'inHospitalDate',
+		title : '住院日期',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val.substring(0,10);
+		}
+	}, {
+		field : 'outHospitalDate',
+		title : '出院日期',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+		    return val.substring(0,10);
+		}
+	}, {
+		field : 'attendDoctor',
+		title : '主治医生',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	}, {
+		field : 'department',
+		title : '所属科室',
+		width : 120,
+		align : 'center',
+		formatter : function(val, rec) {
+			return val;
+		}
+	}
+			
+		  ] ],
+		  onClickRow:function (rowIndex, rowData){
+			var param={'map.patiSerial':rowData.patiSerial,'map.inpatiSerialNumber':rowData.inpatiSerialNumber}
+			
+			$('#show_pati_html').window('close');
+			
+			/*loadData(path+'/doctorAdviceAction!getDoctoradviceList.action','tabl_show',param);
+			$('#serachname2').val(rowData.name);
+			$('#inpatiNumber2').val(rowData.inpatiNumber);
+			$('#tab_show').window('open');
+			*/
+			document.getElementById("tdll").style.display = "block";
+			loadData(path+'/doctorAdviceAction!getDoctoradviceList.action','doctoradvice_show',param);
+			$.post(path+'/doctorAdviceAction!getDoctoradviceList.action',param,function (data){
+			if(data[0].rows.length>0){
+				$('#serachname2').val(rowData.name);
+				$('#inpatiNumber2').val(rowData.inpatiNumber);
+				$('#patiSerial2').val(rowData.patiSerial);
+				$('#inpatiSerialNumber2').val(rowData.inpatiSerialNumber);
+				$('#inHospitalDate2').val(rowData.inHospitalDate);
+				$('#outHospitalDate2').val(rowData.outHospitalDate);
+				$('#medicalInsuranceCode2').val(data[0].rows[0].insuranceNo);
+				}else{
+					$.messager.alert('信息提示','该患者没有医嘱信息','info');
+					$('#serachname2').val("");
+					$('#inpatiNumber2').val("");
+					$('#patiSerial2').val("");
+					$('#inpatiSerialNumber2').val("");
+					$('#inHospitalDate2').val("");
+					$('#outHospitalDate2').val("");
+					$('#medicalInsuranceCode2').val("");
+				}
+				
+			},'json');
+			
+			
+			$('#startDateTime').val("");
+			$('#startDateTime').click(function() {
+				WdatePicker( {
+					minDate : '{%y-80}-%M-%d',
+					readOnly : true
+				});
+			});
+			$('#stopDateTime').val("");
+			$('#stopDateTime').click(function() {
+				WdatePicker( {
+					minDate : '{%y-80}-%M-%d',
+					readOnly : true
+				});
+			});
+		
+		
+			
+	}
+	});
+	
+	
+}
+function createTable() {
+	$('#doctoradvice_show').datagrid( {
+		method:'get',
+		pageSize : 10,
+		pageList : [ 10, 20],
+		idField : 'id',
+	    title:'医嘱查询',
+		collapsible : false,
+		remoteSort : false,
+		rownumbers : true,
+		queryParams : '',
+		singleSelect : true,
+		pagination : true,
+		width:'100%',
+		frozenColumns:[[
+		
+  	{
+		field : 'orderClassName',
+		title : '类别',
+		width : 60,
+		align : 'center',
+	},
+	 {	
+	field : 'startDateTime',
+	title : '下达时间',
+	width : 140,
+	align : 'center'
+}, {
+	field : 'orderText',
+	title : '医嘱内容',
+    width : 250,
+	align : 'center',
+}, 
+	
+{
+	field : 'dosage',
+	title : '剂量',
+    width : 40,
+	align : 'center',
+},
+ {
+	field : 'dosageUnits',
+	title : '单位',
+    width : 40,
+	align : 'center',
+}
+, {
+	field : 'frequency',
+	title : '频次',
+    width : 40,
+	align : 'center',
+},{
+	field : 'administration',
+	title : '途径',
+	width : 50,
+	align : 'center',
+},
+ {
+	field : 'performSchedule',
+	title : '执行时间',
+	width : 75,
+	align : 'center',
+},{
+	field : 'eatTime',
+	title : '服药时间',
+	width : 75,
+	align : 'center',
+},
+{
+	field : 'stopDateTime',
+	title : '结束时间',
+	width : 140,
+	align : 'center',
+}]],
+columns:[[
+{
+	field : 'stopDoctor', 
+	title : '停止医生',
+	width : 60,
+	align : 'center',
+},{
+	field : 'doctor',
+	title : '医生',
+	width : 60,
+	align : 'center',
+	
+},{
+	field : 'freqDetail',
+	title : '医生说明',
+	width : 150,
+	align : 'center',
+},{
+	field : 'drugBillingAttr',
+	title : '自',
+	width : 60,
+	align : 'center',
+},{
+	field : 'performResult',
+	title : '阴阳',
+	width : 30,
+	align : 'center',
+},{
+	field : 'freqCounter',
+	title : '次数',
+	width : 30,
+	align : 'center',
+},{
+	
+	field : 'stopNurse',
+	title : '停止护士',
+	width : 50,
+	align : 'center',
+},{
+	
+	field : 'baoxiao',
+	title : '报销',
+	width : 50,
+	align : 'center',
+	hidden:true
+},
+{
+	field : 'backFlag',
+	title : '退回标志',
+	width : 60,
+	align : 'center',
+	hidden:true
+}
+		                ]]
+		
+	});
+}
+		
+		
+		
+		

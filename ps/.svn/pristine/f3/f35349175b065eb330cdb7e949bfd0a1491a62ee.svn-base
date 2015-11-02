@@ -1,0 +1,56 @@
+package com.linkonworks.df.vo;
+
+public class ExportResponse {
+	private Integer id;
+	private String groupName;
+	private String itemName;
+	private String tableName;
+	private String deptNameId;
+	
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+	public String getItemName() {
+		return itemName;
+	}
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
+	}
+	public String getTableName() {
+		return tableName;
+	}
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+	public String getDeptNameId() {
+		return deptNameId;
+	}
+	public void setDeptNameId(String deptNameId) {
+		this.deptNameId = deptNameId;
+	}
+	public ExportResponse(Integer id, String groupName, String itemName,
+			String tableName, String deptNameId) {
+		super();
+		this.id = id;
+		this.groupName = groupName;
+		this.itemName = itemName;
+		this.tableName = tableName;
+		this.deptNameId = deptNameId;
+	}
+	public ExportResponse() {
+		super();
+	}
+	
+	
+
+}

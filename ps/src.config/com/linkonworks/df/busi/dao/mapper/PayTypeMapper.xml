@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PayTypeDao">
+	<select id="queryAll" resultType="paytype">
+		select
+		id "id",
+		billing_code
+		"billingCode",
+		billing_name "billingName",
+		patient_sett_way
+		"patientSettWay",
+		hosp_sett_way "hospSettWay"
+		from tb_pay_type
+	</select>
+</mapper>

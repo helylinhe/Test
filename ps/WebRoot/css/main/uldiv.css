@@ -1,0 +1,8 @@
+﻿.uldiv{ padding:0px; margin:0px;}
+.uldiv ul{ list-style:none; padding:0px; margin:0px;}
+.uldiv li{ list-style:none; height:40px;}
+.uldiv ul a{ text-decoration:none; color:#000; display:block; height:100%;line-height:40px; padding-left:10px;}
+.uldiv ul a:link{text-decoration:none;color:#000;}
+.uldiv ul a:visited{text-decoration:none;color:#000;}
+.uldiv ul a:hover{text-decoration:none;color:#000;}
+.uldiv ul a:active{text-decoration:none;color:#000;}

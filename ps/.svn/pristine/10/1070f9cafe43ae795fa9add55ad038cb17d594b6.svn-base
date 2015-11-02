@@ -1,0 +1,181 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://"
+			+ request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title>上海市区域医疗行为监管平台</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+			<link rel="stylesheet" type="text/css" href="<%=path%>/js/jquery-easyui-1.3.5/themes/default/easyui.css" />
+		<link rel="stylesheet" type="text/css" href="<%=path%>/js/jquery-easyui-1.3.5/themes/icon.css" />
+		<link rel="stylesheet" type="text/css" href="<%=path%>/css/index.css" />
+		<link rel="stylesheet" type="text/css" href="<%=path%>/css/apssysframe.css" />
+		<link rel="stylesheet" type="text/css" href="<%=path%>/css/content.css" />
+		<script type="text/javascript" src="<%=path%>/js/jquery/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="<%=path%>/js/jquery-easyui-1.3.5/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="<%=path%>/js/jquery-easyui-1.3.5/locale/easyui-lang-zh_CN.js"></script>
+			<script>var path='<%=path%>';</script>
+			<script type="text/javascript" src="<%=path%>/js/suifangProjectMaintain.js"></script>
+			<script type="text/javascript" src="<%=path%>/js/comment/comment.js"></script>
+			<script type="text/javascript" src="<%=path%>/js/flupMaintain/diseaseNameDict.js"></script>
+			
+			
+			<style>
+</style>
+
+	</head>
+	<jsp:include page="/jsp/comment/loginValidate.jsp"></jsp:include>
+	<body class="easyui-layout">
+	
+		<!-- Content Layout -->
+		<div region="center" style="border: 0px;">
+			<div
+				style="width: 96%; height: 80px; margin-left: 10px; margin-top: 15px; min-width:1100px">
+				<fieldset style="border: 1px solid #6293BB">
+
+					<legend>
+						疾病指标查询条件
+					</legend>
+					<table cellspacing="0" cellpadding="0" margin="0"
+						style="width: 100%; height: 50px;">
+						<tr>
+							<td nowrap="nowrap">
+								&nbsp疾病指标名称：
+								
+								<input type="text" style="width: 118px; border: 1px solid #999;" id="diseaseName">
+							</td>
+							<td nowrap="nowrap">
+								&nbsp所属科室：
+								<select style="width: 156px;" class="easyui-combobox" id="deptCode" >
+										
+								</select>
+							</td>
+							<td><a href="javascript:void(0);" class="easyui-linkbutton" icon="icon-search" id='queryInfo'>查询</a></td>
+							<td></td>
+							<td></td>
+						</tr>
+						
+						<tr style="height: 10px;">
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</table>
+				</fieldset>
+			</div>
+			
+			
+			
+			<div style="width: 96%; margin-left: 10px; margin-top: 5px; min-width:1100px">
+				 <table id="flupNameDict_table"></table>
+			</div>
+
+
+
+
+
+		<div id="add_sftable_html" class="easyui-window"
+				style="width: 510px; height: 150px; model: true;" 
+				title="疾病指标添加" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="true" model="true" inline="false"
+				resizable="false" minimizable="false">
+				<table style="width: 480px; margin-left: 5px">
+
+					<tr>
+                        <td nowrap="nowrap">
+							疾病指标类名称
+						</td>
+						<td>
+							 <input type="text" id='aDiseaseName' /> 
+						</td>
+							 <td nowrap="nowrap">
+								所属科室
+							</td>
+							<td>
+								<select style="width: 156px;" class="easyui-combobox" id="aDeptCode" >
+								
+							</select>
+							</td>
+					</tr>
+					<tr>
+                        <td nowrap="nowrap">
+							疾病指标名称首拼
+						</td>
+						<td>
+							 <input type="text"   id='aDiseaseNameSpell' /> 
+						</td>
+							 <td nowrap="nowrap">
+								操作工号
+							</td>
+							<td>
+								<input type="text" value='${sessionScope.employee.name }' readonly="readonly"/> 
+							</td>
+					</tr>
+					
+					
+					<tr>
+						<td colspan="4" nowrap="nowrap" align="center">
+							<a href="javascript:void(0);" class="easyui-linkbutton"  icon="icon-save" id='sava'>保存</a>  
+							<a href="javascript:void(0);" class="easyui-linkbutton" onclick="javascript:$('#add_sftable_html').window('close');" icon="icon-cancel">退出</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+			<div id="update_sftable_html" class="easyui-window"
+				style="width: 510px; height: 150px; model: true;" 
+				title="疾病指标修改" closed="true" draggable="false" collapsible="false"
+				maximizable="false" shadow="true" model="true" inline="false"
+				resizable="false" minimizable="false">
+			<form id="fm" method="post" novalidate>
+				<table style="width: 480px; margin-left: 5px">
+
+					<tr>
+                        <td nowrap="nowrap">
+							疾病指标类名称
+						</td>
+						<td>
+							 <input type="text"  name="uDiseaseName" id='uDiseaseName' /> 
+							 <input type="hidden"  name="uDiseaseNameId" id='uDiseaseNameId'/>
+						</td>
+							 <td nowrap="nowrap">
+								所属科室
+							</td>
+							<td>
+								<select style="width: 156px;" class="easyui-combobox" id="uDeptCode" >
+										
+								</select>
+							</td>
+					</tr>
+					
+					
+						
+					<tr>
+						<td colspan="4" nowrap="nowrap" align="center">
+							<a href="#" class="easyui-linkbutton"  icon="icon-save" id='update'>保存</a>  
+							<a href="#" class="easyui-linkbutton" onclick="javascript:$('#update_sftable_html').window('close');" icon="icon-cancel">退出</a>
+								
+						</td>
+					</tr>
+
+				</table>
+</form>
+				
+			</div>
+			
+			
+			
+			
+		</div>
+		
+	</body>
+</html>

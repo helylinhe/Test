@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupDynamicDao">
+
+<resultMap type="flupitemresponse" id="FlupItemResponseResult">
+		<id property="id" column="id"/>
+		<result property="showNo" column="show_no"/>
+		<result property="operateDate" column="operate_date"/>
+		<result property="employeeCode" column="employee_code"/>
+		<result property="useState" column="use_state"/>
+		<result property="flupGroupId2" column="flup_group_id2"/>
+		<association property="flupNameDict" column="flup_name_id" javaType="FlupNameDict">
+			<id property="flupNameId" column="flup_name_id"/>
+			<result property="flupName" column="flup_name"/>
+		</association>
+		<association property="flupGroup" column="flup_group_id" javaType="FlupGroup">
+			<id property="flupGroupId" column="flup_group_id"/>
+			<result property="groupOne" column="group_one"/>
+			<result property="groupTwo" column="group_two"/>
+			<result property="groupThree" column="group_three"/>
+			<result property="itemName" column="item_name"/>
+			<result property="recordType" column="record_type"/>
+			<result property="dataType" column="data_type"/>
+			<result property="itemRequired" column="item_required"/>
+		</association>
+	</resultMap>
+
+
+
+<!-- 根据随病人编号、住院号、流水号获取该病人随访表的所有随访项随访项 -->
+	<select id="findAllFlupDynamic" parameterType="Map" resultMap="FlupItemResponseResult">
+		select A.flup_group_id  ,
+               A.item_name      ,
+               A.group_one      ,
+               A.group_two      ,
+               A.record_type    ,
+               A.flup_group_id2 ,
+               A.show_no ,
+               A.flup_name_id 
+          from (SELECT c.flup_group_id,
+                       c.item_name,
+                       c.group_one,
+                       c.group_two,
+                       b.show_no,
+                       c.record_type,
+                       d.flup_group_id flup_group_id2,
+                       b.flup_name_id
+                  from tb_pati_flup_rule a
+                 inner join tb_flup_item_response b
+                    on a.flup_table_name_id = b.flup_name_id
+                 inner join tb_flup_group c
+                    on b.flup_group_id = c.flup_group_id
+                  left join tb_flup_dynamic d
+                    on d.flup_group_id = c.flup_group_id
+           and d.FLUP_TIMES = #{flupTimes}
+           and d.pati_serial = #{patiSerial}
+           and d.inpati_number = #{inpatiNumber}
+           and d.inpati_serial_number = #{inpatiSerialNumber}
+         where a.pati_serial =  #{patiSerial}
+           and a.inpati_number = #{inpatiNumber}
+           and a.inpati_serial_number =  #{inpatiSerialNumber}
+           ) A order by to_number(A.show_no)
+	</select>
+	<!-- 修改随访项前先删除次随访的所有随访项再添加选中的随访项 -->
+	<delete id="removeFlupDynamic" parameterType="Map">
+		delete from tb_flup_dynamic
+        where pati_serial =  #{patiSerial}
+          and inpati_number =#{inpatiNumber}
+          and inpati_serial_number = #{inpatiSerialNumber}
+          and flup_times=#{flupTimes}
+	</delete>
+	<!-- 添加选中的随访项 -->
+	<insert id="addFlupDynamic" parameterType="Map">
+		insert into tb_flup_dynamic(id,
+                       pati_serial,
+                       inpati_number,
+                       inpati_serial_number,
+                       insurance_no,
+                       dept_code,
+                       in_hospital_date,
+                       out_hospital_date,
+                       flup_name_id,
+                       flup_group_id,
+                       flup_flag,
+                       show_no,
+                       operation_date,
+                       employee_code,
+                       flup_times)
+		 values(
+		 seq_flup_dynamic.nextval,
+		              #{patiSerial},
+		               #{inpatiNumber},
+                       #{inpatiSerialNumber},
+                       #{insuranceNo},
+                       #{deptCode},
+                       to_date(#{inHospitalDate}, 'yyyy-mm-dd'),
+                       to_date(#{outHospitalDate}, 'yyyy-mm-dd'),
+                       #{flupNameId},
+                       #{flupGroupId},
+                       #{flupGlag},
+                       #{showNo},
+                        to_date((to_char(sysdate,'yyyy-mm-dd')),'yyyy-mm-dd'),
+                       #{employeeCode},
+                       #{flupTimes}
+		              )
+		
+	</insert>
+	
+	<select id="dynamicFlupItems" parameterType="Map" resultMap="FlupItemResponseResult">
+	select 
+	   A.flup_group_id ,
+       A.item_name ,
+       A.group_one ,
+       A.group_two ,
+       A.show_no ,
+       A.flup_name_id ,
+       A.record_type ,
+       '0' flup_group_id2
+  from (SELECT c.flup_group_id,
+               c.item_name,
+               c.group_one,
+               c.group_two,
+               b.show_no,
+              c.record_type,
+               b.flup_name_id
+          from tb_flup_item_response b
+        
+         inner join tb_flup_group c
+            on b.flup_group_id = c.flup_group_id and c.use_state = 1
+         where b.flup_name_id = #{flupNameId}) A order by to_number(show_no)
+	</select>
+	
+	
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into
+		tb_flup_dynamic(ID,PATI_SERIAL,
+INPATI_NUMBER,
+INPATI_SERIAL_NUMBER,
+INSURANCE_NO,
+DEPT_CODE,
+IN_HOSPITAL_DATE,
+OUT_HOSPITAL_DATE,
+FLUP_NAME_ID,
+FLUP_GROUP_ID,
+FLUP_FLAG,
+SHOW_NO,
+OPERATION_DATE,
+EMPLOYEE_CODE,
+FLUP_TIMES
+)
+		SELECT seq_flup_dynamic.Nextval , A.* FROM (
+		<foreach collection="list" item="item" index="index"
+			separator="union">
+			select
+			#{item.patiSerial},
+			#{item.inpatiNumber},
+			#{item.inpatiSerialNumber},
+			#{item.insuranceNo},
+			#{item.deptCode},
+			to_date(#{item.inHospitalDate},'yyyy-MM-dd'),
+			to_date(#{item.outHospitalDate},'yyyy-MM-dd'),
+			#{item.flupNameId},
+			#{item.flupGroupId},
+			#{item.flupFlag},
+			#{item.showNo},
+			sysdate,
+			#{item.employeeCode},
+			#{item.flupTimes}
+			from dual
+		</foreach>
+		) A
+	</insert>
+	
+	
+</mapper>

@@ -1,0 +1,40 @@
+package com.linkonworks.df.busi.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.FlupGroup;
+import com.linkonworks.df.vo.FlupItemResponse;
+
+public interface FlupItemResponseDao extends BaseDao<FlupItemResponse>{
+
+	public List<FlupItemResponse> findFlupItemPage(Map<String,Object> map);
+	
+	
+	public int deleteFlupItemResponse(String flupName) ;
+	
+	public List<FlupItemResponse> findPreview(String flupNameId);
+	
+	public List<FlupItemResponse> findPreviews(Map<String, String> map);
+	
+	public List<FlupGroup> findFirst(String flupNameId);
+	
+	public List<FlupItemResponse> findSecond(String groupName);
+	
+	
+	/*****
+	 * 获取随访模板下的所有组
+	 * @param flupNameID
+	 * @return
+	 */
+	public List<FlupItemResponse> getFlupItemResponseList(String flupNameID);
+	
+	
+	public int updateUseState(List list);
+	
+	public int updateNormalUseState(List list);
+	
+	
+	public List<FlupItemResponse> getFlupItems(String flupNameId);
+}

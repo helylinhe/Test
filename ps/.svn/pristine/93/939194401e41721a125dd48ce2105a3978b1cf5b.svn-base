@@ -1,0 +1,1066 @@
+package com.linkonworks.df.busi.utils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import com.linkonworks.df.busi.comment.ComparaDiseaseItem;
+import com.linkonworks.df.busi.comment.ComparaFlupItem;
+import com.linkonworks.df.vo.DiseaseItemTemplate;
+import com.linkonworks.df.vo.ExportResponse;
+import com.linkonworks.df.vo.FlupGroup;
+import com.linkonworks.df.vo.FlupItemResponse;
+
+public class FlupItemResponseTableView {
+	
+
+	public static final List getSelect(int id) {
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("ph", "电话");
+		map.put("me", "短信");
+		map.put("ch", "微信");
+		map.put("cl", "门诊");
+		map.put("sf", "随访期");
+		map.put("nsf", "非随访期");
+
+		return null;
+
+	}
+
+	public static final String getTable(List<FlupItemResponse> list,String showView) {
+		Map<String, Map<String, List<FlupItemResponse>>> hashMap = new LinkedHashMap<String, Map<String, List<FlupItemResponse>>>();
+		for (int i = 0; i < list.size(); i++) {
+			String key = list.get(i).getFlupGroup().getGroupOne();
+			// 判断hashMap的键是否重复
+			if (!hashMap.containsKey(key)) {
+				// 判断二类分组是否为空
+				if (list.get(i).getFlupGroup().getGroupTwo() == null || list.get(i).getFlupGroup().getGroupTwo().equals("")) {
+					if(list.get(i).getFlupGroup().getRecordType()!=null && list.get(i).getFlupGroup().getRecordType().equals("dx")){
+						List<FlupItemResponse> dxtemp = new ArrayList<FlupItemResponse>();
+						Map<String, List<FlupItemResponse>> dxm = new TreeMap<String, List<FlupItemResponse>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						dxtemp.add(list.get(i));
+						dxm.put("dx"+","+list.get(i).getShowNo(), dxtemp);
+						hashMap.put(key, dxm);
+					}else if(list.get(i).getFlupGroup().getRecordType()!=null && list.get(i).getFlupGroup().getRecordType().equals("fx")){
+						List<FlupItemResponse> fxtemp = new ArrayList<FlupItemResponse>();
+						Map<String, List<FlupItemResponse>> fxm = new TreeMap<String, List<FlupItemResponse>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						fxtemp.add(list.get(i));
+						fxm.put("fx"+","+list.get(i).getShowNo(), fxtemp);
+						hashMap.put(key, fxm);
+					}else{
+						List<FlupItemResponse> wbtemp = new ArrayList<FlupItemResponse>();
+						Map<String, List<FlupItemResponse>> wbm = new TreeMap<String, List<FlupItemResponse>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						wbtemp.add(list.get(i));
+						wbm.put(list.get(i).getFlupGroup().getItemName()+","+list.get(i).getShowNo(), wbtemp);
+						hashMap.put(key, wbm);
+					}
+					
+					
+				} else {
+					  String secondKey = list.get(i).getFlupGroup().getGroupTwo();
+						List<FlupItemResponse> temp = new ArrayList<FlupItemResponse>();
+						Map<String,List<FlupItemResponse>> m=new TreeMap<String,List<FlupItemResponse>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								// TODO Auto-generated method stub
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						temp.add(list.get(i));
+						m.put(secondKey+","+list.get(i).getShowNo(), temp);
+						hashMap.put(key,m);
+					
+				}
+			} else {
+				if ((list.get(i).getFlupGroup().getGroupTwo() == null || list.get(i).getFlupGroup().getGroupTwo().equals(""))) {
+					Map<String, List<FlupItemResponse>> tempMap = (Map<String, List<FlupItemResponse>>) hashMap.get(key);
+					if(list.get(i).getFlupGroup().getRecordType()!=null && list.get(i).getFlupGroup().getRecordType().equals("dx")){
+						boolean dxFlag=false;
+						String dxTwoKey="";
+						for(Iterator dxIt=tempMap.keySet().iterator();dxIt.hasNext();){
+							String dxS=(String) dxIt.next();
+							String dx=dxS.substring(0, dxS.indexOf(","));
+							if(dx!=null && dx.equals("dx")){
+								dxFlag=true;
+								dxTwoKey=dxS;
+								break;
+								
+							}
+						}
+						if(!dxFlag){
+							List<FlupItemResponse> gListdx=new ArrayList<FlupItemResponse>();
+							gListdx.add(list.get(i));
+							tempMap.put("dx,"+list.get(i).getShowNo(), gListdx);
+							hashMap.put(key, tempMap);
+						}else{
+							List<FlupItemResponse> gListdxExist=tempMap.get(dxTwoKey);
+							gListdxExist.add(list.get(i));
+							tempMap.put(dxTwoKey, gListdxExist);
+							hashMap.put(key, tempMap);
+						}
+					}else if(list.get(i).getFlupGroup().getRecordType()!=null && list.get(i).getFlupGroup().getRecordType().equals("fx")){
+						boolean fxFlag=false;
+						String fxTwoKey="";
+						for(Iterator fxIt=tempMap.keySet().iterator();fxIt.hasNext();){
+							String fxS=(String) fxIt.next();
+							String fx=fxS.substring(0,fxS.indexOf(","));
+							if(fx!=null && fx.equals("fx")){
+								fxFlag=true;
+								fxTwoKey=fxS;
+								break;
+								
+							}
+						}
+						
+						if(!fxFlag){
+							List<FlupItemResponse> gListfx=new ArrayList<FlupItemResponse>();
+							gListfx.add(list.get(i));
+							tempMap.put("fx,"+list.get(i).getShowNo(), gListfx);
+							hashMap.put(key, tempMap);
+						}else{
+							List<FlupItemResponse> gListfxExist=tempMap.get(fxTwoKey);
+							gListfxExist.add(list.get(i));
+							tempMap.put(fxTwoKey, gListfxExist);
+							hashMap.put(key, tempMap);
+						}
+					}else{
+						boolean flag=false;
+						String two="";
+						for(Iterator it=tempMap.keySet().iterator();it.hasNext();){
+							String str=(String) it.next();
+							String s=str.substring(0,str.indexOf(","));
+							if(s!=null && s.equals(list.get(i).getFlupGroup().getGroupTwo())){
+								flag=true;
+								two=str;
+								break;
+							}
+						}
+						if(!flag){
+							List<FlupItemResponse> gListwb=new ArrayList<FlupItemResponse>();
+							gListwb.add(list.get(i));
+							tempMap.put(list.get(i).getFlupGroup().getItemName()+","+list.get(i).getShowNo(), gListwb);
+							hashMap.put(key, tempMap);
+						}else{
+							List<FlupItemResponse> gListfx2=tempMap.get(two);
+							gListfx2.add(list.get(i));
+							tempMap.put(two, gListfx2);
+							hashMap.put(key, tempMap);
+						}
+					}
+				} else {
+					Map<String, List<FlupItemResponse>> map = (Map<String, List<FlupItemResponse>>) hashMap.get(key);
+					
+						boolean flag=false;
+						String two="";
+						for(Iterator it=map.keySet().iterator();it.hasNext();){
+							String str=(String) it.next();
+							String s=str.substring(0,str.indexOf(","));
+							if(s!=null && s.equals(list.get(i).getFlupGroup().getGroupTwo())){
+								flag=true;
+								two=str;
+								break;
+							}
+						}
+						if(!flag){
+							List<FlupItemResponse> gListwb2=new ArrayList<FlupItemResponse>();
+							gListwb2.add(list.get(i));
+							map.put(list.get(i).getFlupGroup().getGroupTwo()+","+list.get(i).getShowNo(), gListwb2);
+							hashMap.put(key, map);
+						}else{
+							List<FlupItemResponse> gListfx3=map.get(two);
+							gListfx3.add(list.get(i));
+							map.put(two, gListfx3);
+							hashMap.put(key, map);
+						}
+				}
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table id=\"tableView\" border=\"1\" bordercolor=\"#a0c6e5\" width=\"80%\"; style=\"border-collapse:collapse;margin-left: 5%; margin-right: 5%; margin-top:5px;\">");
+		for(Iterator<String> it=hashMap.keySet().iterator();it.hasNext();){
+			String sbKey=it.next();
+			Map<String,List<FlupItemResponse>> secondMap=hashMap.get(sbKey);
+			sb.append("<tr>");
+			sb.append("<td colspan='1' rowspan='" + secondMap.size() + "'>");
+			sb.append(sbKey);
+			sb.append("</td>");
+			int count=0;
+			for(Iterator<String> its=secondMap.keySet().iterator();its.hasNext();){
+				count++;
+				String sbTwoKey=its.next();
+				List<FlupItemResponse> sblist=secondMap.get(sbTwoKey);
+				String twoMapKey=sbTwoKey.substring(0, sbTwoKey.indexOf(","));
+				if(twoMapKey!=null && (!twoMapKey.equals("dx") && (!twoMapKey.equals("fx")))){
+					String twoShowKey="";
+					if(!twoMapKey.equals(sblist.get(0).getFlupGroup().getItemName())){
+						twoShowKey=twoMapKey;
+					}
+					if(sblist.size()>1){
+						Collections.sort(sblist, new ComparaFlupItem());
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							boolean flagType=false;
+							for(int z=0;z<sblist.size();z++){
+								if(sblist.get(z).getFlupGroup().getRecordType().equals("wb")){
+									flagType=true;
+									break;
+								}
+							}
+							if(!flagType){
+								sb.append("<td>");
+								for(int j=0;j<sblist.size();j++){
+									if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+										sb.append(twoMapKey);
+										sb.append("<input type='text' class='fluptext'  rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+									}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+										sb.append("<input type='radio' class='flupradio' name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+										sb.append(sblist.get(j).getFlupGroup().getItemName());
+									}else{
+										sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+										sb.append(sblist.get(j).getFlupGroup().getItemName());
+									}
+								}
+								sb.append("</td>");
+							}else{ //简单的判断单选，复选，文本混合类型
+								sb.append("<td>");
+								for(int j=0;j<sblist.size();j++){
+									if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+										sb.append(sblist.get(j).getFlupGroup().getItemName());
+										sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" value=''/>");
+									}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+										sb.append("<input type='radio' class='flupradio' name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+										sb.append(sblist.get(j).getFlupGroup().getItemName());
+									}else{
+										sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+										sb.append(sblist.get(j).getFlupGroup().getItemName());
+									}
+									sb.append("<br/>");
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+					}else{
+						if(twoMapKey.equals(sblist.get(0).getFlupGroup().getItemName())){
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							for(int j=0;j<sblist.size();j++){
+								sb.append("<td>");
+								if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+									sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" value=''/>");
+								}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+									sb.append("<input type='radio' class='flupradio' name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+									sb.append(sblist.get(j).getFlupGroup().getItemName());
+								}else{
+									sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+									sb.append(sblist.get(j).getFlupGroup().getItemName());
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+						}else{
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							for(int j=0;j<sblist.size();j++){
+								sb.append("<td>");
+								if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+									sb.append(sblist.get(j).getFlupGroup().getItemName());
+									sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" value=''/>");
+								}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+									sb.append("<input type='radio' class='flupradio' name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+									sb.append(sblist.get(j).getFlupGroup().getItemName());
+								}else{
+									sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+									sb.append(sblist.get(j).getFlupGroup().getItemName());
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+						}
+					}
+				}else{
+					 String showKey="";
+					 if(!twoMapKey.equals(sblist.get(0).getFlupGroup().getItemName())){
+						 showKey=twoMapKey;
+					}
+					if(twoMapKey.equals("dx")){
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaFlupItem());
+							 		sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<input type='text' class='fluptext'  rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+											}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+""+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox'  class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+""+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}
+									}
+									sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								 sb.append("</tr>");
+							
+						}else{
+							 sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<input type='text' class='fluptext'  rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+										}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+","+sblist.get(j).getFlupGroup().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}else if(twoMapKey.equals("fx")){
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaFlupItem());
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+											}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+""+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+""+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}
+									}
+								 sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								 sb.append("</tr>");
+							
+						}else{
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+										}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sblist.get(j).getFlupGroup().getItemName()+","+showKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}else{
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaFlupItem());
+							sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+											}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox' class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+												sb.append(sblist.get(j).getFlupGroup().getItemName());
+												sb.append("<br/>");
+											}
+									}
+								 sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+							
+						}else{
+							 sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<input type='text' class='fluptext' rel=\"文本\" lang='"+sblist.get(j).getFlupGroup().getItemRequired()+"' tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" value=''/>");
+										}else if(sblist.get(j).getFlupGroup().getRecordType()!=null && sblist.get(j).getFlupGroup().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='flupradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox'  class='flupcheckbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getFlupGroup().getFlupGroupId()+","+sblist.get(j).getFlupGroup().getDataType()+"\" name='' value='"+sblist.get(j).getFlupGroup().getItemName()+"'/>");
+											sb.append(sblist.get(j).getFlupGroup().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("<td>");
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}
+				}
+								
+			}
+		}
+		sb.append("</table>");
+		if(showView!=null && !showView.equals("")){
+			sb.append("<div style='margin-left:250px;'><input type='button' id='saveFlupItem' value='保存'/></div>");
+		}
+		return sb.toString();
+		
+	}
+	
+	
+	/*****
+	 * 自定义疾病模板
+	 */
+	public static final String getDiseasItemTemplate(List<DiseaseItemTemplate> list,String showView){
+		
+		Map<String, Map<String, List<DiseaseItemTemplate>>> hashMap = new LinkedHashMap<String, Map<String, List<DiseaseItemTemplate>>>();
+		for (int i = 0; i < list.size(); i++) {
+			String key = list.get(i).getDiseaseItem().getGroupOne();
+			// 判断hashMap的键是否重复
+			if (!hashMap.containsKey(key)) {
+				// 判断二类分组是否为空
+				if (list.get(i).getDiseaseItem().getGroupTwo() == null || list.get(i).getDiseaseItem().getGroupTwo().equals("")) {
+					if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("dx")){
+						List<DiseaseItemTemplate> dxtemp = new ArrayList<DiseaseItemTemplate>();
+						Map<String, List<DiseaseItemTemplate>> dxm = new TreeMap<String, List<DiseaseItemTemplate>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						dxtemp.add(list.get(i));
+						dxm.put("dx"+","+list.get(i).getShowNo(), dxtemp);
+						hashMap.put(key, dxm);
+					}else if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("fx")){
+						List<DiseaseItemTemplate> fxtemp = new ArrayList<DiseaseItemTemplate>();
+						Map<String, List<DiseaseItemTemplate>> fxm = new TreeMap<String, List<DiseaseItemTemplate>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						fxtemp.add(list.get(i));
+						fxm.put("fx"+","+list.get(i).getShowNo(), fxtemp);
+						hashMap.put(key, fxm);
+					}else if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("xlk")){
+						List<DiseaseItemTemplate> fxtemp = new ArrayList<DiseaseItemTemplate>();
+						Map<String, List<DiseaseItemTemplate>> fxm = new TreeMap<String, List<DiseaseItemTemplate>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						fxtemp.add(list.get(i));
+						fxm.put("xlk"+","+list.get(i).getShowNo(), fxtemp);
+						hashMap.put(key, fxm);
+					}else{
+						List<DiseaseItemTemplate> wbtemp = new ArrayList<DiseaseItemTemplate>();
+						Map<String, List<DiseaseItemTemplate>> wbm = new TreeMap<String, List<DiseaseItemTemplate>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						wbtemp.add(list.get(i));
+						wbm.put(list.get(i).getDiseaseItem().getItemName()+","+list.get(i).getShowNo(), wbtemp);
+						hashMap.put(key, wbm);
+					}
+					
+					
+				} else {
+					  String secondKey = list.get(i).getDiseaseItem().getGroupTwo();
+						List<DiseaseItemTemplate> temp = new ArrayList<DiseaseItemTemplate>();
+						Map<String,List<DiseaseItemTemplate>> m=new TreeMap<String,List<DiseaseItemTemplate>>(new Comparator<String>() {
+
+							@Override
+							public int compare(String o1, String o2) {
+								// TODO Auto-generated method stub
+								String oo1=o1.substring(o1.indexOf(",")+1);
+								String oo2=o2.substring(o2.indexOf(",")+1);
+								return Integer.parseInt(oo1)-Integer.parseInt(oo2);
+							}
+						});
+						temp.add(list.get(i));
+						m.put(secondKey+","+list.get(i).getShowNo(), temp);
+						hashMap.put(key,m);
+					
+				}
+			} else {
+				if ((list.get(i).getDiseaseItem().getGroupTwo() == null || list.get(i).getDiseaseItem().getGroupTwo().equals(""))) {
+					Map<String, List<DiseaseItemTemplate>> tempMap = (Map<String, List<DiseaseItemTemplate>>) hashMap.get(key);
+					if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("dx")){
+						boolean dxFlag=false;
+						String dxTwoKey="";
+						for(Iterator dxIt=tempMap.keySet().iterator();dxIt.hasNext();){
+							String dxS=(String) dxIt.next();
+							String dx=dxS.substring(0, dxS.indexOf(","));
+							if(dx!=null && dx.equals("dx")){
+								dxFlag=true;
+								dxTwoKey=dxS;
+								break;
+								
+							}
+						}
+						if(!dxFlag){
+							List<DiseaseItemTemplate> gListdx=new ArrayList<DiseaseItemTemplate>();
+							gListdx.add(list.get(i));
+							tempMap.put("dx,"+list.get(i).getShowNo(), gListdx);
+							hashMap.put(key, tempMap);
+						}else{
+							List<DiseaseItemTemplate> gListdxExist=tempMap.get(dxTwoKey);
+							gListdxExist.add(list.get(i));
+							tempMap.put(dxTwoKey, gListdxExist);
+							hashMap.put(key, tempMap);
+						}
+					}else if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("fx")){
+						boolean fxFlag=false;
+						String fxTwoKey="";
+						for(Iterator fxIt=tempMap.keySet().iterator();fxIt.hasNext();){
+							String fxS=(String) fxIt.next();
+							String fx=fxS.substring(0,fxS.indexOf(","));
+							if(fx!=null && fx.equals("fx")){
+								fxFlag=true;
+								fxTwoKey=fxS;
+								break;
+								
+							}
+						}
+						
+						if(!fxFlag){
+							List<DiseaseItemTemplate> gListfx=new ArrayList<DiseaseItemTemplate>();
+							gListfx.add(list.get(i));
+							tempMap.put("fx,"+list.get(i).getShowNo(), gListfx);
+							hashMap.put(key, tempMap);
+						}else{
+							List<DiseaseItemTemplate> gListfxExist=tempMap.get(fxTwoKey);
+							gListfxExist.add(list.get(i));
+							tempMap.put(fxTwoKey, gListfxExist);
+							hashMap.put(key, tempMap);
+						}
+					}else if(list.get(i).getDiseaseItem().getRecordType()!=null && list.get(i).getDiseaseItem().getRecordType().equals("xlk")){
+						List<DiseaseItemTemplate> xklList=new ArrayList<DiseaseItemTemplate>();
+						xklList.add(list.get(i));
+						tempMap.put("xlk,"+list.get(i).getShowNo(), xklList);
+						hashMap.put(key, tempMap);
+						
+					}else{
+						boolean flag=false;
+						String two="";
+						for(Iterator it=tempMap.keySet().iterator();it.hasNext();){
+							String str=(String) it.next();
+							String s=str.substring(0,str.indexOf(","));
+							if(s!=null && s.equals(list.get(i).getDiseaseItem().getGroupTwo())){
+								flag=true;
+								two=str;
+								break;
+							}
+						}
+						if(!flag){
+							List<DiseaseItemTemplate> gListwb=new ArrayList<DiseaseItemTemplate>();
+							gListwb.add(list.get(i));
+							tempMap.put(list.get(i).getDiseaseItem().getItemName()+","+list.get(i).getShowNo(), gListwb);
+							hashMap.put(key, tempMap);
+						}else{
+							List<DiseaseItemTemplate> gListfx2=tempMap.get(two);
+							gListfx2.add(list.get(i));
+							tempMap.put(two, gListfx2);
+							hashMap.put(key, tempMap);
+						}
+					}
+				} else {
+					Map<String, List<DiseaseItemTemplate>> map = (Map<String, List<DiseaseItemTemplate>>) hashMap.get(key);
+					
+						boolean flag=false;
+						String two="";
+						for(Iterator it=map.keySet().iterator();it.hasNext();){
+							String str=(String) it.next();
+							String s=str.substring(0,str.indexOf(","));
+							if(s!=null && s.equals(list.get(i).getDiseaseItem().getGroupTwo())){
+								flag=true;
+								two=str;
+								break;
+							}
+						}
+						if(!flag){
+							List<DiseaseItemTemplate> gListwb2=new ArrayList<DiseaseItemTemplate>();
+							gListwb2.add(list.get(i));
+							map.put(list.get(i).getDiseaseItem().getGroupTwo()+","+list.get(i).getShowNo(), gListwb2);
+							hashMap.put(key, map);
+						}else{
+							List<DiseaseItemTemplate> gListfx3=map.get(two);
+							gListfx3.add(list.get(i));
+							map.put(two, gListfx3);
+							hashMap.put(key, map);
+						}
+				}
+			}
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table id=\"tableDiseaseView\" border=\"1\" bordercolor=\"#a0c6e5\" width=\"80%\"; style=\"border-collapse:collapse;margin-left: 5%; margin-right: 5%;\">");
+		for(Iterator<String> it=hashMap.keySet().iterator();it.hasNext();){
+			String sbKey=it.next();
+			Map<String,List<DiseaseItemTemplate>> secondMap=hashMap.get(sbKey);
+			sb.append("<tr>");
+			sb.append("<td colspan='1' rowspan='" + secondMap.size() + "'>");
+			sb.append(sbKey);
+			sb.append("</td>");
+			int count=0;
+			for(Iterator<String> its=secondMap.keySet().iterator();its.hasNext();){
+				count++;
+				String sbTwoKey=its.next();
+				List<DiseaseItemTemplate> sblist=secondMap.get(sbTwoKey);
+				String twoMapKey=sbTwoKey.substring(0, sbTwoKey.indexOf(","));
+				if(twoMapKey!=null && ((!twoMapKey.equals("dx")) && (!twoMapKey.equals("fx")) && (!twoMapKey.equals("xlk")))){
+					String twoShowKey="";
+					if(!twoMapKey.equals(sblist.get(0).getDiseaseItem().getItemName())){
+						twoShowKey=twoMapKey;
+					}
+					if(sblist.size()>1){
+						Collections.sort(sblist, new ComparaDiseaseItem());
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							boolean flagType=false;
+							for(int z=0;z<sblist.size();z++){
+								if(sblist.get(z).getDiseaseItem().getRecordType().equals("wb")){
+									flagType=true;
+									break;
+								}
+							}
+							if(!flagType){
+								sb.append("<td>");
+								for(int j=0;j<sblist.size();j++){
+									if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+										sb.append(twoMapKey);
+										sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+									}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+										sb.append("<input type='radio' class='diseaseradio'  name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+										sb.append(sblist.get(j).getDiseaseItem().getItemName());
+									}else{
+										sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+										sb.append(sblist.get(j).getDiseaseItem().getItemName());
+									}
+								}
+								sb.append("</td>");
+							}else{ //简单的判断单选，复选，文本混合类型
+								sb.append("<td>");
+								for(int j=0;j<sblist.size();j++){
+									if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+										sb.append(sblist.get(j).getDiseaseItem().getItemName());
+										sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+									}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+										sb.append("<input type='radio' class='diseaseradio'  name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+										sb.append(sblist.get(j).getDiseaseItem().getItemName());
+									}else{
+										sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+										sb.append(sblist.get(j).getDiseaseItem().getItemName());
+									}
+									sb.append("<br/>");
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+					}else{
+						if(twoMapKey.equals(sblist.get(0).getDiseaseItem().getItemName())){
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							for(int j=0;j<sblist.size();j++){
+								sb.append("<td>");
+								if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+									sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+								}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+									sb.append("<input type='radio' class='diseaseradio'  name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+									sb.append(sblist.get(j).getDiseaseItem().getItemName());
+								}else{
+									sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+									sb.append(sblist.get(j).getDiseaseItem().getItemName());
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+						}else{
+							sb.append("<td>");
+							sb.append(twoMapKey);
+							sb.append("</td>");
+							
+							for(int j=0;j<sblist.size();j++){
+								sb.append("<td>");
+								if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+									sb.append(sblist.get(j).getDiseaseItem().getItemName());
+									sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+twoShowKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+								}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+									sb.append("<input type='radio' class='diseaseradio'  name='"+twoMapKey+"' tag=\""+sbKey+","+twoShowKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+									sb.append(sblist.get(j).getDiseaseItem().getItemName());
+								}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("xlk")){
+									
+									sb.append(sblist.get(0).getDiseaseItem().getItemName());
+									
+									String selectStr="";
+									for(int x=0;x<sblist.size();x++){
+										DiseaseItemTemplate t=sblist.get(x);
+										if(t.getDiseaseItem().getListValue()!=null && !t.getDiseaseItem().getListValue().equals("")){
+											String pattern = "^\\,|\\，$";
+											String arr[]=t.getDiseaseItem().getListValue().split("，");
+											selectStr += "<select class='diseaseselect'>";
+											for(int kk=0;kk<arr.length;kk++){
+											  selectStr+="<option tag='"+t.getDiseaseItem().getGroupOne()+","+t.getDiseaseItem().getGroupTwo()+",下拉框"+","+t.getDiseaseItem().getDiseaseGroupId()+","+t.getDiseaseItem().getItemName()+"' value='"+arr[kk]+"'>"+arr[kk]+"</option>";
+											}
+											selectStr+="</select>";
+										}
+									}
+									sb.append(selectStr);
+								}else{
+									sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+twoShowKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+									sb.append(sblist.get(j).getDiseaseItem().getItemName());
+								}
+								sb.append("</td>");
+							}
+							sb.append("</tr>");
+							if(secondMap.size()>1){
+								if(secondMap.size()!=count)
+								sb.append("<tr>");
+							}
+						}
+					}
+				}else{
+					 String showKey="";
+					 if(!twoMapKey.equals(sblist.get(0).getDiseaseItem().getItemName())){
+						 showKey=twoMapKey;
+					}
+					if(twoMapKey.equals("dx")){
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaDiseaseItem());
+							 		sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+											}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+""+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+""+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}
+									}
+									sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								 sb.append("</tr>");
+							
+						}else{
+							 sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+										}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}else if(twoMapKey.equals("fx")){
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaDiseaseItem());
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<input type='text'  data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+""+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+											}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+""+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+""+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}
+									}
+								 sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								 sb.append("</tr>");
+							
+						}else{
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<input type='text' data='"+sblist.get(j).getDiseaseItem().getDataType()+"' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+										}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sblist.get(j).getDiseaseItem().getItemName()+","+showKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}else if(twoMapKey.equals("xlk")){
+						sb.append("<td>");
+						sb.append(sblist.get(0).getDiseaseItem().getItemName());
+						sb.append("</td>");
+						sb.append("<td>");
+						String selectStr="";
+						for(int x=0;x<sblist.size();x++){
+							DiseaseItemTemplate t=sblist.get(x);
+							if(t.getDiseaseItem().getListValue()!=null && !t.getDiseaseItem().getListValue().equals("")){
+								String pattern = "^\\,|\\，$";
+								String arr[]=t.getDiseaseItem().getListValue().split("，");
+								selectStr += "<select class='diseaseselect'>";
+								for(int kk=0;kk<arr.length;kk++){
+								  selectStr+="<option tag='"+t.getDiseaseItem().getGroupOne()+","+t.getDiseaseItem().getGroupTwo()+",下拉框"+","+t.getDiseaseItem().getDiseaseGroupId()+","+t.getDiseaseItem().getItemName()+"' value='"+arr[kk]+"'>"+arr[kk]+"</option>";
+								}
+								selectStr+="</select>";
+							}
+						}
+						sb.append(selectStr);
+						sb.append("</td>");
+						sb.append("</tr>");
+						
+						
+					}else{
+						if(sblist.size()>1){
+							Collections.sort(sblist, new ComparaDiseaseItem());
+							sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+											if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<input type='text' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+											}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+												sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}else{
+												sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+												sb.append(sblist.get(j).getDiseaseItem().getItemName());
+												sb.append("<br/>");
+											}
+									}
+								 sb.append("</td>");
+								 sb.append("<td>");
+								 sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");	
+								 sb.append("</td>");
+							
+						}else{
+							 sb.append("<td>");
+							 sb.append(twoMapKey);
+							 sb.append("</td>");
+							 sb.append("<td>");
+									for(int j=0;j<sblist.size();j++){
+										if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("wb")){
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<input type='text' class='diseasetext' rel=\"文本\"  tag=\""+sbKey+","+showKey+",文本,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" value=''/>");
+										}else if(sblist.get(j).getDiseaseItem().getRecordType()!=null && sblist.get(j).getDiseaseItem().getRecordType().equals("dx")){
+											sb.append("<input type='radio' class='diseaseradio' rel=\"单选\" tag=\""+sbKey+","+showKey+",单选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='"+sbKey+twoMapKey+"' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}else{
+											sb.append("<input type='checkbox' class='diseasechekbox' rel=\"复选\"  tag=\""+sbKey+","+showKey+",复选,"+sblist.get(j).getDiseaseItem().getDiseaseGroupId()+","+sblist.get(j).getDiseaseItem().getItemName()+"\" name='' value='"+sblist.get(j).getDiseaseItem().getItemName()+"'/>");
+											sb.append(sblist.get(j).getDiseaseItem().getItemName());
+											sb.append("<br/>");
+										}
+								sb.append("<td>");
+								sb.append("</tr>");
+								if(secondMap.size()>1){
+									if(secondMap.size()!=count)
+									sb.append("<tr>");
+								}
+							}
+						}
+					}
+				}
+								
+			}
+		}
+		sb.append("</table>");	
+		if(showView!=null && !showView.equals("")){
+			sb.append("<div style='margin-left:250px;'><input type='button' id='saveDisease' value='保存'/></div>");
+		}
+		return sb.toString();
+	}
+	
+	
+	
+	public static final String viewInspectDeital(List<ExportResponse> list){
+		Map<String,List<String>> hashmap=new HashMap<String,List<String>>();
+		for(int i=0;i<list.size();i++){
+			if(!hashmap.containsKey(list.get(i).getGroupName())){
+				List<String> values=new ArrayList<String>();
+				values.add(list.get(i).getItemName());
+				hashmap.put(list.get(i).getGroupName(), values);
+			}else{
+				List<String> resultValue=hashmap.get(list.get(i).getGroupName());
+				resultValue.add(list.get(i).getItemName());
+				hashmap.put(list.get(i).getGroupName(), resultValue);
+			}
+		}
+		StringBuilder builder=new StringBuilder();
+		builder.append("<table  border=\"1\" bordercolor=\"#a0c6e5\" width=\"80%\"; style=\"border-collapse:collapse;margin-left: 5%; margin-right: 5%;\">");
+		for(Iterator<String> it=hashmap.keySet().iterator();it.hasNext();){
+			String key=it.next();
+			List<String> value=hashmap.get(key);
+			builder.append("<tr>");
+			builder.append("<td rowspan='" +value.size()+"'>");
+			builder.append(key);
+			builder.append("</td>");
+			for(int j=0;j<value.size();j++){
+				builder.append("<td>");
+				builder.append(value.get(j));
+				builder.append("</td>");
+			}
+			builder.append("</tr>");
+		}
+		return builder.toString();
+	} 
+	
+}

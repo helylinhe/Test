@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.KetiReportDao">
+
+	<select id="pageList" parameterType="page" resultType="map">
+		select z.name "name",
+    to_char(z.OUT_HOSPITAL_DATE,'yyyy-MM-dd') "outHospitalDate",
+    to_char(z.in_hospital_date,'yyyy-MM-dd') "inHospitalDate",
+    decode(z.gender,1,'男',2,'女',null) "gender",
+    f_get_pt_pati_age(x.pati_serial,x.inpati_number) "age",
+    x.pati_serial "patiSerial",
+    x.inpati_number "inpatiNumber",
+    x.inpati_serial_number
+    "inpatiSerialNumber",
+    x.column1 "column1",
+    x.column2 "column2",
+    x.column3 "column3",
+    x.column4 "column4",
+    x.column5 "column5",
+    x.column6 "column6",
+    x.column7 "column7",
+    x.column8 "column8",
+    x.column9 "column9",
+    x.column10 "column10",
+    x.column11 "column11",
+    x.column12 "column12",
+    x.column13 "column13",
+    x.column14 "column14",
+    x.column15 "column15",
+    x.column16 "column16",
+    x.column17 "column17",
+    x.column18 "column18",
+    x.column19 "column19",
+    x.column20 "column20",
+    x.column21 "column21",
+    x.column22 "column22",
+    x.column23 "column23",
+    x.column24 "column24",
+    x.column25 "column25",
+    x.column26 "column26",
+    x.column27 "column27",
+    x.column28 "column28",
+    x.column29 "column29",
+    x.column30 "column30",
+    x.column31 "column31",
+    x.column32 "column32",
+    x.column33 "column33",
+    x.column34 "column34",
+    x.column35 "column35",
+    x.column36 "column36",
+    x.column37 "column37",
+    x.column38 "column38",
+    x.column39 "column39",
+    x.column40 "column40",
+    x.column41 "column41",
+    x.column42 "column42",
+    x.column43 "column43",
+    x.column44 "column44",
+    x.column45 "column45",
+    x.column46 "column46",
+    x.column47 "column47",
+    x.column48 "column48",
+    x.column49 "column49",
+    x.column50 "column50",
+    x.column51 "column51",
+    x.column52 "column52",
+    x.column53 "column53",
+    x.column54 "column54",
+    x.column55 "column55",
+    x.column56 "column56",
+    x.column57 "column57",
+    x.column58 "column58",
+    x.column59 "column59",
+    x.column60 "column60",
+    x.column61 "column61",
+    x.column62 "column62" ,
+    x.column63 "column63" ,
+    x.column64 "column64" ,
+    x.column65 "column65" ,
+    x.column66 "column66",
+    x.column67 "column67" ,
+    x.column68 "column68" ,
+    y.column69 "column69" from (select
+    pati_serial,inpati_number,inpati_serial_number,max(case when
+    report_item_name like '%谷丙转氨酶 [ALT]%' then inspect_result else '' end)
+    column1 ,
+    max(case when report_item_name like '%谷草转氨酶 [AST]%' then
+    inspect_result else
+    '' end) column2,
+    max(case when report_item_name like
+    '%GGT%' then inspect_result else '' end)
+    column3,
+    max(case when
+    report_item_name like '%碱性磷酸酶%' then inspect_result else '' end)
+    column4,
+    max(case when report_item_name like '%白蛋白%' then
+    inspect_result else '' end)
+    column5 ,
+    max(case when report_item_name
+    like '%前白蛋白%' then inspect_result else '' end)
+    column6 ,
+    max(case when
+    report_item_name like '%肌酐%' then inspect_result else '' end)
+    column7,
+    max(case when report_item_name like '%尿素氮%' then inspect_result else
+    '' end)
+    column8 ,
+    max(case when report_item_name like '%尿酸%' then
+    inspect_result else '' end)
+    column9,
+    max(case when report_item_name like
+    '%RBP%' then inspect_result else '' end)
+    column10,
+    max(case when
+    report_item_name like '%胱抑素C%' then inspect_result else '' end)
+    column11 ,
+    max(case when report_item_name like '%甘油三脂%' then
+    inspect_result else '' end)
+    column12,
+    max(case when report_item_name
+    like '%总胆固醇%' then inspect_result else '' end)
+    column13,
+    max(case when
+    report_item_name like '%LDL%' then inspect_result else '' end)
+    column14,
+    max(case when report_item_name like '%HDL%' then
+    inspect_result else '' end)
+    column15,
+    max(case when report_item_name
+    like '%脂蛋白(a)%' then inspect_result else ''
+    end) column16,
+    max(case when
+    report_item_name like '%钾 [K]%' then inspect_result else '' end)
+    column17 ,
+    max(case when report_item_name like '%钠 [Na]%' then
+    inspect_result else ''
+    end) column18 ,
+    max(case when report_item_name
+    like '%钙 [Ca]%' then inspect_result else ''
+    end) column19 ,
+    max(case
+    when report_item_name like '%磷 [P]%' then inspect_result else '' end)
+    column20 ,
+    max(case when report_item_name like '%镁 [Mg]%' then
+    inspect_result else ''
+    end) column21 ,
+    max(case when report_item_name
+    like '%[GLU]%' then inspect_result else '' end)
+    column22,
+    max(case when
+    report_item_name like '%[GLU2]%' then inspect_result else ''
+    end)
+    column23,
+    max(case when report_item_name like '%胰岛素(0分钟)%' then
+    inspect_result else ''
+    end) column24,
+    max(case when report_item_name
+    like '%[Ins2h]%' then inspect_result else '' end)
+    column25,
+    max(case when
+    report_item_name like '%C肽 [C-P]%' then inspect_result else '' end)
+    column26,
+    max(case when report_item_name like '%C肽(2.0h) [C-P(2h)]%' then
+    inspect_result else ''
+    end) column27,
+    max(case when report_item_name
+    like '%糖化血红蛋白 [HbA1c]%' then inspect_result else '' end)
+    column28 ,
+    max(case when
+    report_item_name like '%[GAL]%' then inspect_result else '' end)
+    column29 ,
+    max(case when report_item_name like '%抗胰岛素抗体 [IAA]%' then
+    inspect_result else '' end)
+    column30,
+    max(case when report_item_name
+    like '%抗胰岛细胞抗体 [ICA]%' then inspect_result else '' end)
+    column31,
+    max(case when
+    report_item_name like '%抗谷氨酸脱羧酶抗体 [GAD-Ab]%' then inspect_result else ''
+    end)
+    column32 ,
+    max(case when report_item_name like '%胰岛素(0分钟) [Ins-0'']%' then
+    inspect_result else ''
+    end) column33,
+    max(case when report_item_name
+    like '%胰岛素(2分钟) [Ins-2'']%' then inspect_result else ''
+    end) column34,
+    max(case
+    when report_item_name like '%胰岛素(4分钟) [Ins-4'']%' then inspect_result else ''
+    end) column35,
+    max(case when report_item_name like '%胰岛素(6分钟) [Ins-6'']%' then
+    inspect_result else ''
+    end) column36,
+     max(case when report_item_name
+    like '%胰岛素(8分钟) [Ins-8'']%' then inspect_result else ''
+    end) column37,
+    max(case
+    when report_item_name like '%C肽0分钟 [C-P0'']%' then inspect_result else '' end)
+    column38,
+    max(case when report_item_name like '%C肽2分钟 [C-P 2'']%' then
+    inspect_result else '' end)
+    column39,
+    max(case when report_item_name
+    like '%C肽4分钟 [C-P 4'']%' then inspect_result else '' end)
+    column40,
+    max(case when
+    report_item_name like '%C肽6分钟 [C-P 6'']%' then inspect_result else '' end)
+    column41,
+    max(case when report_item_name like '%C肽8分钟 [C-P 8'']%' then
+    inspect_result else '' end)
+    column42,
+    max(case when report_item_name
+    like '%尿微量白蛋白%' then inspect_result else ''
+    end) column43,
+    max(case when
+    report_item_name like '%24h尿蛋白定量%' then inspect_result else ''
+    end)
+    column44,
+    max(case when report_item_name like '%三碘甲状腺原氨酸 [T3]%' then
+    inspect_result else '' end)
+    column45,
+    max(case when report_item_name
+    like '%甲状腺素 [T4]%' then inspect_result else '' end)
+    column46,
+    max(case when
+    report_item_name like '%FT3%' then inspect_result else '' end)
+    column47,
+    max(case when report_item_name like '%FT4%' then
+    inspect_result else '' end)
+    column48,
+    max(case when report_item_name
+    like '%TSH%' then inspect_result else '' end)
+    column49,
+    max(case when
+    report_item_name like '%甲状腺球蛋白抗体 [ATG]%' then inspect_result else '' end)
+    column50 ,
+    max(case when report_item_name like '%甲状腺过氧化物酶抗体 [Anti-TPO]%' then
+    inspect_result else ''
+    end) column51 ,
+    max(case when report_item_name
+    like '%TSH受体抗体 [TRAB]%' then inspect_result else '' end)
+    column52 ,
+    max(case when
+    report_item_name like '%甲状腺球蛋白 [Tg]%' then inspect_result else '' end)
+    column53,
+    max(case when report_item_name like '%PTH%' then
+    inspect_result else '' end)
+    column54,
+    max(case when report_item_name
+    like '%骨钙素N端中分子片段 [N-MID]%' then inspect_result else ''
+    end) column55,
+    max(case
+    when report_item_name like '%β-胶原降解产物 [β-crossl]%' then inspect_result else ''
+    end) column56,
+    max(case when report_item_name like '%25-羟基总维生素D [VitD]%' then
+    inspect_result else '' end)
+    column57,
+    max(case when report_item_name
+    like '%I型胶原氨基末端肽 [PINP]%' then inspect_result else '' end)
+    column58,
+    max(case when
+    report_item_name like '%降钙素 [CT2]%' then inspect_result else '' end)
+    column59,
+    max(case when report_item_name like '%AFP%' then
+    inspect_result else '' end)
+    column60,
+    max(case when report_item_name
+    like '%CEA%' then inspect_result else '' end)
+    column61,
+    max(case when
+    report_item_name like '%糖类抗原CA19-9 [CA19-9]%' then inspect_result else ''
+    end)
+    column62 ,
+    max(case when report_item_name like '%糖类抗原CA24-2 [CA24-2]%' then
+    inspect_result else ''
+    end) column63 ,
+    max(case when report_item_name
+    like '%CA-50%' then inspect_result else '' end)
+    column64 ,
+    max(case when
+    report_item_name like '%NSE%' then inspect_result else '' end)
+    column65,
+    max(case when report_item_name like '%PSA%' then
+    inspect_result else '' end)
+    column66,
+    max(case when report_item_name
+    like '%FPSA%' then inspect_result else '' end)
+    column67,
+    max(case when
+    report_item_name like '%fPSA%' then inspect_result else '' end)
+    column68
+    from(select A.*,diag.out_hospital_date
+    from (select t.id,
+    t.pati_serial, t.inpati_number,
+    t.inpati_serial_number,d.item_name,
+    d.report_item_name,d.inspect_result
+    from tb_inspect t,
+    tb_inspect_detail d
+    where t.inspect_id = d.inspect_id) A,
+    tb_inpati_diag diag
+    where A.pati_serial = diag.pati_serial
+    and
+    A.inpati_number = diag.inpati_number
+    and A.inpati_serial_number =
+    diag.inpati_serial_number
+		<if test="params.name!=null  and params.name!=''">
+			and diag.name like '%'||#{params.name}||'%'
+		</if>
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and diag.INPATI_NUMBER=#{params.inpatiNumber}
+		</if>
+		<if test="params.startDate!=null and params.startDate!=''">
+			and to_char(diag.OUT_HOSPITAL_DATE,'yyyy-MM-dd') <![CDATA[>=]]>
+			#{params.startDate}
+		</if>
+		<if test="params.endDate!=null and params.endDate!=''">
+			and to_char(diag.OUT_HOSPITAL_DATE,'yyyy-MM-dd')<![CDATA[<=]]>
+			#{params.endDate}
+		</if>
+		<if test="list!=null and list!=''">
+			and diag.out_dept in
+			<foreach collection="list" item="item" index="index" open="("
+				close=")" separator=",">
+				#{item.deptCode}
+			</foreach>
+		</if>
+		) group by pati_serial,inpati_number,inpati_serial_number) x inner
+		join
+		(select pati_serial,inpati_number,inpati_serial_number,
+		max(case
+		when 1=1 then a.exam_para else '' end) column69
+		From tb_check a inner join
+		tb_check_items b on a.exam_no=b.exam_no and
+		a.exam_sub_class like
+		'%血管超声%' group by
+		pati_serial,inpati_number,inpati_serial_number) y on
+		x.pati_serial=y.pati_serial and x.inpati_number=y.inpati_number and
+		x.inpati_serial_number=y.inpati_serial_number inner join
+		TB_INPATI_DIAG z on x.pati_serial=z.pati_serial and
+		x.inpati_number=z.inpati_number
+		and
+		x.inpati_serial_number=z.inpati_serial_number
+
+	</select>
+
+
+	<select id="reportDate" parameterType="map" resultType="map">
+	select z.name "name",
+    to_char(z.OUT_HOSPITAL_DATE,'yyyy-MM-dd') "outHospitalDate",
+    to_char(z.in_hospital_date,'yyyy-MM-dd') "inHospitalDate",
+    decode(z.gender,1,'男',2,'女',null) "gender",
+    f_get_pt_pati_age(x.pati_serial,x.inpati_number) "age",
+    x.pati_serial "patiSerial",
+    x.inpati_number "inpatiNumber",
+    x.inpati_serial_number
+    "inpatiSerialNumber",
+    x.column1 "column1",
+    x.column2 "column2",
+    x.column3 "column3",
+    x.column4 "column4",
+    x.column5 "column5",
+    x.column6 "column6",
+    x.column7 "column7",
+    x.column8 "column8",
+    x.column9 "column9",
+    x.column10 "column10",
+    x.column11 "column11",
+    x.column12 "column12",
+    x.column13 "column13",
+    x.column14 "column14",
+    x.column15 "column15",
+    x.column16 "column16",
+    x.column17 "column17",
+    x.column18 "column18",
+    x.column19 "column19",
+    x.column20 "column20",
+    x.column21 "column21",
+    x.column22 "column22",
+    x.column23 "column23",
+    x.column24 "column24",
+    x.column25 "column25",
+    x.column26 "column26",
+    x.column27 "column27",
+    x.column28 "column28",
+    x.column29 "column29",
+    x.column30 "column30",
+    x.column31 "column31",
+    x.column32 "column32",
+    x.column33 "column33",
+    x.column34 "column34",
+    x.column35 "column35",
+    x.column36 "column36",
+    x.column37 "column37",
+    x.column38 "column38",
+    x.column39 "column39",
+    x.column40 "column40",
+    x.column41 "column41",
+    x.column42 "column42",
+    x.column43 "column43",
+    x.column44 "column44",
+    x.column45 "column45",
+    x.column46 "column46",
+    x.column47 "column47",
+    x.column48 "column48",
+    x.column49 "column49",
+    x.column50 "column50",
+    x.column51 "column51",
+    x.column52 "column52",
+    x.column53 "column53",
+    x.column54 "column54",
+    x.column55 "column55",
+    x.column56 "column56",
+    x.column57 "column57",
+    x.column58 "column58",
+    x.column59 "column59",
+    x.column60 "column60",
+    x.column61 "column61",
+    x.column62 "column62" ,
+    x.column63 "column63" ,
+    x.column64 "column64" ,
+    x.column65 "column65" ,
+    x.column66 "column66",
+    x.column67 "column67" ,
+    x.column68 "column68" ,
+    y.column69 "column69" from (select
+    pati_serial,inpati_number,inpati_serial_number,max(case when
+    report_item_name like '%谷丙转氨酶 [ALT]%' then inspect_result else '' end)
+    column1 ,
+    max(case when report_item_name like '%谷草转氨酶 [AST]%' then
+    inspect_result else
+    '' end) column2,
+    max(case when report_item_name like
+    '%GGT%' then inspect_result else '' end)
+    column3,
+    max(case when
+    report_item_name like '%碱性磷酸酶%' then inspect_result else '' end)
+    column4,
+    max(case when report_item_name like '%白蛋白%' then
+    inspect_result else '' end)
+    column5 ,
+    max(case when report_item_name
+    like '%前白蛋白%' then inspect_result else '' end)
+    column6 ,
+    max(case when
+    report_item_name like '%肌酐%' then inspect_result else '' end)
+    column7,
+    max(case when report_item_name like '%尿素氮%' then inspect_result else
+    '' end)
+    column8 ,
+    max(case when report_item_name like '%尿酸%' then
+    inspect_result else '' end)
+    column9,
+    max(case when report_item_name like
+    '%RBP%' then inspect_result else '' end)
+    column10,
+    max(case when
+    report_item_name like '%胱抑素C%' then inspect_result else '' end)
+    column11 ,
+    max(case when report_item_name like '%甘油三脂%' then
+    inspect_result else '' end)
+    column12,
+    max(case when report_item_name
+    like '%总胆固醇%' then inspect_result else '' end)
+    column13,
+    max(case when
+    report_item_name like '%LDL%' then inspect_result else '' end)
+    column14,
+    max(case when report_item_name like '%HDL%' then
+    inspect_result else '' end)
+    column15,
+    max(case when report_item_name
+    like '%脂蛋白(a)%' then inspect_result else ''
+    end) column16,
+    max(case when
+    report_item_name like '%钾 [K]%' then inspect_result else '' end)
+    column17 ,
+    max(case when report_item_name like '%钠 [Na]%' then
+    inspect_result else ''
+    end) column18 ,
+    max(case when report_item_name
+    like '%钙 [Ca]%' then inspect_result else ''
+    end) column19 ,
+    max(case
+    when report_item_name like '%磷 [P]%' then inspect_result else '' end)
+    column20 ,
+    max(case when report_item_name like '%镁 [Mg]%' then
+    inspect_result else ''
+    end) column21 ,
+    max(case when report_item_name
+    like '%[GLU]%' then inspect_result else '' end)
+    column22,
+    max(case when
+    report_item_name like '%[GLU2]%' then inspect_result else ''
+    end)
+    column23,
+    max(case when report_item_name like '%胰岛素(0分钟)%' then
+    inspect_result else ''
+    end) column24,
+    max(case when report_item_name
+    like '%[Ins2h]%' then inspect_result else '' end)
+    column25,
+    max(case when
+    report_item_name like '%C肽 [C-P]%' then inspect_result else '' end)
+    column26,
+    max(case when report_item_name like '%C肽(2.0h) [C-P(2h)]%' then
+    inspect_result else ''
+    end) column27,
+    max(case when report_item_name
+    like '%糖化血红蛋白 [HbA1c]%' then inspect_result else '' end)
+    column28 ,
+    max(case when
+    report_item_name like '%[GAL]%' then inspect_result else '' end)
+    column29 ,
+    max(case when report_item_name like '%抗胰岛素抗体 [IAA]%' then
+    inspect_result else '' end)
+    column30,
+    max(case when report_item_name
+    like '%抗胰岛细胞抗体 [ICA]%' then inspect_result else '' end)
+    column31,
+    max(case when
+    report_item_name like '%抗谷氨酸脱羧酶抗体 [GAD-Ab]%' then inspect_result else ''
+    end)
+    column32 ,
+    max(case when report_item_name like '%胰岛素(0分钟) [Ins-0'']%' then
+    inspect_result else ''
+    end) column33,
+    max(case when report_item_name
+    like '%胰岛素(2分钟) [Ins-2'']%' then inspect_result else ''
+    end) column34,
+    max(case
+    when report_item_name like '%胰岛素(4分钟) [Ins-4'']%' then inspect_result else ''
+    end) column35,
+    max(case when report_item_name like '%胰岛素(6分钟) [Ins-6'']%' then
+    inspect_result else ''
+    end) column36,
+    max(case when report_item_name
+    like '%胰岛素(8分钟) [Ins-8'']%' then inspect_result else ''
+    end) column37,
+    max(case
+    when report_item_name like '%C肽0分钟 [C-P0'']%' then inspect_result else '' end)
+    column38,
+    max(case when report_item_name like '%C肽2分钟 [C-P 2'']%' then
+    inspect_result else '' end)
+    column39,
+    max(case when report_item_name
+    like '%C肽4分钟 [C-P 4'']%' then inspect_result else '' end)
+    column40,
+    max(case when
+    report_item_name like '%C肽6分钟 [C-P 6'']%' then inspect_result else '' end)
+    column41,
+    max(case when report_item_name like '%C肽8分钟 [C-P 8'']%' then
+    inspect_result else '' end)
+    column42,
+    max(case when report_item_name
+    like '%尿微量白蛋白%' then inspect_result else ''
+    end) column43,
+    max(case when
+    report_item_name like '%24h尿蛋白定量%' then inspect_result else ''
+    end)
+    column44,
+    max(case when report_item_name like '%三碘甲状腺原氨酸 [T3]%' then
+    inspect_result else '' end)
+    column45,
+    max(case when report_item_name
+    like '%甲状腺素 [T4]%' then inspect_result else '' end)
+    column46,
+    max(case when
+    report_item_name like '%FT3%' then inspect_result else '' end)
+    column47,
+    max(case when report_item_name like '%FT4%' then
+    inspect_result else '' end)
+    column48,
+    max(case when report_item_name
+    like '%TSH%' then inspect_result else '' end)
+    column49,
+    max(case when
+    report_item_name like '%甲状腺球蛋白抗体 [ATG]%' then inspect_result else '' end)
+    column50 ,
+    max(case when report_item_name like '%甲状腺过氧化物酶抗体 [Anti-TPO]%' then
+    inspect_result else ''
+    end) column51 ,
+    max(case when report_item_name
+    like '%TSH受体抗体 [TRAB]%' then inspect_result else '' end)
+    column52 ,
+    max(case when
+    report_item_name like '%甲状腺球蛋白 [Tg]%' then inspect_result else '' end)
+    column53,
+    max(case when report_item_name like '%PTH%' then
+    inspect_result else '' end)
+    column54,
+    max(case when report_item_name
+    like '%骨钙素N端中分子片段 [N-MID]%' then inspect_result else ''
+    end) column55,
+    max(case
+    when report_item_name like '%β-胶原降解产物 [β-crossl]%' then inspect_result else ''
+    end) column56,
+    max(case when report_item_name like '%25-羟基总维生素D [VitD]%' then
+    inspect_result else '' end)
+    column57,
+    max(case when report_item_name
+    like '%I型胶原氨基末端肽 [PINP]%' then inspect_result else '' end)
+    column58,
+    max(case when
+    report_item_name like '%降钙素 [CT2]%' then inspect_result else '' end)
+    column59,
+    max(case when report_item_name like '%AFP%' then
+    inspect_result else '' end)
+    column60,
+    max(case when report_item_name
+    like '%CEA%' then inspect_result else '' end)
+    column61,
+    max(case when
+    report_item_name like '%糖类抗原CA19-9 [CA19-9]%' then inspect_result else ''
+    end)
+    column62 ,
+    max(case when report_item_name like '%糖类抗原CA24-2 [CA24-2]%' then
+    inspect_result else ''
+    end) column63 ,
+    max(case when report_item_name
+    like '%CA-50%' then inspect_result else '' end)
+    column64 ,
+    max(case when
+    report_item_name like '%NSE%' then inspect_result else '' end)
+    column65,
+    max(case when report_item_name like '%PSA%' then
+    inspect_result else '' end)
+    column66,
+    max(case when report_item_name
+    like '%FPSA%' then inspect_result else '' end)
+    column67,
+    max(case when
+    report_item_name like '%fPSA%' then inspect_result else '' end)
+    column68
+    from(select A.*,diag.out_hospital_date
+    from (select t.id,
+    t.pati_serial, t.inpati_number,
+    t.inpati_serial_number,d.item_name,
+    d.report_item_name,d.inspect_result
+    from tb_inspect t,
+    tb_inspect_detail d
+    where t.inspect_id = d.inspect_id) A,
+    tb_inpati_diag diag
+    where A.pati_serial = diag.pati_serial
+    and
+    A.inpati_number = diag.inpati_number
+    and A.inpati_serial_number =
+    diag.inpati_serial_number
+		<if test="name!=null  and name!=''">
+			and diag.name like '%'||#{name}||'%'
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and diag.INPATI_NUMBER=#{inpatiNumber}
+		</if>
+		<if test="startDate!=null and startDate!=''">
+			and to_char(diag.OUT_HOSPITAL_DATE,'yyyy-MM-dd') <![CDATA[>=]]>
+			#{startDate}
+		</if>
+		<if test="endDate!=null and endDate!=''">
+			and to_char(diag.OUT_HOSPITAL_DATE,'yyyy-MM-dd')<![CDATA[<=]]>
+			#{endDate}
+		</if>
+		<if test="deptCode!=null and deptCode!=''">
+			and diag.out_dept in
+			<foreach collection="deptCode" item="item" index="index"
+				open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		) group by pati_serial,inpati_number,inpati_serial_number) x inner
+		join
+		(select pati_serial,inpati_number,inpati_serial_number,
+		max(case
+		when 1=1 then a.exam_para else '' end) column69
+		From tb_check a inner join
+		tb_check_items b on a.exam_no=b.exam_no and
+		a.exam_sub_class like
+		'%血管超声%' group by
+		pati_serial,inpati_number,inpati_serial_number) y on
+		x.pati_serial=y.pati_serial and x.inpati_number=y.inpati_number and
+		x.inpati_serial_number=y.inpati_serial_number inner join
+		TB_INPATI_DIAG z on x.pati_serial=z.pati_serial and
+		x.inpati_number=z.inpati_number
+		and
+		x.inpati_serial_number=z.inpati_serial_number
+
+	</select>
+
+</mapper>

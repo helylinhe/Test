@@ -1,0 +1,307 @@
+
+$(function (){
+	
+	/***************************************************************************
+	 * 加载院区信息
+	 */
+	$.post(path+"/patidiseasedetailaction!loadHosptialConfig.action",function (data){
+			var html="";
+				for(var i=0;i<data.length;i++){
+					html+="<option value='"+data[i].unitCode+"'>"
+					html+=data[i].hosShortName
+					html+="</option>";
+				}
+				$("#unitCode").html(html);
+	},'json');
+	/***************************************************************************
+	 * 处理多个病人情况
+	 */
+	patiList();
+})
+
+
+/*******************************************************************************
+ * 点击查询按钮进行查询信息
+ */
+
+function searchInfo(){//医保编号                                                                    //住院号                                                               //姓名
+	if($.trim($("#medicalInsuranceCode").val())=="" &&  $.trim($("#inpatiNumber").val())=="" && $.trim($("#serachname").val())==""){
+		$.messager.alert('信息提示','请填写信息进行查询','info');
+		return false;
+	}
+	var param={'map.medicalInsuranceCode':$("#medicalInsuranceCode").val(),'map.inpatiNumber':$("#inpatiNumber").val(),'map.name':$("#serachname").val(),'map.deptCode':$("#unitCode").val()};
+	$.post(path+'/firstTreataction!findPatiInfo.action',param,function (data){
+		if(data[0].rows.length>1){
+			$('#show_pati_html').window('open');
+			$('#tab_pati').datagrid('loadData',data[0].rows);
+		}else{
+			if(data[0].rows[0]!=null){
+				$("#inpati_number").attr("value",data[0].rows[0].inpatiNumber);
+				$("#pati_serial").attr("value",data[0].rows[0].patiSerial);
+				$("#billing_name").attr("value",data[0].rows[0].billingName);
+				$("#name").attr("value",data[0].rows[0].name);
+				$("#birth_date").attr("value",data[0].rows[0].birthDate);
+				$("#county").attr("value",data[0].rows[0].country);
+				$("#mobile_phone").attr("value",data[0].rows[0].mobileNumber);
+				$("#in_hospital_date").attr("value",data[0].rows[0].inHospitalDate);
+				$("#attend_doctor").attr("value",data[0].rows[0].doctorName);
+				$("#address").attr("value",data[0].rows[0].accountAddr);
+				$("input[name=married][value='" + data[0].rows[0].married + "']").attr("checked", true);
+				$("input[name=gender][value='" + data[0].rows[0].gender + "']").attr("checked", true);
+				$("#in_hosp_diag").attr("value",data[0].rows[0].inHospitalDiag);
+					/***********************************************************
+					 * 加载检验信息
+					 */
+//					var htmlInspect="";
+//					$.post(path + '/firstTreataction!findInspectInfo.action',{'map.patiSerial':data[0].rows[0].patiSerial,'map.inpatiNumber':data[0].rows[0].inpatiNumber,'map.inpatiSerialNumber':data[0].rows[0].inpatiSerialNumber},function (data){
+//						if(data[0].rows.length>0){
+//							for(var i=0;i<data[0].rows.length;i++){
+//								htmlInspect+="<tr>";
+//								htmlInspect+="<td>"+data[0].rows[i].itemName+"</td>";
+//								htmlInspect+="<td>"+data[0].rows[i].reportItemName+"</td>";
+//								htmlInspect+="<td>"+data[0].rows[i].inspectResult+"</td>";
+//								htmlInspect+="<td>"+data[0].rows[i].referScale+"</td>";
+//								htmlInspect+="<td>"+data[0].rows[i].inspectDate+"</td>";
+//								htmlInspect+="</tr>";
+//							}
+//							$('#inspect_grid').html(htmlInspect);
+//						}
+//						
+//					},'json')
+//				
+//				/***************************************************************
+//				 * 加载检查信息
+//				 */
+//				
+//					var html="";
+//					$.post(path + '/firstTreataction!findCheckInfo.action',{'map.patiSerial':data[0].rows[0].patiSerial,'map.inpatiNumber':data[0].rows[0].inpatiNumber,'map.inpatiSerialNumber':data[0].rows[0].inpatiSerialNumber},function (data){
+//						if(data[0].rows.length>0){
+//							for(var i=0;i<data[0].rows.length;i++){
+//								html+="<tr>";
+//								html+="<td>"+data[0].rows[i].examSubClass+"</td>";
+//								html+="<td>"+data[0].rows[i].inspectDate+"</td>";
+//								html+="<td>"+data[0].rows[i].description+"</td>";
+//								html+="</tr>";
+//							}
+//							$('#check_grid').html(html);
+//						}
+//						
+//					},'json')
+			}
+	}
+		
+	},'json');
+	
+}
+
+
+/*******************************************************************************
+ * 多个病人信息处理
+ */
+function patiList(){
+	$('#tab_pati').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		singleSelect : true,
+		fitColumns : false,
+		striped : true,
+		pagination : false,
+		title : '病人信息',
+		hideColumn:[[{
+			field : 'inpatiSerialNumber',
+			width : 150,
+			align : 'left',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}
+    ]],
+		columns : [ [ 
+			{
+				field : 'inpatiNumber',
+				title : '住院号',
+				width : 100,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+				}
+			},
+			 {
+				field : 'name',
+				title : '病人姓名',
+				width : 200,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+				}
+			},
+			{
+				field : 'inHospitalDate',
+				title : '入院日期',
+				width : 240,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+
+				}
+			},{
+				field : 'inHospitalDiag',
+				title : '入院诊断',
+				width : 240,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+
+				}
+			},{
+				field : 'department',
+				title : '科室',
+				width : 240,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+
+				}
+			},{
+				field : 'unitCode',
+				title : '院区',
+				width : 240,
+				align : 'center',
+				formatter : function(val, rec) {
+					return val;
+
+				}
+			}
+			
+			
+			
+		  ] ],
+		  onClickRow:function (rowIndex, rowData){
+			
+			$("#inpati_number").attr("value",rowData.inpatiNumber);
+			$("#pati_serial").attr("value",rowData.patiSerial);
+			$("#billing_name").attr("value",rowData.billingName);
+			$("#name").attr("value",rowData.name);
+			$("#birth_date").attr("value",rowData.birthDate);
+			$("#county").attr("value",rowData.country);
+			$("#mobile_phone").attr("value",rowData.mobileNumber);
+			$("#in_hospital_date").attr("value",rowData.inHospitalDate);
+			$("#attend_doctor").attr("value",rowData.doctorName);
+			$("input[name=married][value='" + rowData.married + "']").attr("checked", true);
+			$("input[name=gender][value='" + rowData.gender + "']").attr("checked", true);
+			$("#address").attr("value",rowData.accountAddr);
+			$("#in_hosp_diag").attr("value",rowData.inHospitalDiag);
+			$('#show_pati_html').window('close');
+			
+			/*******************************************************************
+			 * 加载检验信息
+			 */
+			var param={'map.patiSerial':rowData.patiSerial,'map.inpatiSerialNumber':rowData.inpatiSerialNumber,'map.inpatiNumber':rowData.inpatiNumber}; 
+			var htmlInspect="";
+			$.post(path + '/firstTreataction!findInspectInfo.action',param,function (data){
+				if(data[0].rows.length>0){
+					for(var i=0;i<data[0].rows.length;i++){
+						htmlInspect+="<tr>";
+						htmlInspect+="<td>"+data[0].rows[i].itemName+"</td>";
+						htmlInspect+="<td>"+data[0].rows[i].reportItemName+"</td>";
+						htmlInspect+="<td>"+data[0].rows[i].inspectResult+"</td>";
+						htmlInspect+="<td>"+data[0].rows[i].referScale+"</td>";
+						htmlInspect+="<td>"+data[0].rows[i].inspectDate+"</td>";
+						htmlInspect+="</tr>";
+					}
+					$('#inspect_grid').html(htmlInspect);
+				}
+				
+			},'json')
+			/*******************************************************************
+			 * 加载检查信息
+			 */
+
+			var html="";
+			$.post(path + '/firstTreataction!findCheckInfo.action',param,function (data){
+				if(data[0].rows.length>0){
+					for(var i=0;i<data[0].rows.length;i++){
+						html+="<tr>";
+						html+="<td>"+data[0].rows[i].examSubClass+"</td>";
+						html+="<td>"+data[0].rows[i].inspectDate+"</td>";
+						html+="<td>"+data[0].rows[i].description+"</td>";
+						html+="</tr>";
+					}
+					$('#check_grid').html(html);
+				}
+				
+			},'json')
+		}
+	});
+	
+	
+}
+/*******************************************************************************
+ * js打印代码
+ * 
+ * @return
+ */
+function printInfo()
+{
+	window.open(path+'/jsp/caseManagement/print.jsp');
+}
+
+/*******************************************************************************
+ * 导出word文档
+ */
+function exportInfo(){
+	var word = new ActiveXObject("Word.Application"); 
+	  var doc = word .Documents.Add("",0,1);
+	  var Range=doc.Range(); 
+	  var sel = document.body.createTextRange(); 
+	  sel.moveToElementText(document.getElementById('divprint'));
+	  sel.select(); 
+	  sel.execCommand("Copy"); 
+	  Range.Paste(); 
+	  word.Visible = true; 
+}
+/*******************************************************************************
+ * 保存肿瘤信息
+ */
+
+function saveInfo(){
+	var tumorSize=$("#tumor_size").val();
+	var tumorLocation=$("#tumor_location").val();
+	var tumorChange=$("#tumor_change").val();
+	var resultValue=$("#result").val();
+	if(tumorSize.length<=0){
+  		 $.messager.alert('信息提示','请填写肿瘤大小','error');
+ 		 return false;
+ 	}
+	if(tumorSize.length<=0){
+		$.messager.alert('信息提示','请填写肿瘤大小','error');
+		return false;
+	}
+	if(tumorLocation.length<=0){
+		$.messager.alert('信息提示','请填写肿瘤位置','error');
+		return false;
+	}
+	if(tumorChange.length<=0){
+		$.messager.alert('信息提示','请填写肿瘤是否转移','error');
+		return false;
+	}
+	if(resultValue.length<=0){
+		$.messager.alert('信息提示','请填写病例结果信息','error');
+		return false;
+	}
+	var param={'map.tumorsize':tumorSize,'map.location':tumorLocation,'map.change':tumorChange,'map.result':resultValue,'map.inpatiNumber':$("#inpati_number").val(),'map.patiSerial':$("#pati_serial").val()};
+	$.post(path+'/firstTreataction!savePatiCase.action',param,function (data){
+		if(data>0){
+			$.messager.alert('信息提示','保存成功','info');
+			$("#tumor_size").attr("value",tumorSize);
+			$("#tumor_location").attr("value",tumorLocation);
+			$("#tumor_change").attr("value",tumorChange);
+			$("#result").attr("html",resultValue);
+		}else{
+			$.messager.alert('信息提示','添加失败','error');
+		}
+	});
+	
+}
+

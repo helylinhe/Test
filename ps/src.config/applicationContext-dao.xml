@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+
+
+
+	<bean id="userDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.UserDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+
+	<bean id="flupNameDictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupNameDictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+	<bean id="flupItemDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupItemDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	<bean id="flupItemResponseDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.linkonworks.df.busi.dao.FlupItemResponseDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	<bean id="flupGroupDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupGroupDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<bean id="nationDictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.NationDictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<!-- 随访知识库 -->
+	<bean id="diagKnowledgeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DiagKnowledgeDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	<bean id="flupModuleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupModuleDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	<bean id="blackListDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.BlackListDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+
+
+	<bean id="dictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<!-- 导入规则维护 -->
+	<bean id="dataImportRuleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DataImportRuleDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+	<bean id="employeeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.EmployeeDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+
+	<bean id="inpatiDiagDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.InpatiDiagDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+	<bean id="patiOperateDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiOperateDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+
+	<bean id="checkDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.CheckDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+
+	<bean id="inspectDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.InspectDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	
+	<bean id="patiDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	
+	<bean id="departmentDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DepartmentDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<bean id="flupTaskDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupTaskDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+			
+		<!-- 角色DAO -->
+	<bean id="roleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.RoleDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 菜单DAO -->
+	<bean id="sysMenuDefiDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.SysMenuDefiDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 角色权限DAO -->
+	<bean id="rolePrivsDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.RolePrivsDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 权限DAO -->
+	<bean id="privsDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PrivsDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 随访属性DAO -->
+	<bean id="patiFlupRuleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiFlupRuleDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+
+	
+	<!-- 随访评价字典DAO -->
+	<bean id="flupAdviseDictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupAdviseDictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	
+	<!-- 电话随访DAO -->
+	<bean id="mobileFlupDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.MobileFlupDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+
+	
+	<!-- 付费方式 -->
+	<bean id="payTypeDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PayTypeDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	<!-- 诊断组维护 -->
+	<bean id="diagGroupDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DiagGroupDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	<bean id="medicalHistoryDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.MedicalHistoryDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+
+	<bean id="diseaseItemTemplateDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DiseaseItemTemplateDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+
+	
+	
+	<bean id="diseaseNameDictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DiseaseNameDictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+
+    <!-- 疾病 -->
+    <bean id="diseaseItemDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DiseaseItemDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	<!-- 病例 -->
+    <bean id="patiDiseaseDictDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiDiseaseDictDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+    <bean id="patiDiseaseDetailDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiDiseaseDetailDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	
+    <bean id="reportDataDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.ReportDataDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	<bean id="patiReturnRuleDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PatiReturnRuleDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>	
+	
+	<bean id="returnTaskDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.ReturnTaskDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<bean id="fileIndexDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FileIndexDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 动态报表 -->
+	<bean id="dynamicReportDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DynamicReportDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	
+	<bean id="firstTreatDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FirstTreatDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<bean id="ketiReportDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.KetiReportDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	
+	<!-- 平台交易 -->
+	<bean id="platformTradelogDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PlatformTradelogDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<!-- 医嘱查询 -->
+	<bean id="doctorAdviceDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.DoctoradviceDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<!-- 设置随访项 -->
+	<bean id="flupDynamicDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.FlupDynamicDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+	<!-- 前置机管理 -->
+	<bean id="premachineManageDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="com.linkonworks.df.busi.dao.PremachineManageDao"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+</beans>

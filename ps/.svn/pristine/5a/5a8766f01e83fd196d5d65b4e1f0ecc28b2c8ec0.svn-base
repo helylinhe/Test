@@ -1,0 +1,1318 @@
+//定义一个集合
+var arr = new Array();
+
+$(function() {
+	// 检验详细
+	$('#jyDivDetail').datagrid({
+		collapsible : true,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		singleSelect : true,
+		title : '检验详细',
+		columns : [ [ {
+			field : 'itemName',
+			title : '检验名称',
+			width : 200,
+			align : 'center'
+		}, {
+			field : 'inspectName',
+			title : '项目名称',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'inspectResult',
+			title : '检验结果',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'referScale',
+			title : '参考范围',
+			width : 100,
+			align : 'center'
+		}, {
+			field : 'resultUnit',
+			title : '结果单位',
+			width : 100,
+			align : 'center'
+		} ] ],
+	});
+	// 电子病历
+	$('#fileIndexDiv').datagrid({
+		method : 'get',
+		collapsible : true,
+		remoteSort : false,
+		rownumbers : false,
+		singleSelect : true,
+		idField : 'id',
+		pagination : true,
+		pageSize : 10,
+		pageList : [ 10, 20, 30 ],
+		hideColumn : [ [ {
+			field : 'fileNo',
+			title : '文件编号',
+			width : 150,
+			align : 'left',
+		} ] ],
+		columns : [ [{
+			field : 'id',
+			title : '病例Id',
+			width : 150,
+			align : 'left',
+			hidden : true
+		}, {
+			field : 'patientId',
+			title : '病人编号',
+			width : 150,
+			align : 'left',
+			hidden : true
+		}, {
+			field : 'visitId',
+			title : '住院流水号',
+			width : 150,
+			align : 'left',
+			hidden : true
+		}, {
+			field : 'topic',
+			title : '主题',
+			width : 250,
+			align : 'left',
+		}, {
+			field : 'creatorName',
+			title : '创建医生',
+			width : 150,
+			align : 'left',
+		}, {
+			field : 'createDateTime',
+			title : '创建时间',
+			width : 150,
+			align : 'left',
+		}, {
+			field : 'caozuo',
+			title : '调阅',
+			width : 150,
+			align : 'left',
+			formatter : function(value, row, index) {
+				return "<input type='button' onclick=\"getFileIndexShow('"+row.fileNo+"','"+row.patientId+"','"+row.visitId+"')\" value='显示'/>";
+			}
+		} ] ]
+	});
+	
+	
+	
+	
+
+	// 快捷回复
+	$('#smsfast_tab').datagrid({
+		url : '',
+		method : 'get',
+		collapsible : true,
+		remoteSort : false,
+		rownumbers : false,
+		queryParams : '',
+		singleSelect : true,
+		pagination : false,
+		pageSize : 5,
+		pageList : [ 20, 40 ],
+		columns : [ [ {
+			field : 'evaluateName',
+			title : '随访评价',
+			width : 150,
+			align : 'left',
+			formatter : function(val, rec) {
+				return val;
+			}
+		} ] ],
+		onClickRow : function(index, row) {
+			$("#evalute").val(row.evaluateName);
+			$('#smsfast_div').panel('close');
+		},
+		onLoadSuccess : function() {
+			$('#smsfast_div').panel('close');
+		}
+
+	});
+
+	// 加载评价字典表信息
+	$.post(path + "/flupadvisedictaction!findAll.action", function(data) {
+		$('#smsfast_tab').datagrid('loadData', data[0].rows);
+
+	}, 'json')
+
+	/***************************************************************************
+	 * 
+	 * 鼠标丢失,隐藏弹出层
+	 */
+	$("#evalute").blur(function() {
+		$('#smsfast_div').panel('close');
+	});
+
+});
+function opfast() {
+	$('#smsfast_div').panel('open');
+}
+
+
+$(function() {
+
+	/***************************************************************************
+	 * 获取基本信息 inpatiSerialNumber patiSerial inpatiNumber
+	 * 
+	 */
+	var departmentValue = "";
+	var patiSerialValue = $($('#patiSerial', parent.document)).val();
+	var inpatiNumberValue = $($('#inpatiNumber', parent.document)).val();
+	var inpatiSerialNumberValue = $($('#inpatiSerialNumber', parent.document))
+			.val();
+	var param = {
+		"map.patiSerial" : patiSerialValue,
+		"map.inpatiNumber" : inpatiNumberValue
+	};
+	$.post(
+					path + "/patiAction!patiInfo.action",
+					param,
+					function(data) {
+						if (data != null && data != '') {
+							departmentValue = data[0].inpatiDiag.department;
+							$("#department")
+									.html(data[0].inpatiDiag.department); // 获取所属科室
+							$("#patiSerial").html(data[0].patiSerial); // 获取住院号
+							$("#inpatiNumber").html(data[0].inpatiNumber);// 获取病人编号
+							$("#inpatiTimes").html(data[0].inpatiTimes);// 获取住院次数
+							$("#billingCode").html(data[0].billingName);// 获取病人类型
+							$("#attendDoctor").html(
+									data[0].inpatiDiag.attendDoctor);// 主刀医生
+							$("#inHospitalDate").html(
+									data[0].inpatiDiag.inHospitalDate);// 获取住院日期
+							$("#chiefDoctor").html(
+									data[0].inpatiDiag.chiefDoctor);// 获取主任医生
+							$("#name").html(data[0].name); // 获取姓名
+							$("#gender").html(data[0].gender); // 获取性别
+							$("#outHospitalDate").html(
+									data[0].inpatiDiag.outHospitalDate); // 获取出院日期
+							$("#inpatiDoctor").html(
+									data[0].inpatiDiag.inpatiDoctor); // 获取住院医师
+							$("#age").html(data[0].age); // 获取年龄
+							$("#birthDate").html(data[0].birthDate); // 获取出生日期
+							$("#inHospitalDates").html(
+									data[0].inpatiDiag.inHospitalDates); // 获取住院天数
+							$("#diag").html(data[0].inpatiDiag.diag); // 获取门诊诊断
+							$("#certificateType").html(data[0].certificateType); // 获取证件类型
+							$("#certificateNumber").html(
+									data[0].certificateNumber); // 获取证件号码
+							$("#operationName").html(
+									data[0].inpatiDiag.diagSituation); // 获取手术名称
+							$("#mobileNumber").html(data[0].mobileNumber); // 获取手机号码
+							$("#familyNumber").html(data[0].familyNumber); // 获取家庭号码
+							$("#operationDoctorCode").html(
+									data[0].operationDoctorCode); // 获取主刀医生
+							// $("#operationDate").html(data[0].inpatiDiag.patiOperate.operationDate);
+							// //获取手术日期
+							$("#relationName").html(data[0].relationName); // 获取联系人
+							$("#relationMobileNumber").html(
+									data[0].relationMobileNumber); // 获取联系人电话
+							$("#currentAddr").html(data[0].currentAddr); // 获取地址
+							$("#totalMoney").html(data[0].totalMoney); // 总费用
+							$("#charityAidMoney").html(
+									data[0].charityAidMoney == '' ? '0'
+											: data[0].charityAidMoney); // 慈善救助金
+							/***************************************************
+							 * 获取随访信息
+							 */
+							
+							//打印用
+							$("#toPatientname").val(data[0].name);
+							$("#togender").val(data[0].gender);
+							$("#toage").val(data[0].age);
+							$("#topatiSerial").val(data[0].patiSerial);
+							$("#tofamilyNumber").val(data[0].familyNumber);
+							$("#torelationMobileNumber").val(data[0].relationMobileNumber);
+							$("#todepartment").val(data[0].inpatiDiag.department);
+							
+							//$("#to").val(data[0].);
+							//alert(data[0].gender+"------"+data[0].gender+"------"+data[0].age+"------"+data[0].patiSerial+"------"+data[0].mobileNumber+"------"+data[0].name);
+							
+							var param = {
+								"map.id" : $($('#id', parent.document)).val()
+							};
+							$.post(
+											path
+													+ "/flupTaskAction!findSuifangInfo.action",
+											param,
+											function(data) {
+												$("#flupName").html(
+														data[0].flupName);
+												if (data[0].flupWay == 1) {
+													$("#type").html("电话");
+												} else if (data[0].flupWay == 2) {
+													$("#type").html("短信");
+												} else if (data[0].flupWay == 3) {
+													$("#type").html("微信");
+												} else if (data[0].flupWay == 4) {
+													$("#type").html("门诊");
+												} else {
+													$("#type").html("上门");
+												}
+												if (data[0].flupObject == 1) {
+													$("#object").html("本人");
+												} else {
+													$("#object").html("联系人");
+												}
+												if (data[0].flupType == 1) {
+													$("#way").html("专科");
+												} else {
+													$("#way").html("专病");
+												}
+												$("#returnCode").val(
+														data[0].deptCode);
+												$("#phone").html(
+														data[0].flupMobile);
+												$("#times").html(
+														data[0].flupTimes);
+												$("#hiddenFlupNameId")
+														.val(
+																data[0].flupTableNameId);
+												$("#returnDepartment").html(
+														departmentValue);
+												$("#planDoctor").html(
+														data[0].flupDoctor);
+												$("#planDate")
+														.html($(
+																	$('#flupPlanDate',parent.document)).val());
+																	$("#deptCode").val(data[0].deptCode);
+																	$("#unitCode").val(data[0].unitCode);
+																	$("#medicalInsuranceCode").val(data[0].medicalInsuranceCode);
+												$("#toflupNames").val(data[0].flupName);
+												/*******************************
+												 * 异步获取随访模板
+												 */
+											var param = {
+													"map.patiSerial" : $('#patiSerial').text(),
+													"map.inpatiNumber" :$('#inpatiNumber').text(),
+													"map.inpatiSerialNumber" : $('#inpatiTimes').text(),
+													"map.flupTimes" : $('#times').text(),
+													"flupNameId" : data[0].flupTableNameId
+												};
+//											alert($('#times').text()+'----'+$('#inpatiTimes').text()+'--'+$('#inpatiNumber').text()+'------'+$('#patiSerial').text());
+												$.post(path+ "/flupitemresponseaction!findPreviewGroup.action",param,
+																function(d) {
+																	$("#divTemplate").html(d);
+																}, 'html');
+											}, 'json');
+						}
+					}, 'json');
+
+	$('#returnDate').click(function() {
+		WdatePicker({
+			minDate : '{%y-80}-%M-%d',
+			readOnly : true
+		});
+	});
+
+	/***************************************************************************
+	 * 获取某个人的所有随访计划
+	 */
+	var times = parseInt($($('#flupTimes', parent.document)).val());
+
+	$.post(path + "/mobileflupaction!findPlan.action", {
+		"map.patiSerial" : patiSerialValue,
+		"map.inpatiSerialNumber" : $($('#inpatiSerialNumber', parent.document))
+				.val(),
+		"map.inpatiNumber" : inpatiNumberValue,
+		"map.flupPlanDate" : $($('#flupPlanDate', parent.document)).val(),
+		"map.flupTimes" : times + 1
+	}, function(data) {
+
+		var html = "";
+		if (data != null && data != '[]' && data != "") {
+			html += "<span style='padding-left:2%;' rel=" + data[0].id + ">";
+			html += data[0].flupPlanDate;
+			html += "</span>";
+			$("#nextPlan").html(html);
+		} else {
+			html += "<span style='padding-left:2%;'>";
+			html += "无"
+			html += "</span>";
+			$("#nextPlan").html(html);
+		}
+
+	}, 'json');
+
+	/***************************************************************************
+	 * 
+	 * 新增随访计划
+	 */
+	$("#addPlanDate").click(
+			function() {
+				var arrFlupPlan = new Array();
+				$.each($("input[id^='planDates']"), function(i, n) {
+					if ($(this).val() != null && $(this).val() != '') {
+						var flag = compareTime($("#planDate").html(), $(this)
+								.val());
+						if (!flag) {
+							$.messager.alert('提示', '选择随访计划日期不合法', 'info');
+							return false;
+						} else {
+							arrFlupPlan.push($(this).val() + ","
+									+ $(this).attr("rel"));
+						}
+					} else {
+						$.messager.alert('提示', '请选择随访计划日期', 'info');
+						return false;
+					}
+				});
+				var param = {
+					"map.patiSerial" : $($('#patiSerial', parent.document))
+							.val(),
+					"map.inpatiNumber" : $($('#inpatiNumber', parent.document))
+							.val(),
+					"map.inpatiSerialNumber" : $(
+							$('#inpatiSerialNumber', parent.document)).val(),
+					"map.name" : $("#name").html(),
+					"map.flupPlanDate" : arrFlupPlan,
+					"map.deptCode" : $("#deptCode").val(),
+					"map.unitCode" : $("#unitCode").val()
+				};
+				$.post(path + "/mobileflupaction!addFlupPlan.action", param,
+						function(data) {
+							if (data > 0) {
+								$.messager.alert('提示', '随访计划新增成功', 'info');
+								$('#add_plan').window('close');
+							}
+						});
+
+			});
+
+	/***************************************************************************
+	 * 延期随访时间文本框添加随访日期
+	 */
+	$("#delayFlupDate").live('click', function() {
+		WdatePicker({
+			minDate : '{%y-80}-%M-%d',
+			readOnly : true
+		});
+	});
+})
+
+function openevaluteTemplate() {
+	$("#smsfast_div").panel('open');
+	position("evalute", "smsfast_div");
+}
+/*******************************************************************************
+ * 对随访内容进行保存
+ * 
+ * @return
+ */
+function saveTemplateValu() {
+	/***************************************************************************
+	 * 判断延期情况
+	 */
+	if ($("#delayCheck").attr("checked") != "checked") {
+		/*
+		 * var arr=$("#divTemplate table tr"); var group=new Array(); var row;
+		 * for(var i=0;i<arr.length;i++){ var str=""; var
+		 * type=$(arr[i]).find("td").last().find("input").attr("rel");
+		 * if(type==undefined){
+		 * type=$(arr[i]).find("td").last().siblings().find("input").attr("rel");
+		 * if(type=="文本"){
+		 * if($(arr[i]).find("td").last().find("input").attr("lang")!=null &&
+		 * $(arr[i]).find("td").last().find("input").attr("lang")=="1"){
+		 * if($(arr[i]).find("td").last().find("input").val()!=null &&
+		 * $(arr[i]).find("td").last().find("input").val()!=''){
+		 * str+=$(arr[i]).find("td").last().find("input").attr("tag")+","+$(arr[i]).find("td").last().find("input").val();
+		 * }else{ $.messager.alert('提示','请完善随访项','info'); return false; }
+		 * group.push(str); }else{ var strValue="";
+		 * if($(arr[i]).find("td").last().find("input").val()==""){
+		 * strValue="@"; }else{
+		 * strValue=$(arr[i]).find("td").last().find("input").val(); }
+		 * str+=$(arr[i]).find("td").last().find("input").attr("tag")+","+strValue;
+		 * group.push(str); } }else if(type=="单选"){
+		 * if($(arr[i]).find("td").last().siblings().find("input:radio:checked").val()!=null &&
+		 * $(arr[i]).find("td").last().siblings().find("input:radio:checked").val() !=
+		 * undefined){
+		 * str+=$(arr[i]).find("td").last().siblings().find("input").attr("tag")+","+$(arr[i]).find("td").last().siblings().find("input:radio:checked").val();
+		 * group.push(str); }else{ $.messager.alert('提示','请完善随访项','info');
+		 * return false; } }else if(type=="复选"){
+		 * $.each($(arr[i]).find("td").last().siblings().find("input:checked"),function
+		 * (i,n){ var strCheck="";
+		 * strCheck+=$(this).attr("tag")+","+$(this).val();
+		 * group.push(strCheck);
+		 *  }) } }else{ if(type=="文本"){
+		 * if($(arr[i]).find("td").last().find("input").attr("lang")!=null &&
+		 * $(arr[i]).find("td").last().find("lang").val()=='1'){
+		 * if($(arr[i]).find("td").last().find("input").val()!=null &&
+		 * $(arr[i]).find("td").last().find("input").val()!=''){
+		 * str+=$(arr[i]).find("td").last().find("input").attr("tag")+","+$(arr[i]).find("td").last().find("input").val();
+		 * group.push(str); }else{ $.messager.alert('提示','请完善随访项','info');
+		 * return false; } }else{ var strValue1="";
+		 * if($(arr[i]).find("td").last().find("input").val()==""){
+		 * strValue1="@"; }else{
+		 * strValue1=$(arr[i]).find("td").last().find("input").val(); }
+		 * 
+		 * str+=$(arr[i]).find("td").last().find("input").attr("tag")+","+strValue1;
+		 * group.push(str); } }else if(type=="单选"){
+		 * if($(arr[i]).find("td").last().find("input:radio:checked").val()!=null &&
+		 * $(arr[i]).find("td").last().find("input:radio:checked").val()
+		 * !=undefined){
+		 * str+=$(arr[i]).find("td").last().find("input").attr("tag")+","+$(arr[i]).find("td").last().find("input:radio:checked").val();
+		 * group.push(str); }else{ $.messager.alert('提示','请完善随访项','info');
+		 * return false; } }else if(type=="复选"){
+		 * $.each($(arr[i]).find("td").last().find("input:checked"),function
+		 * (i,n){ var strCheck="";
+		 * strCheck+=$(this).attr("tag")+","+$(this).val();
+		 * group.push(strCheck);
+		 *  }) } }
+		 * 
+		 *  }
+		 */
+
+		var group = new Array();
+		var getInput = $("input[tag]");
+		for ( var i = 0; i < getInput.length; i++) {
+			if ($(getInput[i]).attr("rel") == "文本") {
+				if ($(getInput[i]).val() == "") {
+					if ($(getInput[i]).attr("lang") == "1") {
+						$.messager.alert('提示', '请完善随访项', 'info');
+						return false;
+					} else {
+						group.push($(getInput[i]).attr("tag") + ","
+								+ $(getInput[i]).val());
+					}
+				} else {
+					group.push($(getInput[i]).attr("tag") + ","
+							+ $(getInput[i]).val());
+				}
+			}
+		}
+		$.each($("input[tag]:checked"), function(i, n) {
+			group.push($(this).attr("tag") + "," + $(this).val());
+		})
+		var value = $("#suifangstatu  option:selected").text();
+		if (value != "") {
+			if (value != "随访成功") {
+				if (value != "病故") {
+					var valueReson = $("#reson").val();
+					if (valueReson == "" || valueReson == null) {
+						$.messager.alert('提示', '请填写随访结果说明', 'info');
+						return false;
+					}
+				}
+			}
+		}
+
+		$.messager.confirm('确认对话框', '随访结果:随访成功,是否确定保存随访信息？', function(r) {
+			if (r) {
+				var times = parseInt($("#times").html());
+				var param = {
+					"map.patiSerial" : $("#patiSerial").html(),
+					"map.inpatiNumber" : $("#inpatiNumber").html(),
+					"map.flupNameId" : $("#hiddenFlupNameId").val(),
+					"map.group" : group,
+					"map.evaluate" : $("#evalute").val(),
+					"map.id" : $($('#id', parent.document)).val(),
+					"map.returnCode" : $("#returnCode").val(),
+					"map.returnDate" : $("#returnDate").val(),
+					"map.flupTaskId" : $($('#id', parent.document)).val(),
+					"map.flupResult" : value,
+					"map.flupFailre" : $("#reson").val(),
+					"map.inpatiSerialNumber" : $(
+							$('#inpatiSerialNumber', parent.document)).val(),
+					"map.flupNum" : times + 1,
+					"map.flupEvaluate" : $("#evaluate").val(),
+					"map.flupStatus": $("#suifangstatu  option:selected").val()
+				};
+				$.post(path + "/mobileflupaction!addBatch.action", param,
+						function(data) {
+							if (data > 0) {
+								$.messager.confirm('确认对话框', '随访信息保存成功',
+										function(r) {
+											if (r) {
+												parent.closeChild();
+											}
+										});
+
+							} else {
+								$.messager.alert('提示', '此项随访任务已完成', 'info');
+							}
+						})
+			}
+		},'text/html');
+	} else {
+		// 处理延期情况
+		var delayFlupDate = $("#delayFlupDate").val();
+		var toDate = $("#toDate").val();
+		var flag = compareTime(toDate, delayFlupDate);
+		if (!flag) {
+			$.messager.alert('提示', '延期日期不合法', 'info');
+			return false;
+		} else {
+			$.messager.confirm('确认对话框', '是否延期随访？', function(r) {
+				if (r) {
+					var p = {
+						"map.patiSerial" : $("#patiSerial").html(),
+						"map.inpatiNumber" : $("#inpatiNumber").html(),
+						"map.inpatiSerialNumber" : $(
+								$('#inpatiSerialNumber', parent.document))
+								.val(),
+						"map.flupNum" : parseInt($("#times").html()),
+						"map.flupTaskId" : $($('#id', parent.document)).val(),
+						"map.delayFlupDate" : delayFlupDate
+					};
+					$.post(path + "/mobileflupaction!delayFlupDate.action", p,
+							function(data) {
+								if (data > 0) {
+									$.messager.alert('提示', '延期随访计划成功', 'info');
+									parent.closeChild();
+								}
+							}, 'json');
+				}
+			});
+		}
+	}
+}
+
+/*******************************************************************************
+ * 新增随访计划日期列
+ * 
+ * @return
+ */
+function addTr() {
+	var index = parseInt($("#table tr").last().index()) + 1;
+	var flupTimes = (parseInt($("#timenext" + (index - 1)).html()) + 1);
+	var html = "<tr>";
+	html += "<td>计划随访日期:";
+	html += "<input type='text' id='planDates" + index + "' rel='"
+			+ (parseInt($("#timenext" + (index - 1)).html()) + 1)
+			+ "' style='width:100px;'/>";
+	html += "</td>";
+	html += "<td>第<lable id='timenext" + index + "'>"
+			+ (parseInt($("#timenext" + (index - 1)).html()) + 1)
+			+ "</lable>次随访<lable><button onclick='javascript:open_follow("+flupTimes+");'>随访项</button></lable></td>";
+	html += "</tr>";
+	$("#planDates" + index).live('click', function() {
+		WdatePicker({
+			minDate : '{%y-80}-%M-%d',
+			readOnly : true
+		});
+	});
+	$("#table tr").last().after(html);
+}
+
+function delTr() {
+	var index = parseInt($("#table tr").last().index());
+	if (index != 0) {
+		$("#table tr").last().remove();
+	}
+}
+
+/*******************************************************************************
+ * 下次随访设置JS
+ */
+function showNextPlan() {
+
+	var nextValue = $("#nextPlan > span").html();
+	if (nextValue != "" && nextValue != null && nextValue == "无") {
+		$('#add_plan').window('open');
+		$("#timenext0").html(parseInt($("#times").html()) + 1);
+		var  time=parseInt($("#times").html()) + 1;
+		$("#timenext0").parent().find("lable").last().html("");
+		$("#timenext0").parent().find("lable").last().html("<button onclick='javascript:open_follow("+time+");'>随访项</button>");
+		$("#planDates0").attr("rel", parseInt($("#times").html()) + 1);
+		$("#planDates0").live('click', function() {
+			WdatePicker({
+				minDate : '{%y-80}-%M-%d',
+				readOnly : true
+			});
+		})
+	} else {
+		$('#next_plan').window('open');
+		var html = "";
+		$.post(path + "/mobileflupaction!findListPlans.action", {
+			"map.patiSerial" : $($('#patiSerial', parent.document)).val(),
+			"map.inpatiNumber" : $($('#inpatiNumber', parent.document)).val(),
+			"map.flupPlanDate" : $($('#flupPlanDate', parent.document)).val(),
+			"map.inpatiSerialNumber":$($('#inpatiSerialNumber', parent.document)).val()
+		}, function(data) {
+			for ( var i = 0; i < data.length; i++) {
+				html += "<li>";
+				html += "&nbsp;&nbsp;<input type='text'  id='nextPlan" + i + "' rel='"
+						+ data[i].flupNum + "," + data[i].taskOpen
+						+ "'value='" + data[i].flupPlanDate + "'/>";
+				html += "<lable id='lable"+i+"'>第" + data[i].flupNum + "次随访</labe>";
+				html += "<button onclick='javascript:open_follow("+data[i].flupNum+");'>随访项</button>";
+				html += "</li>";
+			}
+
+			$("input[id^='nextPlan']").live('click', function() {
+				WdatePicker({
+					minDate : '{%y-80}-%M-%d',
+					readOnly : true
+				});
+			})
+			$("#nextplans").html(html);
+		}, 'json');
+		$("#nextplans").html(html);
+	}
+}
+
+
+
+/*******************************************************************************
+ * 对随访计划进行判断（终止，还是修改随访计划日期）
+ * 
+ * @return
+ */
+function changeFlupPlan() {
+	// .$('input[name="testradio"]:checked').val() plans
+	var times = parseInt($("#times").html());
+	var plansValue = $('input[name="plans"]:checked').val();
+	// 表示终止随访计划
+	if (plansValue == 1) {
+		$.post(path + "/mobileflupaction!endPlans.action", {
+			"map.patiSerial" : $($('#patiSerial', parent.document)).val(),
+			"map.inpatiNumber" : $($('#inpatiNumber', parent.document)).val(),
+			"map.inpatiSerialNumber" : $(
+					$('#inpatiSerialNumber', parent.document)).val(),
+			"map.flupNum" : times + 1
+		}, function(data) {
+			if (data > 0) {
+				$.messager.alert('提示', '终止随访计划成功', 'info');
+				$('#next_plan').window('close');
+			}
+		}, 'json');
+	} else if (plansValue == 0) {
+		// 修改随访计划时间
+		var arrPlans = new Array();
+		$.each($("input[id^='nextPlan']"), function(i, n) {
+			if ($(this).val() != "" && $(this).val() != null) {
+				arrPlans.push($(this).val() + "," + $(this).attr("rel"));
+			} else {
+				$.messager.alert('提示', '计划随访日期不能为空', 'info');
+				return false;
+			}
+		})
+		$.post(path + "/mobileflupaction!updatePlans.action", {
+			"map.patiSerial" : $($('#patiSerial', parent.document)).val(),
+			"map.inpatiNumber" : $($('#inpatiNumber', parent.document)).val(),
+			"map.inpatiSerialNumber" : $(
+					$('#inpatiSerialNumber', parent.document)).val(),
+			"map.flupPlanGroups" : arrPlans,
+			"map.flupPlanDate" : $($('#flupPlanDate', parent.document)).val()
+		}, function(data) {
+			if (data > 0) {
+				$.messager.alert('提示', '随访计划修改成功', 'info');
+				$('#next_plan').window('close');
+			}
+		})
+	}
+}
+
+/*******************************************************************************
+ * 查询病人电子病例信息
+ * 
+ */
+function getPatiInfo() {
+	
+	var unitcodeValue = $("#unitCode").val();
+	if(unitcodeValue!=null && unitcodeValue==1){
+		window.open('http://172.31.10.122:8080/EMRView/main.html?mpi=hm_'+$($('#patiSerial', parent.document)).val());
+	}else{
+		$("#edit_suifang_html").panel('open');
+		$("#fileName").html($("#name").text());
+		$("#filePatiSerial").html($($('#patiSerial', parent.document)).val());
+		$("#filePatiSerialNumber").html(
+				$($('#inpatiSerialNumber', parent.document)).val());
+		var param = {
+			'map.patientId' : $($('#patiSerial', parent.document)).val(),
+			'map.visitId' : $($('#inpatiSerialNumber', parent.document)).val(),
+			'map.unitCode' : "2"
+		};
+		loadData(path + "/fileIndexAction!findFileIndex.action", 'fileIndexDiv',
+				param);
+		for ( var i = 0; i < parent.size; i++) {
+			parent.arrFileIndex[i].close();
+	
+		}
+		parent.size = 0;
+	}
+}
+
+/**
+ * 调阅检查
+ */
+function getJCInfo() {
+	var name = $("#name").text();
+	var inpatiSerialNumber = $($('#inpatiSerialNumber', parent.document)).val();
+	var patiSerial = $($('#patiSerial', parent.document)).val();
+	var inpatiNumber = $($('#inpatiNumber', parent.document)).val();
+	findJC(name, inpatiSerialNumber, patiSerial, inpatiNumber);
+}
+/**
+ * 调阅检验
+ */
+function getJYInfo() {
+	var name = $("#name").text();
+	var inpatiSerialNumber = $($('#inpatiSerialNumber', parent.document)).val();
+	var patiSerial = $($('#patiSerial', parent.document)).val();
+	var inpatiNumber = $($('#inpatiNumber', parent.document)).val();
+	findJY(name, inpatiSerialNumber, patiSerial, inpatiNumber);
+}
+/*******************************************************************************
+ * 打印
+ * 
+ */
+function findDY(){
+	
+	$("#flupNameId").val($("#hiddenFlupNameId").val());
+	$("#flupnames").val($("#toflupNames").val());
+	$("#Patientname").val($("#toPatientname").val());
+	$("#Patgender").val($("#togender").val());
+	$("#Patage").val($("#toage").val());
+	$("#PatpatiSerial").val($("#topatiSerial").val());
+	$("#PatfamilyNumber").val($("#tofamilyNumber").val());
+	$("#PatrelationMobileNumber").val($("#torelationMobileNumber").val());
+	$("#inpatiSerialNumber").val($("#inpatiSerialNumber").val());
+	$("#Patdepartment").val($("#todepartment").val());
+	$("#showButton").val("");
+	$("#exportFlupName").submit();
+	
+}
+
+
+/*******************************************************************************
+ * 查询病人电子病例信息
+ * 
+ */
+function getFileIndexShow(fileNo,patientId,visitId) {
+	$.ajax({
+		type : "post",
+		async : false,//使AJax同步 
+		url : path + "/fileIndexAction!findFileIndexShow.action",
+		dataType : "html",
+		data : {
+			"fileIndex.patientId" : patientId,
+			"fileIndex.visitId" : visitId,
+			"fileIndex.fileNo" : fileNo,
+			"fileIndex.unitCode" : "2"
+		},
+		success : function(data) {
+			var url = data;
+			window.setTimeout("openFile('" + url + "')", 600);
+		},
+
+	});
+}
+
+function openFile(data) {
+		
+			var objChild = window.open(data);
+			parent.arrFileIndex[parent.size] = objChild;
+			parent.size++;
+}
+
+/**
+ * 设置文本值
+ */
+function setInfo(type, inpatiSerialNumber, patiSerial, name) {
+	$("#" + type + "name").html(name);
+	$("#" + type + "patiSerial").html(patiSerial);
+	$("#" + type + "inpatiSerialNumber").html(inpatiSerialNumber);
+}
+// 检验信息
+function createInspectTable() {
+	$('#jyDiv').datagrid({
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		singleSelect : true,
+		fitColumns : true,
+		pageSize : 10,
+		pageList : [ 10, 20, 50 ],
+		pagination : true,
+		title : '检验信息',
+		columns : [ [ {
+			field : 'itemName',
+			title : '检验名称',
+			width : 220,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'inspectDate',
+			title : '检验日期',
+			width : 70,
+			align : 'center'
+		}] ],
+		onClickRow : function(rowIndex, rowData) {
+			getInspectDetail(rowData);
+		}
+	});
+}
+// 检查表
+function createCheckTable() {
+	$('#jcDiv').datagrid({
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		nowrap:false,
+		rownumbers : true,
+		singleSelect : true,
+		pageSize : 10,
+		pageList : [ 10, 20, 30, 40 ],
+		pagination : true,
+		title : '检查详情',
+		frozenColumns : [ [ {
+			field : 'examItem',
+			title : '项目名称',
+			width : 200,
+			align : 'center'
+		}, 
+		    {
+			field : 'inspectDate',
+			title : '申请日期',
+			width : 80,
+			align : 'center'
+		} ] ],
+		columns : [ [  {
+			field : 'description',
+			title : '检查结果',
+			width : 750,
+			align : 'left'
+		}] ]
+	});
+}
+
+// 调阅检查
+function findJC(name, inpatiSerialNumber, patiSerial, inpatiNumber) {
+	$("#jc_html").panel("open");
+	setInfo('c', inpatiSerialNumber, patiSerial, name);
+	createCheckTable();
+	var param = {
+		'map.inpatiSerialNumber' : inpatiSerialNumber,
+		'map.patiSerial' : patiSerial,
+		'map.inpatiNumber' : inpatiNumber
+	}
+	loadData(path + '/checkAction!queryPages.action', 'jcDiv', param);
+
+}
+
+// 调阅检验
+function findJY(name, inpatiSerialNumber, patiSerial, inpatiNumber) {
+	$("#jy_html").panel("open");
+	setInfo('y', inpatiSerialNumber, patiSerial, name);
+	createInspectTable();
+	var param = {
+		'map.inpatiSerialNumber' : inpatiSerialNumber,
+		'map.patiSerial' : patiSerial,
+		'map.inpatiNumber' : inpatiNumber
+	}
+	loadData(path + '/inspectAction!queryInspectPages.action', 'jyDiv', param);
+}
+
+function createHighcharts(data, title, name) {
+	var categories = new Array();
+	var seriesDate = new Array();
+	var text = '';
+	var titleText = '';
+	if (data.length == 0) {
+		categories.push('');
+		seriesDate.push('');
+		text = '无图像';
+		titleText = '';
+	} else {
+		text = '参考范围:' + data[0].referScale;
+		//获取基准线的数值
+		var range=data[0].referScale.split('--');
+		if(range.length!=2){
+			range1=data[0].referScale.split('≤');
+			range2=data[0].referScale.split('≥');
+			range3=data[0].referScale.split('＜');
+			range4=data[0].referScale.split('＞');
+			if(range1[0]=='' || range3[0]=='')
+				range=[0,range1[1]];
+			else if(range2[0]=='' || range4[0]=='')
+				range=[range2[1],10000000000000];
+			else if(range3[0]=='')
+				range=[0,range1[1]];
+			else if(range4[0]=='')
+				range=[range4[1],10000000000000];
+		}
+		titleText = data[0].resultUnit;
+		for ( var i = 0; i < data.length; i++) {
+			categories.push(data[i].inspectDate);
+			seriesDate.push(parseFloat(data[i].inspectResult));
+		}
+	}
+
+	$('#container').highcharts({
+		chart : {
+			type : 'spline'
+		},
+		plotLines: [{   //一条延伸到整个绘图区的线，标志着轴中一个特定值。
+            color: 'red',
+            dashStyle: 'Dash', //Dash,Dot,Solid,默认Solid
+            width: 1.5,
+            value: range[0],  //y轴显示位置
+            zIndex: 4
+        },{   //一条延伸到整个绘图区的线，标志着轴中一个特定值。
+            color: 'red',
+            dashStyle: 'Dash', //Dash,Dot,Solid,默认Solid
+            width: 1.5,
+            value: range[1],  //y轴显示位置
+            zIndex: 4
+        }],
+		title : {
+			text : title
+		},
+		subtitle : {
+			text : text
+		},
+		xAxis : {
+			categories : categories,
+			labels : {
+				step : 1
+			},
+			tickInterval : 1
+		},
+		yAxis : {
+			title : {
+				text : titleText
+			},
+			labels : {
+				formatter : function() {
+					return this.value;
+				}
+			}
+		},
+		tooltip : {
+			crosshairs : true,
+			shared : true
+		},
+		plotOptions : {
+			spline : {
+				marker : {
+					radius : 4,
+					lineColor : '#666666',
+					lineWidth : 1
+				}
+			}
+		},
+		series : [ {
+			name : name,
+			data : seriesDate
+		} ]
+	});
+
+}
+
+function getInspectDetail(row) {
+	$("#jyDivDetail").datagrid("unselectAll");
+	$.ajax({
+		type : "post",
+		url : path + '/inspectAction!queryInspectDetail.action',
+		dataType : "json",
+		data : {
+			"inspectId" : row.inspectId,
+			"itemCode" : row.itemCode
+		},
+		success : function(data) {
+			$('#jyDivDetail').datagrid({
+				collapsible : false,
+				remoteSort : false,
+				idField : 'id',
+				rownumbers : true,
+				singleSelect : true,
+				title : '检查详情',
+				columns : [ [ {
+					field : 'itemName',
+					title : '检验名称',
+					width : 150,
+					align : 'center'
+				}, {
+					field : 'inspectName',
+					title : '项目名称',
+					width : 100,
+					align : 'center'
+				}, {
+					field : 'inspectResult',
+					title : '检验结果',
+					width : 100,
+					align : 'center'
+				}, {
+					field : 'referScale',
+					title : '参考范围',
+					width : 100,
+					align : 'center'
+				}, {
+					field : 'resultUnit',
+					title : '结果单位',
+					width : 100,
+					align : 'center'
+				} ] ],
+				onClickRow : function(rowIndex, rowData) {
+					var row = $("#jyDiv").datagrid("getSelected");
+					$.ajax({
+						type : "post",
+						url : path + '/inspectAction!queryHighChars.action',
+						dataType : "json",
+						data : {
+							"patiSerial" : row.patiSerial,
+							"itemName"   : rowData.itemName,
+							"reportItemCode" : rowData.reportItemCode
+						},
+						success : function(data) {
+							createHighcharts(data[0].rows, rowData.itemName, rowData.inspectName);
+						}
+					});
+				}
+			});
+
+			$('#jyDivDetail').datagrid("loadData", data[0].rows);
+		}
+	});
+}
+
+
+/*************************************************************
+ * 弹出随访项窗口
+ * 
+ */
+function open_follow(count){
+	
+	var sel='';
+	$('#followStudy_window').window('open');
+	
+	/*$('#followStudy_dateGrid').datagrid( {
+		collapsible : false,
+		remoteSort : false,
+		rownumbers : true,
+		singleSelect:false,
+		fitColumns:true,
+		idField : 'id',
+		nowrap:false,
+		title : '随访项列表',
+		pagination : false,
+		width:750,
+
+		columns:[[{
+			hidden:true,
+			field : 'flupGroupId2',
+			title : '已选择随访项编码',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				if(val=='' || val.length==0 || val==null){
+					sel=1;
+				}
+				return val;
+			}
+		},{
+			 field: 'op11',
+			 title: '是否随访<input id=\"detailcheckbox\" type=\"checkbox\"  >',
+			 width: 400,
+			 align : 'center',
+             formatter: function (value, rec, rowIndex) {
+            	 if(sel==1){
+            		 sel='';
+            		return "<input type=\"checkbox\"  name=\"PD\" value=\"" + rec.flupGroupId +'|'+rec.flupNameId+'|'+rec.showNo+"|"+count +"\" >";
+ 				}
+            	 return "<input type=\"checkbox\"  name=\"PD\" value=\"" + rec.flupGroupId +'|'+rec.flupNameId+'|'+rec.showNo+"|"+count + "\"  checked=\"checked\">";
+             }
+		  	},{
+		  	hidden:true,
+			field : 'flupGroupId',
+			title : '项目编号',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'itemName',
+			title : '项目名称',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'groupOne',
+			title : 'I级分组',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'groupTow',
+			title : 'II级分组',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			field : 'recordType',
+			title : '记录方式',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		} , {
+			hidden:true,
+			field : 'flupNameId',
+			title : '随访表编号',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}, {
+			hidden:true,
+			field : 'showNo',
+			title : '显示序号',
+			width : 400,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		} ]],
+		onLoadSuccess: function () {
+            $("#detailcheckbox").unbind();
+            全选            $("#detailcheckbox").click(function () {
+                if ($(this).attr('checked') == 'checked') {
+                    $("input[name='PD']").attr("checked", 'checked');
+                } else {
+                    $("input[name='PD']").removeAttr("checked");
+                }
+            });
+           
+        }
+	});
+	$('#followStudy_dateGrid').datagrid('unselectAll');
+	var param = {
+			"map.patiSerial" : $('#patiSerial').text(),
+			"map.inpatiNumber" :$('#inpatiNumber').text(),
+			"map.inpatiSerialNumber" :$($('#inpatiSerialNumber', parent.document)).val(),
+			"map.flupTimes" : count,
+			"map.flupNameId":$("#hiddenFlupNameId").val()
+		};
+	loadData(path + "/fileIndexAction!findAllFlupDynamic.action", 'followStudy_dateGrid',param);*/
+	//alert("D");
+	$("#flupTimes").val(count);
+	var param = {
+			"map.patiSerial" : $('#patiSerial').text(),
+			"map.inpatiNumber" :$('#inpatiNumber').text(),
+			"map.inpatiSerialNumber" :$($('#inpatiSerialNumber', parent.document)).val(),
+			"map.flupTimes" : count,
+			"map.flupNameId":$("#hiddenFlupNameId").val()
+		};
+	$.post(path + "/fileIndexAction!findAllFlupDynamic.action",param,function (data){
+		$("#followStudy_dateGrid").html(data);
+	},'html');
+	
+	
+	
+}
+
+
+$(function (){
+	
+	/*
+	 * 保存
+	 */
+	$("#saveFlupDynamic").live('click',function (){
+		var patiSerial = $("#patiSerial").html();
+		var inpatiNumber= $("#inpatiNumber").html();
+		var inpatiSerialNumber=$($('#inpatiSerialNumber', parent.document)).val();
+		var insuranceNo =$($('#medicalInsuranceCode', parent.document)).val();
+		var deptCode =$("#deptCode").val();
+		var inHospitalDate=$("#inHospitalDate").html();
+		var outHospitalDate=$("#outHospitalDate").html();
+		var flupNameId=$("#hiddenFlupNameId").val();
+		var flupTimes=$("#flupTimes").val();
+		var groupArray = new Array();
+		$('input:checkbox[name=cb_flup_group]:checked').each(function (i,n){
+			var groupValue = $(this).val();
+		    	groupValue+=",";
+			    groupArray.push(groupValue);
+		});
+		var param={"map.patiSerial":patiSerial,"map.inpatiNumber":inpatiNumber,
+				"map.inpatiSerialNumber":inpatiSerialNumber,"map.insuranceNo":insuranceNo,
+				"map.deptCode":deptCode,"map.inHospitalDate":inHospitalDate,
+				"map.outHospitalDate":outHospitalDate,
+				"map.flupNameId":flupNameId,
+				"map.flupTimes":flupTimes,
+				"map.group":groupArray}
+		$.post(path+"/fileIndexAction!addFlupDynamic.action",param,function (data){
+			if(data>0){
+				alert('保存成功');
+				$("#followStudy_window").window('close');
+			}
+		});
+		
+	});
+	$("#closeFlupDynamic").live('click',function(){
+		$("#followStudy_window").window('close');
+	});
+});
+/**
+ * 确定按钮
+ */
+function followStudy(){
+	 //获取所有选中的多选框
+     var items = $("input[name='PD']:checked");
+     //选中的随访项编号数组
+     var result = new Array();
+     //随访项列表编号
+     var flupNameId;
+     //显示序号数组
+     var showNo=new Array();
+     //第几次随访
+     var sfNumber;
+     //获取所有选中的随访项编号和随访表编号
+     $.each(items, function (index, item) {
+    	 var i=item.value.split('|');
+    	 result.push(i[0]);
+    	 flupNameId=i[1];
+    	 showNo.push(i[2]);
+    	 sfNumber=i[3];
+     });
+     if(result=="" || result==null){
+    	 alert("请选择随访项！");
+    	 return;
+     }
+     
+     $.messager.confirm('提示','此操作不可撤销，您确定要执行此操作吗?',function(r) {
+     	if(r){
+     		$.ajax({
+     			type : "post",
+     			url : path + '/fileIndexAction!editFlupDynamic.action',
+     			dataType : "json",
+     			data : {
+     				"map.patiSerial" : $('#patiSerial').text(),
+     				"map.inpatiNumber" :$('#inpatiNumber').text(),
+     				"map.inpatiSerialNumber" : $($('#inpatiSerialNumber', parent.document)).val(),
+     				"map.flupTimes" :sfNumber ,
+     				"map.insuranceNo" : $('#medicalInsuranceCode').val(),
+     				"map.deptCode" : $('#deptCode').val(),
+     				"map.inHospitalDate" : $('#inHospitalDate').text(),
+     				"map.outHospitalDate" : $('#outHospitalDate').text(),
+     				"map.flupNameId" : flupNameId,
+     				"map2.flupGroupId" : result,
+     				"map.flupGlag" : '1',
+     				"map2.showNo" : showNo
+     			},
+     			success : function(data) {
+     				alert('保存成功！');
+     			}
+     		});
+     	}						
+     });
+	
+
+	
+}

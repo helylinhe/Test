@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!-- 检验表 -->
+<mapper namespace="com.linkonworks.df.busi.dao.InspectDao">
+	<select id="getPageInspect" parameterType="page" resultType="inspect">
+	select 
+	   A.pati_serial  "patiSerial",
+	   A.item_name    "itemName",
+       A.inspect_id   "inspectId",
+       A.item_code    "itemCode",
+       A.inspect_date "inspectDate"
+  			from (select 
+  			   ti.pati_serial pati_serial,
+  			   td.item_name  item_name,
+               td.inspect_id inspect_id,
+               td.item_code item_code,
+               to_char(ti.inspect_date, 'yyyy-MM-dd') inspect_date
+          from tb_inspect ti
+          left join tb_inspect_detail td
+            on ti.inspect_id = td.inspect_id
+         where 1 = 1
+           <if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and ti.pati_serial=#{params.patiSerial}
+		 </if>
+		 <if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and ti.inpati_number=#{params.inpatiNumber}
+		 </if>
+		 <if test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+		   and ti.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+         group by td.item_name,
+                  td.inspect_id,
+                  to_char(ti.inspect_date, 'yyyy-MM-dd'),
+                  td.item_code,
+                  ti.pati_serial
+         order by td.item_name) A
+
+	</select>
+	<select id="getInspects" parameterType="page" resultType="inspect">
+     select 
+       A.pati_serial  "patiSerial",
+       A.item_name    "itemName",
+       A.inspect_id   "inspectId",
+       A.item_code    "itemCode",
+       A.inspect_date "inspectDate"
+  			from (select 
+  			   ti.pati_serial pati_serial,
+  			   td.item_name  item_name,
+               td.inspect_id inspect_id,
+               td.item_code item_code,
+               to_char(ti.inspect_date, 'yyyy-MM-dd') inspect_date
+          from tb_inspect ti
+          left join tb_inspect_detail td
+            on ti.inspect_id = td.inspect_id
+         where 1 = 1
+	         <if test="params.inspectDate!=null and params.inspectDate!=''">
+			   and  to_char((ti.inspect_date),'yyyy-MM-dd') <![CDATA[>=]]>  #{params.inspectDate}
+			 </if>
+           <if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and ti.pati_serial=#{params.patiSerial}
+		 </if>
+		 <if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and ti.inpati_number=#{params.inpatiNumber}
+		 </if>
+		 <if test="params.inpatiSerialNumber!=null and params.inpatiSerialNumber!=''">
+		   and ti.inpati_serial_number=#{params.inpatiSerialNumber}
+		 </if>
+         group by td.item_name,
+                  td.inspect_id,
+                  to_char(ti.inspect_date, 'yyyy-MM-dd'),
+                  td.item_code,
+                  ti.pati_serial
+         order by td.item_name) A
+	</select>
+	
+	<select id="getInspectsDetail" parameterType="java.util.Map" resultType="inspect">
+		  select 
+		  	  td.report_item_code reportItemCode,
+              td.item_name  "itemName",
+              td.report_item_name "inspectName",
+              td.inspect_result "inspectResult",
+              td.refer_scale "referScale",
+              td.result_unit "resultUnit"
+         from tb_inspect_detail td
+        where  td.inspect_id = #{inspectId} and td.item_code = #{itemCode} order by td.print_order
+	</select>
+	
+	<select id="getHighChars" parameterType="java.util.Map" resultType="inspect">
+	   select 
+ 		 dd.item_name itemName,
+         to_char(ti.inspect_date,'yyyy-MM-dd') inspectDate,
+         dd.refer_scale referScale,
+         dd.inspect_result inspectResult
+            from tb_inspect_detail dd, tb_inspect ti
+            where dd.inspect_id = ti.inspect_id
+            and dd.report_item_code = #{reportItemCode}
+            and ti.pati_serial = #{patiSerial}
+            and dd.item_name like '%'||#{itemName}||'%' 
+            order by ti.inspect_date asc
+	</select>
+	
+	<resultMap type="java.util.HashMap" id="resultFlupName">
+		<result property="flupNameId" column="flup_name_id" />
+		<result property="flupName" column="flup_name" />
+	</resultMap>
+	
+	<select id="printFlupName" parameterType="java.util.Map" statementType="CALLABLE" resultMap="resultFlupName">
+		{call
+		  pkg_flups.p_flup_name(#{patientId,mode=IN,jdbcType=VARCHAR},#{inpatiNumber,mode=IN,jdbcType=VARCHAR},#{visitId,mode=IN,jdbcType=VARCHAR},
+		#{someList, mode=OUT, jdbcType=CURSOR, javaType=ResultSet,
+		resultMap=resultFlupName})
+		}
+	</select>
+	
+</mapper>

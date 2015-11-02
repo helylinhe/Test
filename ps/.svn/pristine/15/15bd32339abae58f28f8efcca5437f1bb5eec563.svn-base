@@ -1,0 +1,37 @@
+package com.linkonworks.df.busi.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.DiseaseItem;
+import com.linkonworks.df.vo.DiseaseItemTemplate;
+import com.linkonworks.df.vo.DiseaseNameDict;
+
+public interface DiseaseItemTemplateDao extends BaseDao<DiseaseItemTemplate>{
+	
+	public List<DiseaseItem> diseaseItemFirst();
+	
+	public List<DiseaseItem> diseaseItemSeconde(Map<String,String> map);
+	
+	public List<DiseaseNameDict> diseaseNameDict(List list);
+	
+	
+	public List<DiseaseItem> pageListDisease(Page<DiseaseItem> page);
+	
+	
+	public List<DiseaseItemTemplate> pageListDiseaseRight(Map<String,String> map);
+	//public List<DiseaseItemTemplate> pageListDiseaseRight(Map<String,Object> map);
+	
+	
+	public List<DiseaseItemTemplate> diseaseItemTemplates(String diseaseItemId);
+	
+	public int updateUseState(List list);
+	
+	
+	public int updateNormalUseState(List list);
+	
+	public int deleteDiseaseItem(String diseasName);
+	
+	
+}

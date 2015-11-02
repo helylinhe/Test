@@ -1,0 +1,107 @@
+package com.linkonworks.df.vo;
+
+public class FileIndex {
+	
+	private String id ;
+	private String patientId;
+	private String visitId;
+	private String fileNo;
+	private String fileName;
+	private String topic;
+	private String creatorName;
+	private String creatorId;
+	private String createDateTime;
+	private String lastModifyDateTime;
+	private String unitCode;
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getPatientId() {
+		return patientId;
+	}
+	public void setPatientId(String patientId) {
+		this.patientId = patientId;
+	}
+	public String getVisitId() {
+		return visitId;
+	}
+	public void setVisitId(String visitId) {
+		this.visitId = visitId;
+	}
+	public String getFileNo() {
+		return fileNo;
+	}
+	public void setFileNo(String fileNo) {
+		this.fileNo = fileNo;
+	}
+	public String getFileName() {
+		return fileName;
+	}
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	public String getTopic() {
+		return topic;
+	}
+	public void setTopic(String topic) {
+		this.topic = topic;
+	}
+	public String getCreatorName() {
+		return creatorName;
+	}
+	public void setCreatorName(String creatorName) {
+		this.creatorName = creatorName;
+	}
+	public String getCreatorId() {
+		return creatorId;
+	}
+	public void setCreatorId(String creatorId) {
+		this.creatorId = creatorId;
+	}
+	public String getCreateDateTime() {
+		return createDateTime;
+	}
+	public void setCreateDateTime(String createDateTime) {
+		this.createDateTime = createDateTime;
+	}
+	public String getLastModifyDateTime() {
+		return lastModifyDateTime;
+	}
+	public void setLastModifyDateTime(String lastModifyDateTime) {
+		this.lastModifyDateTime = lastModifyDateTime;
+	}
+	public String getUnitCode() {
+		return unitCode;
+	}
+	public void setUnitCode(String unitCode) {
+		this.unitCode = unitCode;
+	}
+	public FileIndex(String id, String patientId, String visitId,
+			String fileNo, String fileName, String topic, String creatorName,
+			String creatorId, String createDateTime, String lastModifyDateTime,
+			String unitCode) {
+		super();
+		this.id = id;
+		this.patientId = patientId;
+		this.visitId = visitId;
+		this.fileNo = fileNo;
+		this.fileName = fileName;
+		this.topic = topic;
+		this.creatorName = creatorName;
+		this.creatorId = creatorId;
+		this.createDateTime = createDateTime;
+		this.lastModifyDateTime = lastModifyDateTime;
+		this.unitCode = unitCode;
+	}
+	public FileIndex() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	
+
+
+}

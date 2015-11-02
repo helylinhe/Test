@@ -1,0 +1,29 @@
+package com.linkonworks.df.busi.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.vo.User;
+
+public interface UserDao extends BaseDao<User>{
+
+	public List<User> getUser(Map map);
+	
+	public int saveUser(User user);
+	
+	
+	public User getUserDetail(String name);
+	
+	
+	public List<User> getAllUser(Map map);
+	
+	public int getAllUserCount(Map map);
+	
+	public List<User> getPageUser(Page page);
+	
+	
+	
+	
+	
+}

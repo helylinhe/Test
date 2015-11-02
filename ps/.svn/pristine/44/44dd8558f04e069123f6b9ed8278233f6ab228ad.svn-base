@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.BlackListDao">
+	
+	<select id="getBlackList" parameterType="page" resultType="blacklist">
+	
+		
+		select 
+		id "id",
+		pati_serial "patiSerial",
+		medical_insurance_code "medicalInsuranceCode",
+		inpati_number "inpatiNumber",
+		id_number "idNumber",
+		name "name",
+		gender "gender",
+		age "age",
+		add_reasons "addReasons",
+		state "state"
+		from tb_blacklist where 1=1 and state=1
+			
+	<if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and pati_serial = #{params.patiSerial}
+	</if>
+	<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and inpati_number = #{params.inpatiNumber}
+	</if>
+	<if test="params.medicalInsuranceCode!=null and params.medicalInsuranceCode!=''">
+		   and medical_insurance_code = #{params.medicalInsuranceCode}
+	</if>
+	<if test="params.name!=null and params.name!=''">
+		   and name like '%'||#{params.name}||'%'
+	</if>
+	<!-- 
+	<if test="params.state!=null and params.state!=''">
+		   and state = #{params.state}
+	</if>
+	 -->
+		 order by operate_date desc
+	</select>
+	
+	<select id="getBlackListTwo" parameterType="page" resultType="blacklist">
+		select 
+	        id "id",
+	        pati_serial "patiSerial",
+	        medical_insurance_code "medicalInsuranceCode",
+	        inpati_number "inpatiNumber",
+	        certificate_number "idNumber",
+	        name "name",
+	        gender "gender",
+	        trunc((trunc(SYSDATE)- trunc(birth_date))/365) "age",
+	        '' "addReasons",
+        	black_list_state "state"
+		from tb_pati where 1=1 and black_list_state=0
+			
+	<if test="params.patiSerial!=null and params.patiSerial!=''">
+		   and pati_serial = #{params.patiSerial}
+	</if>
+	<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+		   and inpati_number = #{params.inpatiNumber}
+	</if>
+	<if test="params.medicalInsuranceCode!=null and params.medicalInsuranceCode!=''">
+		   and medical_insurance_code = #{params.medicalInsuranceCode}
+	</if>
+	<if test="params.name!=null and params.name!=''">
+		    and name like '%'||#{params.name}||'%'
+	</if>
+	
+	</select>
+	
+	
+	<!-- 查询出患者基本信息数据加入到黑名单表 -->
+	<insert id="addBlack" parameterType="blacklist">
+	 	insert into tb_blacklist(id,pati_serial,medical_insurance_code,inpati_number,id_number,name,gender,age,add_reasons,state)
+		select seq_tb_blacklist.nextval,pati_serial,medical_insurance_code,inpati_number,certificate_number,name,gender,age,#{addReasons},1 
+		from tb_pati where  1=1
+		<if test="id!=null and id!=''">
+		and id =#{id}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber !=''">
+		and inpati_number = #{inpatiNumber}
+		</if>
+		<if test="patiSerial and patiSerial !=''">
+		and pati_serial = #{patiSerial}
+		</if>
+		
+		
+	</insert>
+	<!-- 
+	<delete id="deleteBlack" parameterType="java.lang.String">
+		delete from tb_blacklist where id=#{id}
+	</delete>
+	 -->
+	 
+	 <!-- 把患者信息表的数据修改成黑名单状态 
+	 <update id="updatePati" parameterType="java.lang.String">
+		update tb_pati set black_list_state = 1 where id=#{id}
+	</update>
+	-->
+	<update id="updatePati" parameterType="blacklist">
+		update tb_pati set black_list_state = 1 where   pati_serial=#{patiSerial} and inpati_number=#{inpatiNumber}
+	</update>
+	
+	
+	
+	<!-- 把黑名单表状态修改成正常 
+	<update id="updataBlack" parameterType="java.lang.String">
+		update tb_blacklist set state=0 where id=#{id}
+	</update>
+	-->
+	<!--把患者信息表状态修改成正常  
+	<update id="updatePatiTwo" parameterType="java.lang.String">
+		update tb_pati set black_list_state=0 where id=#{id}
+	</update>
+	-->
+	<update id="updataBlack" parameterType="blacklist">
+		update tb_blacklist set state=0 where  pati_serial=#{patiSerial} and inpati_number=#{inpatiNumber}
+	</update>
+	<!-- 修改患者信息状态改成黑名单 -->
+	<update id="updataBlackTwo" parameterType="blacklist">
+		update tb_blacklist set state=1 
+		<if test="addReasons!='' and addReasons!=null">
+		,add_reasons = #{addReasons}
+		</if>
+		 where  pati_serial=#{patiSerial} and inpati_number=#{inpatiNumber}
+	</update>
+	
+	<update id="updatePatiTwo" parameterType="blacklist">
+		update tb_pati set black_list_state=0 where pati_serial=#{patiSerial} and inpati_number=#{inpatiNumber}
+	</update>
+	
+		<select id="selectBlack" parameterType="blacklist" resultType="blacklist">
+			select b.pati_serial patiSerial,b.inpati_number inpatiNumber , b.state state from tb_blacklist b where b.pati_serial =  #{patiSerial} and b.inpati_number=#{inpatiNumber}
+		</select>
+	
+	
+	
+	<select id="findList" parameterType="page" resultType="Map">
+		select k.pati_serial patiSerial,
+	       k.inpati_number inpatiNumber,
+	       k.name name,
+	       f_get_age(k.pati_serial, k.inpati_number) age,
+	       k.diag_name diagName,
+	       k.dept_code deptCode,
+	       f_get_dept_name(k.dept_code) department,
+	       k.flup_result flupResult,
+	       k.flup_failre flupFailre
+	  from tb_flup_task k
+	 where k.flup_complete = '1'
+	  	<if test="params.state!=null and params.state!=''">
+	  		and k.flup_status=#{params.state} 
+	  	</if>
+	  	<if test="params.name!=null and params.name!=''">
+	  		and k.name like '%'||#{params.name}||'%'
+	  	</if>
+	  	<if test="params.patiSerial!=null and params.patiSerial!=''">
+	  		and k.pati_serial = #{params.patiSerial}
+	  	</if>
+	  	<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+	  		and k.inpati_number = #{params.inpatiNumber}
+	  	</if>
+	  	<if test="list!=null">
+	  		and k.dept_code in 
+	  		<foreach collection="list" index="index" 
+	  			item="item" open="(" separator="," close=")">
+	  			#{item.deptCode}
+	  		</foreach>
+	  	</if>
+	</select>
+	
+</mapper>

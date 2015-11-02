@@ -1,0 +1,179 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DataImportRuleDaoService;
+import com.linkonworks.df.busi.service.FlupModuleService;
+import com.linkonworks.df.busi.service.FlupNameDictService;
+import com.linkonworks.df.busi.utils.FinalUtil;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.busi.utils.SessionData;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.Dict;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.FlupModule;
+import com.linkonworks.df.vo.FlupNameDict;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class FlupModuleAction extends ActionSupport{
+	
+	private FlupModuleService flupModuleService;	
+	private Page<FlupModule> page=new Page<FlupModule>(); //参数传递(pageSize pageNumber)
+	private Map<String,String> map=new HashMap<String,String>(); //参数传递(筛选条件参数)
+	private DataImportRuleDaoService dataImportRuleService;
+	
+
+
+	/**
+	 * 查询信息随访模板维护
+	 */
+	public String execute(){
+		HttpSession session = ServletActionContext.getRequest().getSession();
+		Employee employee=(Employee) session.getAttribute("employee");
+		map.put("operateEmpolyeeCode", employee.getJobnum());
+		page.setParams(map);
+		page.setList(SessionData.getDepartmentCode());
+		Map userMap = new HashMap();
+		userMap.put("rows",flupModuleService.getFlupModule(page));
+		userMap.put("totalRecord",page.getTotalRecord());
+		userMap.put("totalPage", page.getTotalPage());
+		userMap.put("pageNo", page.getPageNo());
+		JSON json=JSONArray.fromObject(userMap);
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * 修改信息随访模板维护
+	 * @return
+	 */
+	public String updateFlupModule(){
+		 HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+		try {
+			FlupModule flupModule = new FlupModule();
+			flupModule.setInfoCode(request.getParameter("infoCode"));
+			flupModule.setInfoName(request.getParameter("infoName"));
+			flupModule.setInfoContent(request.getParameter("infoContent"));
+			flupModule.setMaintainDept(request.getParameter("maintainDept"));
+			flupModule.setInfoBeyone(request.getParameter("infoBeyone"));
+			flupModule.setInfoBelong(request.getParameter("infoBelong"));
+//			flupModule.setId(request.getParameter("id"));
+			flupModule.setOperateEmpolyeeCode(SessionData.getEmployeeCode()); //医生工号设置成死的暂时
+			int result = flupModuleService.updateFlupModule(flupModule);
+			 if(result == 1)
+				 response.getWriter().print("success"); 
+			 else
+				 response.getWriter().print("faild");
+			 
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("error");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 添加信息随访模板维护
+	 * @return
+	 */
+	public String addFlupModule(){
+		 HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+		try {
+			FlupModule flupModule = new FlupModule();
+//			flupModule.setInfoCode(request.getParameter("infoCode"));
+			flupModule.setInfoName(request.getParameter("infoName"));
+			flupModule.setInfoContent(request.getParameter("infoContent"));
+			flupModule.setMaintainDept(request.getParameter("maintainDept"));
+			flupModule.setInfoBeyone(request.getParameter("infoBeyone"));
+			flupModule.setInfoBelong(request.getParameter("infoBelong"));
+			flupModule.setOperateEmpolyeeCode(SessionData.getEmployeeCode()); //医生工号设置成死的暂时
+			int result = flupModuleService.savaFlupModule(flupModule);
+			 if(result == 1)
+				 response.getWriter().print("success"); 
+			 else
+				 response.getWriter().print("faild");
+			 
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				response.getWriter().print("error");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * 加载combobox数据
+	 */
+	public String loadCombobox(){
+//		Department d= new Department();
+//		d.setDeptCode("");
+//		d.setDeptName("不限");
+//		List<Department> department = dataImportRuleService.findAllDepartments();
+//		department.add(0,d);
+		List<Department> department = SessionData.getDepartmentCode();
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		jsonMap.put("department", department);
+		jsonMap.put("wdepartment", department);
+		jsonMap.put("udepartment", department);
+		JsonUtil.jsonData(jsonMap);	
+		return null;
+	}
+	
+	public Page<FlupModule> getPage() {
+		return page;
+	}
+	public void setPage(Page<FlupModule> page) {
+		this.page = page;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+
+	public void setFlupModuleService(FlupModuleService flupModuleService) {
+		this.flupModuleService = flupModuleService;
+	}
+	public void setDataImportRuleService(
+			DataImportRuleDaoService dataImportRuleService) {
+		this.dataImportRuleService = dataImportRuleService;
+	}
+
+
+	
+
+}

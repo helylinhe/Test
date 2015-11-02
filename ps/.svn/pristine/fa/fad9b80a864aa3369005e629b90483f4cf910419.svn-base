@@ -1,0 +1,89 @@
+package com.linkonworks.df.busi.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.dao.DiseaseItemTemplateDao;
+import com.linkonworks.df.busi.service.DiseaseItemTemplateService;
+import com.linkonworks.df.vo.DiseaseItem;
+import com.linkonworks.df.vo.DiseaseItemTemplate;
+import com.linkonworks.df.vo.DiseaseNameDict;
+
+public class DiseaseItemTemplateServiceImpl implements DiseaseItemTemplateService{
+
+	private DiseaseItemTemplateDao diseaseItemTemplateDao;
+
+	public DiseaseItemTemplateDao getDiseaseItemTemplateDao() {
+		return diseaseItemTemplateDao;
+	}
+
+	public void setDiseaseItemTemplateDao(
+			DiseaseItemTemplateDao diseaseItemTemplateDao) {
+		this.diseaseItemTemplateDao = diseaseItemTemplateDao;
+	}
+
+	@Override
+	public List<DiseaseItem> diseaseItemFirst() {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemFirst();
+	}
+
+	@Override
+	public List<DiseaseItem> diseaseItemSeconde(Map<String, String> map) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemSeconde(map);
+	}
+
+	@Override
+	public List<DiseaseItem> pageListDisease(Page page) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.pageListDisease(page);
+	}
+
+	@Override
+	public List<DiseaseNameDict> diseaseNameDict() {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseNameDict();
+	}
+
+	@Override
+	public List<DiseaseItemTemplate> pageListDiseaseRight(Map<String,String> map) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.pageListDiseaseRight(map);
+	}
+
+	@Override
+	public List<DiseaseItemTemplate> diseaseItemTemplates(String diseaseItemId) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.diseaseItemTemplates(diseaseItemId);
+	}
+
+	@Override
+	public int addBatch(List<DiseaseItemTemplate> list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.insertBatch(list);
+	}
+
+	@Override
+	public int updateNormalUseState(List list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.updateNormalUseState(list);
+	}
+
+	@Override
+	public int updateUseState(List list) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.updateUseState(list);
+	}
+
+	@Override
+	public int deleteDiseaseItem(String diseasName) {
+		// TODO Auto-generated method stub
+		return diseaseItemTemplateDao.deleteDiseaseItem(diseasName);
+	}
+
+	
+	
+	
+}

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DiagGroupDao">
+<select id="findPageList" parameterType="page" resultType="com.linkonworks.df.vo.DiagGroup">
+		select  d.dept_code deptCode,
+        d.group_name groupName,
+        d.group_code groupCode,
+        m.dept_name deptName,
+        m.unit_code unitCode
+        from tb_diag_group d ,tb_department m where d.dept_code = m.dept_code 
+	 <if test="params.groupName!=null  and params.groupName!='' ">
+	   and d.group_name like  '%'||#{params.groupName}||'%'
+	 </if>
+	 <if test="list!=null ">
+	 	and d.dept_code in 
+	 	<foreach collection="list" index="index" item="item"
+	 		open="(" separator="," close=")">
+	 		 #{item.deptCode}
+	 	</foreach> 
+	 </if>
+	 order by d.log_date desc
+	</select>
+	
+	<select id="findPageListIcd" parameterType="page" resultType="com.linkonworks.df.vo.DiagGroup">
+		select f.id             id,
+       f.group_code     groupCode,
+       f.diagnosis_code diagnosisCode,
+       f.diagnosis_name diagnosisName
+       from tb_diaggp_to_ICD10 f
+        where f.group_code = #{params.groupCode} order by f.id
+	</select>
+	
+	
+	
+	
+	<insert id="insert" parameterType="com.linkonworks.df.vo.DiagGroup">
+		insert into tb_diag_group (group_code,group_name,dept_code,log_date,employee_code)
+		 values(seq_tb_diag_group.nextval,#{groupName},#{deptCode},sysdate,#{employeeCode})
+	</insert>
+	<insert id="insertIcd" parameterType="java.util.List">
+		insert into tb_diaggp_to_ICD10
+        select seq_tb_diaggp_to_icd10.nextval,A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{item.groupCode},
+	 	 	#{item.diagnosisCode},
+	   		#{item.groupName},
+	   		#{item.diagnosisName}, sysdate,
+	  		#{item.employeeCode}
+            from dual 
+             </foreach>
+        ) A
+	  </insert>
+	<select id="getDiagGroups" parameterType="com.linkonworks.df.vo.DiagGroup" resultType="com.linkonworks.df.vo.DiagGroup">
+		select  d.group_code groupCode from tb_diag_group d where d.group_name = #{groupName}
+	</select>
+	
+	<select id="getAllDiagGroups" resultType="com.linkonworks.df.vo.DiagGroup">
+		select d.group_code groupCode,d.group_name groupName from tb_diag_group d
+	</select>
+	
+	<update id="update" parameterType="com.linkonworks.df.vo.DiagGroup" >
+		update tb_diaggp_to_icd10 d set d.diagnosis_code=#{diagnosisCode},d.diagnosis_name=#{diagnosisName},
+		d.log_date=sysdate,d.employee_code =#{employeeCode} where d.id=#{id}
+	</update>
+	
+	<update id="updateGroup" parameterType="com.linkonworks.df.vo.DiagGroup" >
+		update tb_diag_group d set d.group_name=#{groupName},
+		d.dept_code=#{deptCode},
+		d.log_date=sysdate,d.employee_code =#{employeeCode} where d.group_code=#{groupCode}
+	</update>
+	
+	<!-- 检索查询诊断组 -->
+	<select id="findDiagnosisDict"  resultType="com.linkonworks.df.vo.DiagnosisDict" parameterType="String">
+	   select * from(select  d.group_code diagnosisCode , d.group_name diagnosisName,rownum rn from tb_diag_group d where rownum<![CDATA[<=]]>80 and 
+		 d.group_name like #{keyInfo}  
+		 and d.dept_code in 
+		 <foreach item="item" index="index" collection="dept"
+			open="(" separator="," close=")">
+			 #{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+	   order by length(d.group_name) 
+	   ) where rn <![CDATA[>]]>0
+	</select>
+	
+	<delete id="deleteGroupIcd" parameterType="String">
+		 delete tb_diaggp_to_ICD10 d where d.id in 
+		<foreach item="item" index="index" collection="array"
+			open="(" separator="," close=")">
+			 #{item, jdbcType=NUMERIC}  
+		</foreach>  
+	</delete>
+	
+	<select id="findIcdByGroupCode"  parameterType="com.linkonworks.df.vo.DiagGroup" resultType="int" >
+		select count(1) from tb_diaggp_to_ICD10 d where d.group_code =#{groupCode} and d.diagnosis_code = #{diagnosisCode}
+	</select>
+	
+	<delete id="deleteGroupIcdByGroupCode" parameterType="String">
+		 delete tb_diaggp_to_ICD10 d where d.group_code in 
+		<foreach item="item" index="index" collection="array"
+			open="(" separator="," close=")">
+			 #{item, jdbcType=NUMERIC}  
+		</foreach>  
+	</delete>
+	
+	<delete id="deleteGroupByGroupCode" parameterType="String">
+		 delete tb_diag_group d where d.group_code in 
+		<foreach item="item" index="index" collection="array"
+			open="(" separator="," close=")">
+			 #{item, jdbcType=NUMERIC}  
+		</foreach>  
+	</delete>
+	
+</mapper>

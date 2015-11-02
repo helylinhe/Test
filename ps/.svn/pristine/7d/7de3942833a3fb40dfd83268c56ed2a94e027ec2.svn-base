@@ -1,0 +1,273 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.struts2.ServletActionContext;
+import org.json.JSONArray;
+
+import net.sf.json.JSON;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.FlupItemResponseService;
+import com.linkonworks.df.busi.service.FlupNameDictService;
+import com.linkonworks.df.busi.utils.FinalUtil;
+import com.linkonworks.df.busi.utils.FlupItemResponseTableView;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.vo.Department;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.FlupGroup;
+import com.linkonworks.df.vo.FlupItem;
+import com.linkonworks.df.vo.FlupItemResponse;
+import com.linkonworks.df.vo.FlupNameDict;
+import com.linkonworks.df.vo.User;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class FlupItemResponseAction extends ActionSupport{
+
+	private FlupItemResponseService flupItemResponseService;
+	private FlupNameDictService flupNameDictService;
+	
+	private Page<User> page=new Page<User>(); //参数传递(pageSize pageNumber)
+	private Map<String,String> map=new HashMap<String,String>(); //参数传递(筛选条件参数)
+	
+	
+	
+	public FlupNameDictService getFlupNameDictService() {
+		return flupNameDictService;
+	}
+
+	public void setFlupNameDictService(FlupNameDictService flupNameDictService) {
+		this.flupNameDictService = flupNameDictService;
+	}
+
+	public FlupItemResponseService getFlupItemResponseService() {
+		return flupItemResponseService;
+	}
+
+	public void setFlupItemResponseService(
+			FlupItemResponseService flupItemResponseService) {
+		this.flupItemResponseService = flupItemResponseService;
+	}
+	
+	
+	
+	public Page<User> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<User> page) {
+		this.page = page;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	/***
+	 * 异步加载随访表名
+	 * @return
+	 */
+	public String flupNamDict(){
+		HttpSession session = ServletActionContext.getRequest().getSession();
+		List<Department> departments= (List<Department>) session.getAttribute("departmentTable");
+		List<String> deptcodes=new ArrayList<String>();
+		for(Department d:departments){
+			deptcodes.add(d.getDeptCode());
+		}
+		List<FlupNameDict> list=flupNameDictService.findByDeptCode(deptcodes);
+		Map map=new HashMap();
+		map.put("rows",list);
+		JsonUtil.jsonData(map);
+		return null;
+	}
+	
+	/**
+	 * 分页查询
+	 * @return
+	 */
+	public String pageList(){
+		Map<String, Object> flupItemResponseMap=new HashMap<String, Object>();
+		page.setParams(map);
+		flupItemResponseMap.put("rows",flupItemResponseService.findPageList(page));
+		flupItemResponseMap.put("totalRecord",page.getTotalRecord());
+		flupItemResponseMap.put("totalPage", page.getTotalPage());
+		flupItemResponseMap.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(flupItemResponseMap);
+		return null;
+	}
+	
+	/****
+	 * 随访表名对应的分页查询
+	 * @return
+	 */
+	public String pageFlupItemList(){
+		Map<String,Object> pageFlupItemResponse=new HashMap<String,Object>();
+		pageFlupItemResponse.put("rows", flupItemResponseService.findFlupItemPage(map));
+		JsonUtil.jsonData(pageFlupItemResponse);
+		return null;
+	}
+	
+	/****
+	 * 保存模板下的随访项目
+	 * @return
+	 */
+	public String addFlupItemResponse(){
+		HttpSession session = ServletActionContext.getRequest().getSession();
+		Employee employee=(Employee) session.getAttribute("employee");
+		List<FlupItemResponse> list=new ArrayList<FlupItemResponse>();
+		String flupNameId=map.get("flupNameId");
+		String arr[]=map.get("arrFlupGroupId").split(",");
+		FlupItemResponse res=null;
+		int count=0;
+		for(int i=0;i<arr.length;i++){
+			res=new FlupItemResponse();
+			FlupGroup group=new FlupGroup();
+			FlupNameDict nameDict=new FlupNameDict();
+			String[] s=arr[i].split("_");
+			group.setFlupGroupId(s[0]);
+			res.setShowNo(s[1]);
+			nameDict.setFlupNameId(flupNameId);
+			res.setFlupGroup(group);
+			res.setFlupNameDict(nameDict);
+			res.setEmployeeCode(employee.getJobnum());
+			res.setUseState("1");
+			list.add(res);
+		}
+		/*List<String> diffList =new ArrayList<String>();
+		Map<String,String> itemList =new HashMap<String,String>();
+		List<String> updateList =new ArrayList<String>();
+		List<String> updateUseStateList=new ArrayList<String>();
+		int count=0;
+		if(items.size()>0){
+			for(FlupItemResponse r:items){
+				itemList.put(r.getFlupGroup().getFlupGroupId(), r.getId()+","+r.getUseState());
+			}
+			for(Iterator<String> i = itemList.keySet().iterator(); i.hasNext();){
+				String key=i.next();
+				if(!stooges.contains(key)){
+					String[] value=itemList.get(key).split(",");
+					updateList.add(value[0]);
+				}
+			}
+			for(String str:stooges){
+				if(!itemList.containsKey(str)){
+					diffList.add(str);
+				}else{
+					String [] val=itemList.get(str).split(",");
+					if(val[1]!=null && val[1].equals("0")){
+						updateUseStateList.add(val[0]);
+					}
+					
+				}
+			}
+			*//*****
+			 * 添加数据
+			 *//*
+			for(int j=0;j<diffList.size();j++){
+				res=new FlupItemResponse();
+				FlupGroup group=new FlupGroup();
+				FlupNameDict nameDict=new FlupNameDict();
+				group.setFlupGroupId(diffList.get(j));
+				nameDict.setFlupNameId(flupNameId);
+				res.setFlupGroup(group);
+				res.setFlupNameDict(nameDict);
+				res.setEmployeeCode(employee.getJobnum());
+				res.setUseState("1");
+				list.add(res);
+			}
+			*//******
+			 * 修改状态
+			 *//*
+			if(updateList.size()>0){
+				count=flupItemResponseService.updateUseState(updateList);
+			}
+			*//*****
+			 * 把停用的修改掉正常状态
+			 *//*
+			if(updateUseStateList.size()>0){
+				count=flupItemResponseService.updateNormalUseState(updateUseStateList);
+			}
+			
+		}else{
+			for(int i=0;i<arr.length;i++){
+				res=new FlupItemResponse();
+				FlupGroup group=new FlupGroup();
+				FlupNameDict nameDict=new FlupNameDict();
+				group.setFlupGroupId(arr[i]);
+				nameDict.setFlupNameId(flupNameId);
+				res.setFlupGroup(group);
+				res.setFlupNameDict(nameDict);
+				res.setEmployeeCode(employee.getJobnum());
+				res.setUseState("1");
+				list.add(res);
+			}
+		}*/
+		flupItemResponseService.deleteFlupItemResponse(flupNameId);
+		if(list.size()>0){
+			count=flupItemResponseService.insertBatch(list);
+		}
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(count);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/***
+	 * 预览下分组查询
+	 */
+	public String findPreviewGroup(){
+		HttpServletRequest  request = ServletActionContext.getRequest();
+		StringBuilder sb = new StringBuilder();
+		PrintWriter  out = null; 
+		try {
+			out = ServletActionContext.getResponse().getWriter();
+			System.out.println(request.getParameter("flupNameId"));
+			System.out.println(request.getParameter("flupNameId").length());
+			List<FlupItemResponse>  list = flupItemResponseService.findPreview(request.getParameter("flupNameId"));
+			System.out.println(list.size());
+			sb.append(FlupItemResponseTableView.getTable(list,request.getParameter("showButton")));
+			System.out.println(sb.toString());
+			out.print(sb);
+		}catch (Exception e) {
+			out.print("error");
+			e.printStackTrace();
+		}
+			return null;
+	}
+	
+	/******
+	 * 查询
+	 */
+	public String findItems(){
+		
+			List<FlupItemResponse>  list = flupItemResponseService.getFlupItems(map.get("flupNameId"));
+			Map<String,List<FlupItemResponse>> m=new HashMap<String,List<FlupItemResponse>>();
+			m.put("rows", list);
+			JsonUtil.jsonData(m);
+			return null;
+	}
+}

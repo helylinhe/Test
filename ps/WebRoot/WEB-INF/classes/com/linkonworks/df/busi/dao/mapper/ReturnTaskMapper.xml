@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.ReturnTaskDao">
+
+<select id="findPageList" parameterType="page" resultType="com.linkonworks.df.vo.ReturnTask">
+		  select d.id                    id,
+		  f_get_age(d.pati_serial ,d.inpati_number) age,
+          d.pati_serial           patiSerial,
+          d.inpati_number         inpatiNumber,
+          d.inpati_serial_number  inpatiSerialNumber,
+          d.name                  name,
+          d.dept_code             deptCode,
+          F_GET_EMPLOYEE_NAME(d.retm_doctor_code)      retmDoctorCode,
+          to_char(d.retplan_date,'yyyy-mm-dd')          retplanDate,
+          F_GET_DEPT_NAME(d.retplan_dept_code)     retplanDeptName,
+          d.retplan_dept_code     retplanDeptCode,
+          d.return_content        returnContent,
+          d.return_date           returnDate,
+          d.return_confirm        returnConfirm,
+          d.return_complete       returnComplete,
+          d.flup_mobile           flupMobile,
+          d.notify_way            notifyWay,
+          d.send_content          sendContent,
+          d.return_times          returnTimes,
+          d.task_state            taskState,
+          d.operate_date          operateDate,
+          d.operate_employee_code operateEmployeeCode,
+          d.unit_code             unitCode,
+          f.gender                gender,
+          f.out_hosp_diag          outHospDiag,
+          f.out_hosp_diag_code     outHospDiagCode,
+          g.operation_name        operationName
+     from tb_return_task d
+     left join tb_inpati_diag f
+       on d.inpati_number = f.inpati_number
+      and d.inpati_serial_number = f.inpati_serial_number
+     left join tb_pati_operate g
+       on d.inpati_number = g.inpati_number
+      and d.inpati_serial_number = g.inpati_serial_number where 1=1
+	   <if test="params.name!=null and params.name!='' and params.name!='%%' ">
+		and d.name like #{params.name}
+	   </if>
+	    <if test="params.patiSerial!=null and params.patiSerial!='' and params.patiSerial!='%%' ">
+		and d.pati_serial like #{params.patiSerial}
+	   </if>
+	    <if test="params.inpatiNumber!=null and params.inpatiNumber!='' and params.inpatiNumber!='%%' ">
+		and d.inpati_number like #{params.inpatiNumber}
+	   </if>
+	    <if test="params.returnConfirm!=null and params.returnConfirm!=''">
+		and d.return_confirm = #{params.returnConfirm}
+	   </if>
+	   <if test="params.returnComplete!=null and params.returnComplete!=''">
+		and d.return_complete = #{params.returnComplete}
+	   </if>
+	   <if test="params.retmDoctorCode!=null and params.retmDoctorCode!=''">
+		and d.retm_doctor_code = #{params.retmDoctorCode}
+	   </if>
+	   <if test="params.retplanDeptCode!=null and params.retplanDeptCode!=''">
+		and d.retplan_dept_code = #{params.retplanDeptCode}
+	   </if>
+	   <if test="params.retplanDateStart!=null and params.retplanDateStart!=''">
+	   and  d.retplan_date <![CDATA[>=]]> to_date(#{params.retplanDateStart},'yyyy-MM-dd') 
+	 </if>
+	 <if test="params.retplanDateEnd!=null and params.retplanDateEnd!=''">
+	   and  d.retplan_date <![CDATA[<=]]> to_date(#{params.retplanDateEnd},'yyyy-MM-dd') 
+	 </if>
+	</select>
+	
+	<select id="findFlupModule" parameterType="com.linkonworks.df.vo.FlupModule" resultType="com.linkonworks.df.vo.FlupModule">
+	  select 
+	  m.info_code infoCode,
+             m.info_name infoName,
+             m.info_content infoContent,
+             m.info_name_spell infoNameSpell,
+             m.info_beyone infoBeyone,
+             m.info_belong infoBelong,
+             m.maintain_dept maintainDept,
+             m.operate_date operateDate,
+             m.operate_empolyee_code operateEmpolyee
+	   from tb_flup_module  m where ((m.info_beyone  = '科室' and m.maintain_dept in
+	  <foreach item="item" index="index" collection="deptCode"
+			open="(" separator="," close=")">
+			 #{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+	  ) 
+	  or (m.info_beyone ='个人' and m.operate_empolyee_code =#{operateEmpolyeeCode}
+	   ) or m.info_beyone = '全院' ) and m.info_belong= '复诊提示'
+	</select>
+	<!--  
+	<update id="updateMessage" parameterType="com.linkonworks.df.vo.ReturnMessage">
+			update tb_return_task d set 
+			d.retplan_date = TO_DATE(#{returnDate},'YYYY-MM-DD'), 
+			d.retplan_dept_code =#{deptCode} ,
+			d.return_confirm = 1 ,
+			d.return_content =#{confirm}, 
+			d.send_content =#{message},
+			d.notify_way =#{type}  
+			where d.id in
+		<foreach item="item" index="index" collection="strId" open="(" separator="," close=")">
+			  #{item, jdbcType=NUMERIC}  
+		</foreach>
+	</update>
+	-->
+		<update id="updateMessage" parameterType="com.linkonworks.df.vo.ReturnMessage">
+			update tb_return_task d set d.return_confirm = 1 
+			<if test="returnDate!=null and returnDate!=''" >
+			,d.retplan_date = TO_DATE(#{returnDate},'YYYY-MM-DD') 
+			</if>
+			<if test="deptCode!=null and deptCode!=''" >
+			,d.retplan_dept_code =#{deptCode} 
+			</if>
+			<if test="confirm!=null and confirm!=''" >
+			,d.return_content =#{confirm}
+			</if>
+			<if test="message!=null and message!=''" >
+			,d.send_content =#{message}
+			</if>
+			<if test="type!=null and type!=''" >
+			,d.notify_way =#{type} 
+			</if>
+			where d.id = #{id}
+		</update>
+</mapper>

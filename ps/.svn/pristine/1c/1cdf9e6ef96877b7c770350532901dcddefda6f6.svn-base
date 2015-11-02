@@ -1,0 +1,341 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.MobileFlupService;
+import com.linkonworks.df.busi.service.NationDictService;
+import com.linkonworks.df.busi.service.PatiFlupRuleService;
+import com.linkonworks.df.busi.service.PatiService;
+import com.linkonworks.df.busi.utils.ActionUtil;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.MobileFlup;
+import com.linkonworks.df.vo.NationDict;
+import com.linkonworks.df.vo.Pati;
+import com.opensymphony.xwork2.ActionSupport;
+
+public class PatiAction extends ActionSupport {
+	private HttpServletResponse response;
+	private PatiService patiService;
+	private NationDictService nationDictService;
+	private PatiFlupRuleService patiFlupRuleService;
+	private MobileFlupService mobileFlupService;
+	private Pati pati;
+	private Map<String, String> map = new HashMap<String, String>();
+	private Page<Pati> page = new Page<Pati>(); // 参数传递(pageSize
+	private String ids;
+
+	public String addPati() {
+		ActionUtil.printParamsJSON();
+		try {
+			HttpSession session = ServletActionContext.getRequest()
+					.getSession();
+			Employee e = (Employee) session.getAttribute("employee");
+			pati.setEmployeeCode(e.getJobnum());
+			int result = patiService.insert(pati);
+			String json = "";
+
+			if (result >= 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	public String updPati() {
+		try {
+			Map<String,Object> map=new HashMap<String,Object>();
+			map.put("flupMobile", pati.getFlupMobile());
+			map.put("inpatiNumber", pati.getInpatiNumber());
+			map.put("patiSerial", pati.getPatiSerial());
+			int result = patiService.update(pati);
+			int res=patiFlupRuleService.update(map);
+			String json = "";
+			if (result+res > 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String delPati() {
+		String arr_ids[] = ids.split(",");
+		try {
+			int result = patiService.delete(Arrays.asList(arr_ids));
+			String json = "";
+			if (result > 0) {
+				response = ServletActionContext.getResponse();
+				json = "{\"ok\":" + "\"" + result + "\"" + "}";
+				response.getWriter().print(json.toString());
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+
+	public String query() {
+		List<NationDict> list = nationDictService.getAll();
+		JSON json = JSONArray.fromObject(list);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String queryPages() {
+		page.setParams(map);
+		Map<String, Object> itemMap = new HashMap<String, Object>();
+		itemMap.put("rows", patiService.getPagePati(page));
+		itemMap.put("totalRecord", page.getTotalRecord());
+		itemMap.put("totalPage", page.getTotalPage());
+		itemMap.put("pageNo", page.getPageNo());
+		JSON json = JSONArray.fromObject(itemMap);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/***
+	 * 获取病人基本信息
+	 * 
+	 * @return
+	 */
+	public String patiInfo() {
+		Pati p = patiService.getPatiInfo(map);
+		JSON json = JSONArray.fromObject(p);
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void checkPati() {
+		try {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("patiSerial", pati.getPatiSerial());
+			map.put("inpatiNumber", pati.getInpatiNumber());
+			HttpServletResponse response = ServletActionContext.getResponse();
+			Pati p = patiService.checkPati(map);
+			if (p != null) {
+				response.getWriter().print("true");
+			} else {
+				response.getWriter().print("false");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/*****
+	 * 历史随访信息记录
+	 * @return
+	 */
+	public String queryHistory(){
+		page.setParams(map);
+		Map<String, Object> results=new HashMap<String, Object>();
+		List<Map<String,Object>> list=patiService.historyInfo(page);
+		results.put("rows",list);
+		results.put("totalRecord",page.getTotalRecord());
+		results.put("totalPage", page.getTotalPage());
+		results.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(results);
+		return null;
+	}
+	
+	
+	/*****
+	 * 对历史随访信息进行修改并保存
+	 * @return
+	 */
+	public String addFlupItems(){
+		HttpSession session=ServletActionContext.getRequest().getSession();
+		Employee employee=(Employee) session.getAttribute("employee");
+		HttpServletRequest  request = ServletActionContext.getRequest();
+		String arr[]=request.getParameterValues("map.group[]");
+		List<MobileFlup> list=new ArrayList<MobileFlup>();
+		//生活指导方式,心里调整,单选,127,zf,良好
+		//体征,体重,文本,122,zf,444
+		//症状,无症状,复选,116,zf,无症状
+		String flupNameId=map.get("flupNameId");
+		String patiSerial=map.get("patiSerial");
+		String inpatiNumber=map.get("inpatiNumber");
+		String evaluate=map.get("evaluate");
+		String flupTaskId=map.get("flupTaskId");
+		int result=0;
+		Map<String,String> checkMobileFlup=new HashMap<String,String>();
+		checkMobileFlup.put("patiSerial", patiSerial);
+		checkMobileFlup.put("inpatiNumber", inpatiNumber);
+		checkMobileFlup.put("taskId", flupTaskId);
+		int checkCount=mobileFlupService.deleteFlupItem(checkMobileFlup);
+		MobileFlup mobileFlup=null;
+			for(int i=0;i<arr.length;i++){
+				String str[]=arr[i].split(",");
+				mobileFlup=new MobileFlup();
+				mobileFlup.setGroupOne(str[0]);
+				if((str[2]!=null) && (str[2].equals("文本"))){
+					mobileFlup.setFlupGroupId(str[3]);
+					mobileFlup.setGroupTwo(str[1]);
+					mobileFlup.setGroupThree("");
+					mobileFlup.setItemName(str[5]);
+					mobileFlup.setDataType(str[4]);
+					if(str.length>6){
+						mobileFlup.setItemValue(str[6]);
+					}else{
+						mobileFlup.setItemValue("");
+					}
+				}else if((str[2]!=null) && (str[2].equals("单选"))){
+					mobileFlup.setFlupGroupId(str[3]);
+					mobileFlup.setGroupTwo(str[1]);
+					mobileFlup.setGroupThree("");
+					mobileFlup.setItemName(str[5]);
+					mobileFlup.setDataType(str[4]);
+					mobileFlup.setItemValue(str[5]);
+				}else{
+					mobileFlup.setFlupGroupId(str[3]);
+					mobileFlup.setGroupTwo(str[1]);
+					mobileFlup.setGroupThree("");
+					mobileFlup.setItemName(str[5]);
+					mobileFlup.setDataType(str[4]);
+					mobileFlup.setItemValue(str[5]);
+				}
+				mobileFlup.setFlupTaskId(flupTaskId);
+				mobileFlup.setFlupNameId(flupNameId);
+				mobileFlup.setInpatiNumber(inpatiNumber);
+				mobileFlup.setPatiSerial(patiSerial);
+				
+				list.add(mobileFlup);
+			}
+			result=mobileFlupService.insertBatch(list);
+			HttpServletResponse response=ServletActionContext.getResponse();
+			try {
+				PrintWriter out=response.getWriter();
+				ServletActionContext.getResponse().setContentType("text/html;charset=UTF-8");
+				out.print(result);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return null;
+	}
+	
+	
+	/****
+	 * 打印随访表
+	 * @return
+	 */
+	public void printFlupName(){
+		
+	}
+	
+
+	public PatiService getPatiService() {
+		return patiService;
+	}
+
+	public void setPatiService(PatiService patiService) {
+		this.patiService = patiService;
+	}
+
+	public Pati getPati() {
+		return pati;
+	}
+
+	public void setPati(Pati pati) {
+		this.pati = pati;
+	}
+
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	public Page<Pati> getPage() {
+		return page;
+	}
+
+	public void setPage(Page<Pati> page) {
+		this.page = page;
+	}
+
+	public String getIds() {
+		return ids;
+	}
+
+	public void setIds(String ids) {
+		this.ids = ids;
+	}
+
+	public NationDictService getNationDictService() {
+		return nationDictService;
+	}
+
+	public void setNationDictService(NationDictService nationDictService) {
+		this.nationDictService = nationDictService;
+	}
+
+	
+
+	public PatiFlupRuleService getPatiFlupRuleService() {
+		return patiFlupRuleService;
+	}
+
+	public void setPatiFlupRuleService(PatiFlupRuleService patiFlupRuleService) {
+		this.patiFlupRuleService = patiFlupRuleService;
+	}
+
+	public MobileFlupService getMobileFlupService() {
+		return mobileFlupService;
+	}
+
+	public void setMobileFlupService(MobileFlupService mobileFlupService) {
+		this.mobileFlupService = mobileFlupService;
+	}
+
+	
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" 
+	xmlns:soap="http://cxf.apache.org/bindings/soap"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://cxf.apache.org/bindings/soap 
+	   					http://cxf.apache.org/schemas/configuration/soap.xsd 
+	   					http://cxf.apache.org/jaxws 
+	   					http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<!-- 加载cxf配置文件 -->
+	 <import resource="classpath:META-INF/cxf/cxf.xml"/>
+	
+	<!-- WEBService Service层注入 -->
+	<bean id="dictWebService" class="com.linkonworks.df.busi.webservice.serviceImpl.DictWebServiceImpl">
+		<property name="dictDao" ref="dictDao"></property>
+	</bean>
+	
+	<bean id="authInterceptor" class="com.linkonworks.df.busi.webservice.util.AuthInterceptor"></bean>
+	
+	<!--<jaxws:endpoint implementor="#dictWebService" address="/dictWebService">
+		
+		<jaxws:inInterceptors>
+			<ref bean="authInterceptor"/>
+		</jaxws:inInterceptors>
+ 
+	<jaxws:inInterceptors>
+		<bean class="org.apache.cxf.interceptor.LoggingInInterceptor"></bean>
+		<bean class="org.apache.cxf.binding.soap.saaj.SAAJInInterceptor"></bean>
+		<bean class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+			<constructor-arg>
+				<map>
+					<entry key="action" value="UsernameToken" />   
+                        <entry key="passwordType"  value="PasswordText" />   
+                        <entry key="user" value="cxfServer" />   
+                        <entry key="passwordCallbackRef">   
+                            <ref bean="serverPasswordCallback" />   
+                        </entry>   
+				</map>
+			</constructor-arg>
+		</bean>
+	</jaxws:inInterceptors>
+
+	
+	</jaxws:endpoint>-->
+	<!-- 
+	<jaxws:client id="hw" serviceClass="com.cxf.demo.service.HelloWorld" address="http://localhost:9090/hello_world_servlet/helloWorldService"></jaxws:client> 
+
+
+	<bean id="serverPasswordCallback" class="com.linkonworks.df.busi.webservice.util.ServerPasswordCallback"></bean>
+	
+	 -->
+	
+	
+</beans>

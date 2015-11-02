@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.PremachineManageDao">
+	<select id="getPageGroups" parameterType="page" resultType="premachine">
+		select 
+		machine "machine",
+		ip_address "ipAddress",
+		port "port",
+		state "state",
+		network_ip "networkIp",
+		start_date "startDate",
+		end_date "endDate",
+		id "id"
+ 		from tb_pt_machine_manage  
+ 		where 1=1
+ 		
+ 		<if test="params.machine!=null and params.machine!='' ">
+		    and machine like '%'||#{params.machine}||'%'
+		</if>
+ 		<if test="params.ipAddress!=null and params.ipAddress!=''">
+		   and ip_address = #{params.ipAddress}
+		</if>
+		<if test="params.state!=null and params.state!=''">
+		   and state = #{params.state}
+		</if>
+	</select>
+	
+	<insert id="addBlack" parameterType="premachine">
+		insert into  tb_pt_machine_manage  (id,machine,ip_address,port,state,network_ip,start_date,end_date)
+		values(seq_tb_pt_machine_manage.nextval,#{machine},#{ipAddress},#{port},#{state},'','','')
+	</insert>
+	 
+	 <update id="updatestate" parameterType="premachine">
+		update tb_pt_machine_manage t set
+		<if test="machine!=null and machine!='' ">
+		t.machine = #{machine},
+		</if>
+		<if test="ipAddress!=null and ipAddress!='' ">
+		t.ip_address = #{ipAddress},
+		</if>
+		<if test="port!=null and port!='' ">
+		t.port = #{port},
+		</if>
+		
+		t.state = #{state}
+		
+		where t.id = #{id}
+		
+	</update>
+	<delete id="deleteBlack" parameterType="java.lang.String">
+        delete tb_pt_machine_manage t where t.id= #{id}
+	</delete>
+	   
+</mapper>

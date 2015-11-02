@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FirstTreatDao">
+
+	<resultMap type="java.util.HashMap" id="patiInfoResult">
+		<result property="inpatiNumber" column="inpati_number" />
+		<result property="inpatiSerialNumber" column="inpati_serial_number" />
+		<result property="patiSerial" column="pati_serial" />
+		<result property="billingName" column="billing_name" />
+		<result property="name" column="name" />
+		<result property="gender" column="gender" />
+		<result property="birthDate" column="birth_date" />
+		<result property="country" column="country" />
+		<result property="mobileNumber" column="mobile_number" />
+		<result property="married" column="married" />
+		<result property="inHospitalDate" column="in_hospital_date" />
+		<result property="attendDoctor" column="attend_doctor" />
+		<result property="addr" column="addr" />
+		<result property="doctor" column="doctor" />
+		<result property="inHospDiag" column="in_hosp_diag" />
+		<result property="medicalInsuranceCode" column="medical_insurance_code"/>
+		<result property="deptCode" column="deptcode"/>
+	</resultMap>
+
+
+	<select id="getPatiInfo" statementType="CALLABLE" parameterType="java.util.Map"
+		resultMap="patiInfoResult">
+		{call
+		lkpspf_mid.pkg_get_his.p_get_patientinfo(#{medicalInsuranceCode,mode=IN,jdbcType=VARCHAR},#{inpatiNumber,mode=IN,jdbcType=VARCHAR},#{name,mode=IN,jdbcType=VARCHAR},#{unitCode,mode=IN,jdbcType=VARCHAR},
+		#{someList, mode=OUT, jdbcType=CURSOR, javaType=ResultSet,
+		resultMap=patiInfoResult})
+		}
+	</select>
+
+	<select id="getInspectInfo" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.Inspect">
+	 select b.inspect_name inspectName ,
+       b.report_item_name reportItemName ,
+       b.inspect_result inspectResult,
+       b.refer_scale referScale,
+      to_char(b.inspect_date,'yyyy-MM-dd') inspectDate
+  from (SELECT re.item_name
+          FROM tb_export_response re
+         where re.table_name = 'tb_inspect_detail'
+         and  re.dept_table_id in(
+		select r.id from tb_report_name r where  r.menuname='首次治疗情况'
+		          <if test="deptCode!=null and deptCode!=''">
+		          	  and r.dept_code=#{deptCode}
+		          </if>
+		          )
+         ) a
+ inner join (SELECT i.inspect_name,
+                    idt.report_item_name,
+                    idt.inspect_result,
+                    idt.refer_scale,
+                    i.inspect_date
+               FROM tb_inspect i
+              inner join tb_inspect_detail idt
+                 on i.inspect_id = idt.inspect_id
+                <if test="patiSerial!=null and patiSerial!=''">
+			and i.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and i.inpati_number=#{inpatiNumber}
+		</if>
+		<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+			and i.inpati_serial_number=#{inpatiSerialNumber}
+		</if>) b
+    on a.item_name = b.report_item_name
+    group by b.inspect_name,b.report_item_name,b.inspect_result,b.refer_scale,to_char(b.inspect_date,'yyyy-MM-dd')
+		
+	</select>
+
+
+	<select id="getCheckInfo" parameterType="java.util.Map" resultType="check">
+		  select a.item_name "examSubClass", 
+           to_char(b.apply_date, 'yyyy-mm-dd') "inspectDate",
+            b.description "description"
+      from (SELECT re.item_name
+              FROM tb_export_response re
+             where re.table_name = 'tb_check' and  re.dept_table_id in (
+           select r.id from tb_report_name r where  r.menuname='首次治疗情况'
+            <if test="deptCode!=null and deptCode!=''">
+              and r.dept_code=#{deptCode}
+            </if>
+       ) ) a
+     inner join (SELECT exam_sub_class, apply_date, description
+                   FROM tb_check 
+                  where 1=1
+                    <if test = "patiSerial!=null and patiSerial!=''" >
+		                   and pati_serial = #{patiSerial} 
+		                </if> 
+		                <if test = "inpatiNumber!=null and inpatiNumber!=''" >
+		                   and inpati_number = #{inpatiNumber} 
+		               </if> 
+		               <if test ="inpatiSerialNumber!=null and inpatiSerialNumber!=''" >
+		                   and inpati_serial_number = #{inpatiSerialNumber} 
+		               </if>
+                  ) b
+        on a.item_name = b.exam_sub_class
+	</select>
+	
+	
+	<insert id="savePatiCase" parameterType="java.util.Map" >
+		insert into lkpspf.tb_save_patient(id,pati_serial,inpati_number,tumour_size,tumour_location,is_move,illness)
+		values (lkpspf.seq_tb_save_patient.nextval,#{patiSerial,jdbcType=VARCHAR},#{inpatiNumber,jdbcType=VARCHAR},#{tumorsize,jdbcType=VARCHAR},#{location,jdbcType=VARCHAR},#{change,jdbcType=VARCHAR},#{result,jdbcType=VARCHAR})
+	</insert>
+	
+	<select id="findOperationInfo" parameterType="java.util.Map" resultType="com.linkonworks.df.vo.PatiOperate">
+		select o.operation_name          "operationName",
+       		   o.operation_date          "operationDate",
+               o.pre_operation_diag_name "preOperationDiagName"
+		  from tb_pati_operate o
+		 where 1=1
+		 <if test = "patiSerial!=null and patiSerial!=''" >
+                   and o.pati_serial = #{patiSerial} 
+        </if> 
+        <if test = "inpatiNumber!=null and inpatiNumber!=''" >
+                   and o.inpati_number = #{inpatiNumber} 
+        </if> 
+        <if test ="inpatiSerialNumber!=null and inpatiSerialNumber!=''" >
+                   and o.inpati_serial_number = #{inpatiSerialNumber} 
+       </if>
+		
+	</select>
+
+</mapper>

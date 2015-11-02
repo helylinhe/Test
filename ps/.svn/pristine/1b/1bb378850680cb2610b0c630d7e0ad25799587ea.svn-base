@@ -1,0 +1,259 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.protocol.HttpRequestExecutor;
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.DynamicReportService;
+import com.linkonworks.df.busi.utils.FlupItemResponseTableView;
+import com.linkonworks.df.busi.utils.JsonUtil;
+import com.linkonworks.df.busi.utils.SessionData;
+import com.linkonworks.df.vo.ExportResponse;
+import com.linkonworks.df.vo.FlupGroup;
+import com.linkonworks.df.vo.FlupItemResponse;
+import com.linkonworks.df.vo.FlupNameDict;
+import com.linkonworks.df.vo.ReportName;
+import com.linkonworks.df.vo.Employee;
+import com.linkonworks.df.vo.ReportName;
+
+public class DynamicReportAction {
+	
+	private DynamicReportService dynamicReportService;
+	private Page page=new Page();
+	private Map<String,String> map=new HashMap<String,String>();
+	private Map<String,String> map=new HashMap<String,String>();
+	private ReportName reportName1;
+	private ReportName reportName2;
+	private String status;
+	private String id;
+	private ReportName reportName2;
+	private String status;
+	private String id;
+
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public ReportName getReportName1() {
+		return reportName1;
+	}
+
+	public void setReportName1(ReportName reportName1) {
+		this.reportName1 = reportName1;
+	}
+
+	public ReportName getReportName2() {
+		return reportName2;
+	}
+
+	public void setReportName2(ReportName reportName2) {
+		this.reportName2 = reportName2;
+	}
+
+	public DynamicReportService getDynamicReportService() {
+		return dynamicReportService;
+	}
+
+	public void setDynamicReportService(DynamicReportService dynamicReportService) {
+		this.dynamicReportService = dynamicReportService;
+	}
+	
+	
+	public Map<String, String> getMap() {
+		return map;
+	}
+
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+	public Page getPage() {
+		return page;
+	}
+
+	public void setPage(Page page) {
+		this.page = page;
+	}
+	public Map<String, String> getMap() {
+		return map;
+	}
+	public void setMap(Map<String, String> map) {
+	this.map = map;
+	}
+
+	/****
+	 * 加载报表表名
+	 */
+	public String loadReportName(){
+		List<ReportName> reportName=dynamicReportService.findReportName(SessionData.getDepartmentCode());
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("rows",reportName);
+		JsonUtil.jsonData(map);
+		return null;
+	}
+
+	/****
+	 * 加载报表项
+	 * @return
+	 */
+	public String pageList(){
+		page.setList(SessionData.getDepartmentCode());
+		List<Map<String,String>> list=dynamicReportService.pageReportItems(page);
+		Map<String, Object> results=new HashMap<String, Object>();
+		results.put("rows",list);
+		results.put("totalRecord",page.getTotalRecord());
+		results.put("totalPage", page.getTotalPage());
+		results.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(results);
+		return null;
+	}
+	
+	/*****
+	 * 加载右边指标项
+	 */
+	public String pageRightList(){
+		//deptTableId
+		HttpServletRequest request=ServletActionContext.getRequest();
+		String tableId=request.getParameter("deptTableId");
+		List<ExportResponse> reportName=dynamicReportService.pageRightReportItems(tableId);
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("rows",reportName);
+		JsonUtil.jsonData(map);
+		return null;
+	}
+	
+	/****
+	 * 保存报表下面的报表项
+	 */
+	public String addResponseItem(){
+		List<ExportResponse> list=new ArrayList<ExportResponse>();
+		String tableNameId=map.get("flupNameId");
+		String arr[]=map.get("arrFlupGroupId").split(",");
+		ExportResponse r=null;
+		int count=0;
+		for(int i=0;i<arr.length;i++){
+			r=new ExportResponse();
+			String s[]=arr[i].split(";");
+			r.setGroupName(s[1]);
+			r.setTableName(s[0]);
+			r.setItemName(s[2]);
+			r.setDeptNameId(tableNameId);
+			list.add(r);
+		}
+		if(list.size()>0){
+			dynamicReportService.deleteBatch(tableNameId);
+			count=dynamicReportService.insertBatch(list);
+		}
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(count);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/****
+	 * 预览检验，检查指标项目
+	 */
+	public String findView(){
+		String tableNameId=map.get("flupNameId");
+		List<ExportResponse> reportName=dynamicReportService.pageRightReportItems(tableNameId);
+		String result=FlupItemResponseTableView.viewInspectDeital(reportName);
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+		
+	}
+	
+	/****
+	 * 动态报表表头
+	 */
+	public String reportTitle(){
+		String frozenColumns="{\"field\" : \"inpatiNumber\",\"title\" : \"住院号\",\"width\" : 100,\"align\" : \"left\"},{\"field\" : \"name\",\"title\" : \"姓名\",\"width\" : 100,\"align\" : \"left\"},{\"field\" : \"gender\",\"title\" : \"性别\",\"width\" : 100,\"align\" : \"left\"},{\"field\" : \"inHospitalDate\",\"title\" : \"入院日期\",\"width\" : 100,\"align\" : \"left\"},{\"field\" : \"outHospitalDate\",\"title\" : \"出院日期\",\"width\" : 100,\"align\" : \"left\"}";
+		String str="";
+		List<ExportResponse> columns=dynamicReportService.getReportItems("010101");
+		for(int i=0;i<columns.size();i++){
+			if(i==columns.size()){
+				str += "{\"field\" : \"column"+(i+1)+"\",\"title\" : \""+columns.get(i).getItemName()+"\",\"width\" : 150,\"align\" : \"left\"}";
+			}else{
+				str += "{\"field\" : \"column"+(i+1)+"\",\"title\" : \""+columns.get(i).getItemName()+"\",\"width\" : 150,\"align\" : \"left\"},";
+			}
+			
+		}
+		
+		/***
+		 * {"field" : 'TABLESUMMARY',"title" : '表概要',"width" : 100,"align" : 'left'}
+		 */
+		String dynamicColumn=str.substring(0,str.length()-1);
+		String result="{\"frozenColumns\":[["+frozenColumns+"]],\"columns\":[["+dynamicColumn+"]]}";
+		HttpServletResponse response = ServletActionContext.getResponse();
+		try {
+			PrintWriter out = response.getWriter();
+			out.print(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+//分页查询动态报表列表
+	public void pageReport(){
+		page.setParams(map);
+		Map<String, Object> pMap = new HashMap<String, Object>();
+		pMap.put("rows", dynamicReportService.pageReport(page));
+		pMap.put("totalRecord", page.getTotalRecord());
+		pMap.put("totalPage", page.getTotalPage());
+		pMap.put("pageNo", page.getPageNo());
+		JsonUtil.jsonData(pMap);
+	}
+	//添加动态报表信息
+	public void addReport(){
+		Employee employee = (Employee) ServletActionContext.getRequest().getSession().getAttribute("employee");
+		this.reportName1.setEmployeeNo(employee.getJobnum());
+		dynamicReportService.addReport(reportName1);
+	}
+	//修改动态报表信息
+	public void editReport(){
+		Employee employee = (Employee) ServletActionContext.getRequest().getSession().getAttribute("employee");
+		this.reportName2.setEmployeeNo(employee.getJobnum());
+		dynamicReportService.editReport(reportName2);
+	}
+	
+	public void updateStatus(){
+		System.out.println(reportName2.getId());
+		System.out.println(reportName2.getStatus());
+		dynamicReportService.editStatus(reportName2);
+	}
+}

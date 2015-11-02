@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.MedicalHistoryDao">
+
+	<insert id="insert" parameterType="medicalhistory">
+		insert into tb_medical_history(mhisy_code,pati_serial,inpati_number,inpati_serial_number,name,dept_code,
+										attack_yearmon,mhisy_mnum,fir_symptom,fir_symptom_depict,orig_diag_code,
+										orig_diag_name,orig_diag_depict,ckd_period,diag_date,allergy_state,
+										allergy_depict,fam_hist_state,fam_entity_name,fam_diag_code,fam_diag_name,
+										fam_hist_depict,ops_state,ops_depict,infect_state,infect_depict,smoking_state,
+									smoking_yearnum,smoking_num,quite_smoking_year,wine_state,wine_yearnum,
+									  wine_num,quite_wine_year,operate_date,operate_employee_code,unit_code)
+							   values(seq_tb_medical_history.nextval,#{patiSerial},#{inpatiNumber},#{inpatiSerialNumber},#{name},#{deptCode},
+							   		 #{attackYearmon},#{mhisyMnum},#{firSymptom},#{firSymptomDepict},#{origDiagCode},#{origDiagName},#{origDiagDepict},
+							   		 #{ckdPeriod},to_date(#{diagDate},'YYYY-MM-DD'),#{allergyState},#{allergyDepict},#{famHistState},#{famEntityName},
+							   		 #{famDiagCode}, #{famDiagName},#{famHistDepict},#{opsState},#{opsDepict},#{infectState},#{infectDepict},#{smokingState},
+							   		 #{smokingYearnum},#{smokingNum},#{quiteSmokingYear},#{wineState},#{wineYearnum},#{wineNum},#{quiteWineYear},
+							   		 sysdate,#{operateEmployeeCode},#{unitCode}
+							   )
+
+	</insert>
+	
+	<select id="findIcd1O" resultType="com.linkonworks.df.vo.DiagGroup" parameterType="java.util.Map">
+		select g.diagnosis_code "diagnosisCode", 
+				g.diagnosis_name "diagnosisName"
+  			from TB_DIAGGP_TO_ICD10 g
+	</select>
+
+
+</mapper>

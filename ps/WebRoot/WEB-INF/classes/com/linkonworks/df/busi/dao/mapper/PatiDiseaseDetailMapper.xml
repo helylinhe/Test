@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<!-- 保存疾病项 -->
+<mapper namespace="com.linkonworks.df.busi.dao.PatiDiseaseDetailDao">
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		<selectKey keyProperty="id" order="BEFORE" resultType="String">
+			SELECT seq_tb_pati_disease_detail.nextval FROM DUAL
+		</selectKey>
+		insert into
+		tb_pati_disease_detail(id,pati_serial,inpati_number,inpati_serial_number,medical_insurance_code,name,gender,age,disease_name_id,disease_group_id,
+		group_one,group_two,item_name,data_type,item_value,operate_date,operate_employee_code,unit_code,detail_id)
+		SELECT seq_tb_pati_disease_detail.nextval , A.* FROM (
+		<foreach collection="list" item="item" index="index"
+			separator="union">
+			select
+			#{item.patiSerial},#{item.inpatiNumber},#{item.inpatiSerialNumber},#{item.medicalInsuranceCode},#{item.name},
+			#{item.gender},#{item.age},#{item.diseaseNameId},
+			#{item.diseaseGroupId},#{item.groupOne},#{item.groupTwo},#{item.itemName},#{item.dataType},
+			#{item.itemValue},sysdate,#{item.operateEmployeeCode},#{item.unitCode},#{item.detailId}
+			from dual
+		</foreach>
+		) A
+	</insert>
+	<!-- 添加化疗模板指标信息 -->
+		<insert id="inserBatch" parameterType="java.util.List">
+			<selectKey keyProperty="id" order="BEFORE" resultType="String">
+				SELECT seq_tb_pati_disease_detail.nextval FROM DUAL
+			</selectKey>
+		insert into
+		tb_pati_disease_detail(seq_tb_pati_disease_detail.nextval,pati_serial,inpati_number,inpati_serial_number,medical_insurance_code,name,gender,age,disease_name_id,disease_group_id,
+		group_one,group_two,item_name,data_type,item_value,operate_date,operate_employee_code,unit_code,detail_id)
+		SELECT seq_tb_pati_disease_detail.nextval , A.* FROM (
+		<foreach collection="list" item="item" index="index"
+			separator="union">
+			select
+			#{item.patiSerial},#{item.inpatiNumber},#{item.inpatiSerialNumber},#{item.medicalInsuranceCode},#{item.name},
+			#{item.gender},#{item.age},#{item.diseaseNameId},
+			#{item.diseaseGroupId},#{item.groupOne},#{item.groupTwo},#{item.itemName},#{item.dataType},
+			#{item.itemValue},sysdate,#{item.operateEmployeeCode},#{item.unitCode},#{item.detailId}
+			from dual
+		</foreach>
+		) A
+	</insert>
+
+
+	<select id="diseaseItems" parameterType="java.util.Map"
+		resultType="patidiseasedetail">
+		select d.id "id",
+		d.disease_group_id "diseaseGroupId",
+		d.group_one "groupOne",
+		d.group_two "groupTwo",
+		d.item_name "itemName",
+		d.item_value "itemValue",
+		d.data_type "dataType"
+		from tb_pati_disease_detail d
+		where 1=1
+		<if test="patiSerial!=null and patiSerial!=''">
+			and d.pati_serial =#{patiSerial}
+		 	</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and d.inpati_number =#{inpatiNumber}
+		 	</if>
+		<if test="detailId!=null and detailId!=''">
+			and d.detail_id =#{detailId}
+		 	</if>
+		<if test="date!=null and date!=''">
+			and to_char(d.operate_date, 'yyyy-mm-dd') = #{date}
+		 	</if>
+	</select>
+
+	<select id="historyDiseasePage" parameterType="page" resultType="patidiseasedetail">
+		 select A.Detail_Id "detailId",
+	       A.Pati_Serial "patiSerial",
+	       A.Inpati_Number "inpatiNumber",
+	       A.medical_insurance_code "medicalInsuranceCode",
+	       to_char(A.operate_date, 'yyyy-mm-dd') "operateDate",
+	       A.Disease_Name_Id "diseaseNameId",
+	       A.name "name",
+	       A.disease_name "diseaseName"
+	  from (select d.detail_id,
+	               d.pati_serial,
+	               d.inpati_number,
+	               d.medical_insurance_code,
+	               d.operate_date,
+	               d.disease_name_id,
+	               d.name,
+	               dict.disease_name
+	          from tb_pati_disease_detail d,tb_disease_name_dict dict
+	         where 1 = 1 and dict.disease_name_id=d.disease_name_id
+	         <choose>
+				<when test="params.medicalInsuranceCode !=null and  params.medicalInsuranceCode!=''">
+					and d.medical_insurance_code =#{params.medicalInsuranceCode}
+				</when>
+				<otherwise>
+					<if test="params.inpatiNumber !=null and  params.inpatiNumber!=''">
+						and d.inpati_number =#{params.inpatiNumber}
+					</if>
+				</otherwise>
+			</choose>
+			<if test="params.name!=null and params.name!=''">
+				and d.name like '%'||#{params.name}||'%'
+			</if>
+	         group by d.detail_id,
+	                  d.pati_serial,
+	                  d.inpati_number,
+	                  d.medical_insurance_code,
+	                  d.operate_date,
+	                  d.disease_name_id,
+	                  d.name,
+	                  dict.disease_name
+	        order by d.operate_date desc
+	        ) A
+	</select>
+
+	<delete id="deletePatiDiseaseDetailInfo" parameterType="java.lang.String">
+		delete
+		from tb_pati_disease_detail d where d.detail_id=#{_parameter}
+	</delete>
+
+</mapper>

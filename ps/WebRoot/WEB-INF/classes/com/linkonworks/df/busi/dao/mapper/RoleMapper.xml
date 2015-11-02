@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.RoleDao">
+
+	<select id="findRoleList" parameterType="map" resultType="tree">
+		select 
+		  t.role_code "id",
+		  t.role_name "text",
+		  t.role_code "roleCode",
+		  decode(t.role_status,1,'close','close') "state"
+		  from tb_role t
+	</select>
+	
+	<insert id="insert" parameterType="role">
+		insert into tb_role(role_code,role_name,role_status,memo)
+		values(seq_tb_role.nextval,#{roleName},#{roleStatus},#{memo})
+	</insert>
+	
+	
+	<select id="findMenuRole" parameterType="map" resultType="tree">
+		SELECT 
+		  d.id "id", 
+		  d.menu_level "menuLevel", 
+		  d.menu_higher_no "menuHigherNo", 
+		  d.menu_code "menuCode", 
+		  d.menu_name "text"
+		  FROM tb_sys_menu_defi  d where d.del_state=0
+		  order by d.menu_higher_no desc
+	</select>
+	
+</mapper>

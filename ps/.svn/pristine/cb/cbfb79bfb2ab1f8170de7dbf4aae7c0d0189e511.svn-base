@@ -1,0 +1,180 @@
+package com.linkonworks.df.busi.action;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import org.apache.struts2.ServletActionContext;
+
+import com.linkonworks.df.busi.comment.Page;
+import com.linkonworks.df.busi.service.BlackListService;
+import com.linkonworks.df.busi.service.FlupModuleService;
+import com.linkonworks.df.vo.BlackList;
+import com.linkonworks.df.vo.FlupItemResponse;
+import com.linkonworks.df.vo.FlupModule;
+import com.opensymphony.xwork2.ActionSupport;
+
+//
+public class BlackListAction extends ActionSupport{
+	
+	
+	private BlackListService blackListService;	
+	private Page<BlackList> page = new Page<BlackList>(); //参数传递(pageSize pageNumber)
+	private Map<String,String> map = new HashMap<String,String>(); //参数传递(筛选条件参数)
+	
+	
+	/**
+	 * 查询黑名单信息
+	 */
+	public String execute(){
+		page.setParams(map);
+		Map userMap = new HashMap();
+		if(map.get("state") == null || map.get("state").equals("1"))
+			userMap.put("rows",blackListService.getBlackList(page));
+		else
+			userMap.put("rows",blackListService.getBlackListTwo(page));
+		userMap.put("totalRecord",page.getTotalRecord());
+		userMap.put("totalPage", page.getTotalPage());
+		userMap.put("pageNo", page.getPageNo());
+		JSON json=JSONArray.fromObject(userMap);
+		HttpServletResponse response=ServletActionContext.getResponse();
+		try {
+			PrintWriter out=response.getWriter();
+			out.print(json.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 加入黑名单
+	 * @return 
+	 */
+	public String addBlakList(){
+		HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+		 PrintWriter out = null;
+		 try {
+			 out = response.getWriter();
+			 String[] id = request.getParameter("id").split(",");
+			 String[] patiSerial = request.getParameter("patiSerial").split(",");
+			 String[] inpatiNumber = request.getParameter("inpatiNumber").split(",");
+			 String content = request.getParameter("content");
+			 BlackList b = null;
+			 for (int i = 0; i < id.length; i++) {
+				b = new BlackList();
+				b.setAddReasons(content);
+				b.setId(id[i]);
+				b.setPatiSerial(patiSerial[i]);
+				b.setInpatiNumber(inpatiNumber[i]);
+				//修改基本患者状态===>>添加到黑名单表中去
+				blackListService.updatePati(b);
+				blackListService.addBlack(b);	
+			}
+				 out.print("success"); 
+		} catch (Exception e) {
+				 out.print("faild");
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * 撤销黑名单
+	 * @return
+	 */
+	public String deleteBlackList(){
+		
+		HttpServletResponse response = ServletActionContext.getResponse();
+		 HttpServletRequest request = ServletActionContext.getRequest();
+		 PrintWriter out = null;
+		 try {
+			 out = response.getWriter();
+			 String[] id = request.getParameter("id").split(",");
+			 String[] patiSerial = request.getParameter("patiSerial").split(",");
+			 String[] inpatiNumber = request.getParameter("inpatiNumber").split(",");
+			 BlackList b = null;
+			 for (int i = 0; i < id.length; i++) {
+//				 blackListService.updataBlack(id[i]);
+//				 blackListService.updatePatiTwo(id[i]);
+				 b = new BlackList();
+				 b.setPatiSerial(patiSerial[i]);
+				 b.setInpatiNumber(inpatiNumber[i]);
+				 blackListService.updataBlack(b);
+				 blackListService.updatePatiTwo(b);
+			}
+				 out.print("success"); 
+		} catch (Exception e) {
+				 out.print("faild");
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public Page<BlackList> getPage() {
+		return page;
+	}
+	public void setPage(Page<BlackList> page) {
+		this.page = page;
+	}
+	public Map<String, String> getMap() {
+		return map;
+	}
+	public void setMap(Map<String, String> map) {
+		this.map = map;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public void setBlackListService(BlackListService blackListService) {
+		this.blackListService = blackListService;
+	}
+	
+	
+
+}

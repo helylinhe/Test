@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DiagKnowledgeDao">
+
+	<!-- 查询随访知识库 -->
+	<select id="findPageList" parameterType="page" resultType="diagKnowledge">
+	      select 
+		       k.audits_state auditsState,
+		       F_GET_DEPT_NAME(k.dept_code) deptName,
+		       k.dept_code deptCode,
+		       k.knowledge_code knowledgecode,
+		       k.body_part_name bodypartname,
+		       k.main_symptom mainsymptom,
+	         k.main_symptom_spell mainsymptomspell,
+	         k.symptom_desc symptomdesc,
+	         k.symptom_analyze symptomanalyze,
+	         k.advise advise,
+	         to_char(k.log_date, 'yyyy-mm-dd') logdate,
+	         F_GET_EMPLOYEE_NAME(k.log_empolyee_code) logempolyeecode,
+	         k.diag_code diagCode,
+	         k.diag_name diagName,
+	         d.id dictId
+	    from tb_diag_knowledge k, tb_dict d
+	   where  d.name = k.body_part_name 
+	  <if test="params.bodyPartName!=null  and params.bodyPartName!=''">
+	     and k.body_part_name like '%'||#{params.bodyPartName}||'%'
+	 </if>
+	  <if test="params.mainSymptom!=null  and params.mainSymptom!=''">
+	   and k.main_symptom like  '%'||#{params.mainSymptom}||'%'
+	 </if>
+	  <if test="params.diagCode!=null  and params.diagCode!=''">
+	   and k.diag_code like  '%'||#{params.diagCode}||'%'
+	 </if>
+	 <if test="list!=null">
+	     and k.dept_code in 
+	 	<foreach collection="list" index="index" item="item"
+	 		open="(" separator="," close=")">
+	    	#{item.deptCode}
+	    </foreach>
+	 </if>
+		
+	</select>
+	<!-- 新增随访知识库 -->
+	<insert id="insert" parameterType="diagKnowledge"  >
+		insert into tb_diag_knowledge values(seq_tb_diag_knowledge.nextval,#{deptCode},#{bodyPartName},#{mainSymptom},#{mainSymptomSpell},2,#{diagCode},#{diagName},#{symptomDesc},#{symptomAnalyze},#{advise},sysdate,#{logEmpolyeeCode},'')  
+	</insert>
+	<!-- 修改随访知识库 -->
+	<update id="update" parameterType="diagKnowledge" >
+		update tb_diag_knowledge d set d.symptom_Analyze =#{symptomAnalyze},d.symptom_desc =#{symptomDesc},d.body_part_name =#{bodyPartName},d.main_symptom =#{mainSymptom},d.advise =#{advise},d.log_date=sysdate,d.log_empolyee_code =#{logEmpolyeeCode}  where d.knowledge_code= #{knowledgeCode}
+	</update>
+	
+	<!-- 查询全部的症状 -->
+	<select id="findListByCode"  resultType="dict">
+	 select d.id id ,d.code_type codeType ,d.code code ,d.name name ,d.echo_serial echoSerial from tb_dict d where code_type='症状部位' order by d.id
+	</select>
+	<!-- 查找主要症状的方法 -->
+	<select id="findListByDictId" resultType="com.linkonworks.df.vo.SymptomDict" parameterType="String">
+	 select s.symptom_code symptomCode ,s.symptom_name symptomName, s.place_code placeCode ,s.input_code inputCode , to_char(s.log_date,'yyyy-mm-dd') logDate ,s.employee_code employeeCode from tb_symptom_dict s where s.place_code = #{dictId} order by s.symptom_code 
+	</select>
+	<!-- 新增主要症状的方法 -->
+	<insert id="insertSymptomDict" parameterType="com.linkonworks.df.vo.SymptomDict">
+	  insert into tb_symptom_dict values(seq_tb_symptom_dict.nextVal,#{symptomName},#{placeCode},#{inputCode},sysdate,'10010')
+	</insert>
+	<!-- 修改主要症状的方法 -->
+	<update id="updateSymptomDict" parameterType="com.linkonworks.df.vo.SymptomDict">
+	  update tb_symptom_dict s set s.symptom_name = #{symptomName},s.log_date= sysdate,s.employee_code = '10011' where s.symptom_code = #{symptomCode}
+	</update>
+	<!-- 修改随访知识的审核状态 -->
+	<update id="updateDiagKnowledge" parameterType="diagKnowledge" >
+		update tb_diag_knowledge d set d.audits_state = #{auditsState},d.diag_remark = #{diagRemark}  where d.knowledge_code= #{knowledgeCode}
+	</update>
+	<!-- 检索查询DiagnosisDict -->
+	<select id="findDiagnosisDict"  resultType="com.linkonworks.df.vo.DiagnosisDict" parameterType="String">
+	   select * from(select  d.diagnosis_code diagnosisCode , d.diagnosis_name diagnosisName,rownum rn from tb_icd10_dict d where rownum<![CDATA[<=]]>80 and 
+	  <if test="searType!=null">
+	   d.input_code like #{keyInfo}
+	  </if>
+	  <if test="searType==null">
+	  d.diagnosis_name like #{keyInfo}
+	  </if>
+	   order by length(d.diagnosis_name) 
+	   ) where rn <![CDATA[>]]>0
+	</select>
+</mapper>

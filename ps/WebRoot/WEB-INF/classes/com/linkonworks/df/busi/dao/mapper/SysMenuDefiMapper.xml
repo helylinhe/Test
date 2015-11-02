@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.SysMenuDefiDao">
+	
+	<select id="getSysMenu" parameterType="java.lang.String" resultType="sysmenudefi">
+		select m.id "id",
+       m.menu_code "menuCode",
+       m.menu_name "menuName"
+       from tb_sys_menu_defi m 
+       where m.menu_code in (
+ 		select p.menu_code from tb_privs p where p.privs_id in (
+  			select  rp.privs_id from tb_role_privs  rp where rp.role_code=#{_parameter}))
+	</select>
+	
+	<select id="getMenuItems" parameterType="java.lang.String" resultType="sysmenudefi">
+	select
+		s.id "id",
+		s.menu_level "menuLevel",
+		s.menu_no "menuNo",
+		s.menu_higher_no "menuHigherNo",
+	    s.menu_code "menuCode",
+	    s.menu_name "menuName",
+	    s.url_address "urlAddress"
+	from tb_sys_menu_defi s where s.del_state=0 and s.menu_code in (
+		select privs.menu_code from tb_privs privs where privs.privs_id in (
+		select p.privs_id from tb_role_privs p where p.role_code in(
+		 select r.role_code from tb_role r where r.role_code =#{_parameter})))
+	</select>
+	
+	
+	<select id="getParentMenu" parameterType="java.util.List" resultType="sysmenudefi">
+		select
+  			s.id "id",
+  			s.menu_level "menuLevel",
+  			s.menu_no "menuNo" ,
+  			s.menu_higher_no "menuHigherNo",
+  			s.menu_code "menuCode",
+  			s.menu_name "menuName"
+ 		from tb_sys_menu_defi s where s.del_state=0 and 
+ 		s.menu_code in 
+ 		<foreach collection="list" item="item" index="index"
+ 		  open="("	separator=","  close=")">
+ 		  		#{item}
+ 		  </foreach>
+ 		 order by s.menu_no asc
+	</select>
+	
+	<select id="findListByObject" parameterType="sysmenudefi" resultType="sysmenudefi">
+		select d.menu_code "menuCode",
+			   d.menu_name "menuName" 
+	    from tb_sys_menu_defi d
+		where d.del_state=0 and d.menu_level=1
+	</select>
+	
+	<insert id="insert" parameterType="sysmenudefi">
+		insert into tb_sys_menu_defi(id,prog_name,menu_level,menu_no,menu_higher_no,menu_code,menu_name,operate_date,operate_employee_code,del_state,url_address)
+		values(seq_tb_sys_menu_defi.nextval,#{progName},#{menuLevel},#{menuNo},#{menuHigherNo},#{menuCode},#{menuName},sysdate,#{operateEmployeeCode},#{delState},#{urlAddress})
+	</insert>
+	
+</mapper>

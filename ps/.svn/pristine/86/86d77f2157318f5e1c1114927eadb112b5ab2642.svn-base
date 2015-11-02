@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+	<!-- 住院信息 -->
+<mapper namespace="com.linkonworks.df.busi.dao.InpatiDiagDao">
+	<select id="getPageInpati" parameterType="page" resultType="inpatidiag">
+	select
+    tid.pati_serial "patiSerial",
+    tid.inpati_number "inpatiNumber",
+    tid.inpati_serial_number
+    "inpatiSerialNumber",
+    tid.in_hospital_date
+    "inHospitalDate",
+    tid.out_hospital_date "outHospitalDate",
+    tid.out_dept
+    "inDept",
+    tid.in_hospital_weight "inHospitalWeight",
+    tid.memo "memo",
+    tid.diag "diag",
+    out_hosp_diag
+    "outHospDiag",
+    tid.out_hosp_diag_other "outHospDiagOther",
+    tid.diag_situation "diagSituation",
+    f_get_dept_name(tid.out_dept)"department",
+    F_GET_EMPLOYEE_NAME(tid.chief_doctor) "chiefDoctor",
+    F_GET_EMPLOYEE_NAME(tid.attend_doctor) "attendDoctor",
+    F_GET_EMPLOYEE_NAME(tid.inpati_doctor) "inpatiDoctor",
+      tid.in_hospital_dates "inHospitalDates",
+      f_get_dept_name(tid.out_ward) "outWard",
+      tp.inpati_times "inpatiTimes",
+      tp.name "name",
+      tp.medical_insurance_code "medicalInsuranceCode",
+      tp.gender "gender",
+      F_GET_PATI_AGE(tp.pati_serial, tp.inpati_number) "age",
+      tp.birth_addr
+      "birthAddr",
+      tp.birth_weight "birthWeight",
+      tp.birth_date "birthDate",
+      tp.country "country",
+      tp.race "race",
+      tp.certificate_type
+      "certificateType",
+      tp.certificate_number "certificateNumber",
+      tp.mobile_number "mobileNumber",
+      tp.family_number "familyNumber",
+      tp.profession_title "professionTitle",
+      tp.married "married",
+      tp.current_addr "currentAddr",
+      tp.current_postcode "currentPostcode",
+      tp.account_addr "accountAddr",
+      tp.account_postcode "accountPostcode",
+      tp.relation_name "relationName",
+      F_GET_RELATION_NAME(tp.relation) "relation",
+      tp.relation_mobile_number "relationMobileNumber",
+      tp.same_family_inpat_number "sameFamilyInpatNumber",
+      tp.current_inpati_serial "currentInpatiSerial",
+      tp.unit_code "unitCode",
+      tp.birth_state "birthState",
+      f_get_flup_mobile (tid.inpati_serial_number,tid.inpati_number) "flupMobile",
+      tp.billing_name "billingName",
+      tid.charity_aid_money charityDidMoney,
+      tid.total_money totalMoney
+      from
+      tb_inpati_diag tid
+      left join tb_pati tp
+      on tid.inpati_number=tp.inpati_number
+      where 1=1
+		<if test="params.inpatiNumber!=null and params.inpatiNumber!=''">
+			and tid.inpati_number=#{params.inpatiNumber}
+		</if>
+		<if test="params.patiSerial!=null and params.patiSerial!=''">
+			and tid.pati_serial=#{params.patiSerial}
+		</if>
+	</select>
+	
+	<select id="patiInfo" parameterType="java.util.Map" resultType="inpatidiag">
+		select
+    tid.pati_serial "patiSerial",
+    tid.inpati_number "inpatiNumber",
+    tid.inpati_serial_number
+    "inpatiSerialNumber",
+    to_char(tid.in_hospital_date,'yyyy-MM-dd') "inHospitalDate",
+    to_char(tid.out_hospital_date,'yyyy-MM-dd') "outHospitalDate",
+    tid.out_dept
+    "inDept",
+    tid.in_hospital_weight "inHospitalWeight",
+    tid.memo "memo",
+    tid.diag "diag",
+    out_hosp_diag
+    "outHospDiag",
+    tid.out_hosp_diag_other "outHospDiagOther",
+    tid.diag_situation "diagSituation",
+    f_get_dept_name(tid.out_dept)"department",
+    F_GET_EMPLOYEE_NAME(tid.chief_doctor) "chiefDoctor",
+    F_GET_EMPLOYEE_NAME(tid.attend_doctor) "attendDoctor",
+    F_GET_EMPLOYEE_NAME(tid.inpati_doctor) "inpatiDoctor",
+      tid.in_hospital_dates "inHospitalDates",
+      f_get_dept_name(tid.out_ward) "outWard",
+      tp.inpati_times "inpatiTimes",
+      tp.name "name",
+      tp.medical_insurance_code "medicalInsuranceCode",
+      tp.gender "gender",
+      F_GET_PATI_AGE(tp.pati_serial, tp.inpati_number) "age",
+      tp.birth_addr
+      "birthAddr",
+      tp.birth_weight "birthWeight",
+      tp.birth_date "birthDate",
+      tp.country "country",
+      tp.race "race",
+      tp.certificate_type
+      "certificateType",
+      tp.certificate_number "certificateNumber",
+      tp.mobile_number "mobileNumber",
+      tp.family_number "familyNumber",
+      tp.profession_title "professionTitle",
+      tp.married "married",
+      tp.current_addr "currentAddr",
+      tp.current_postcode "currentPostcode",
+      tp.account_addr "accountAddr",
+      tp.account_postcode "accountPostcode",
+      tp.relation_name "relationName",
+      F_GET_RELATION_NAME(tp.relation) "relation",
+      tp.relation_mobile_number "relationMobileNumber",
+      tp.same_family_inpat_number "sameFamilyInpatNumber",
+      tp.current_inpati_serial "currentInpatiSerial",
+      tp.unit_code "unitCode",
+      tp.birth_state "birthState",
+      f_get_flup_mobile (tid.inpati_serial_number,tid.inpati_number) "flupMobile",
+      tp.billing_name "billingName",
+      tid.charity_aid_money charityDidMoney,
+      tid.total_money totalMoney
+      from
+      tb_inpati_diag tid
+      left join tb_pati tp
+      on tid.inpati_number=tp.inpati_number
+      where 1=1
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and tid.inpati_number=#{inpatiNumber}
+		</if>
+		<if test="patiSerial!=null and patiSerial!=''">
+			and tid.pati_serial=#{patiSerial}
+		</if>
+		<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+			and tid.inpati_serial_number=#{inpatiSerialNumber}
+		</if>
+	</select>
+	
+	
+	<select id="findPatis" resultType="com.linkonworks.df.vo.InpatiDiag"
+		parameterType="page">
+			select 
+			 diag.pati_serial           patiSerial,
+	         diag.inpati_number          "inpatiNumber",
+	         diag.inpati_serial_number   "inpatiSerialNumber",
+	         diag.medical_insurance_code  "medicalInsuranceCode",
+	         diag.name   "name",
+	         to_char(diag.in_hospital_date,'yyyy-mm-dd') "inHospitalDate",
+	         to_char(diag.out_hospital_date,'yyyy-mm-dd') "outHospitalDate",
+	         diag.gender "gender",
+	         F_GET_PT_PATI_AGE(diag.pati_serial,diag.inpati_number) "age",
+	         diag.out_dept "dept",
+	         F_GET_DEPT_NAME(diag.out_dept) "department",
+	         diag.unit_code "unitCode"
+	    from tb_pt_inpati_diag diag
+	   where 1=1  
+			<if test="params.inpatiNumber !=null and  params.inpatiNumber!=''">
+				and diag.inpati_number = #{params.inpatiNumber}
+			</if>
+		   <if test="params.medicalInsuranceCode !=null and  params.medicalInsuranceCode!=''">
+				 and diag.medical_insurance_code =#{params.medicalInsuranceCode}
+			</if>
+		   <if test="params.name !=null and  params.name!=''">
+				and diag.name  like '%'||#{params.name}||'%'
+			</if>
+			<if test="list!=null and  list.size()>0">
+			and diag.out_dept in 
+				<foreach collection="list" item="item" open="(" close=")" separator=",">
+					#{item.deptCode, jdbcType=NUMERIC}  
+				</foreach>
+		   </if>
+	
+	</select>
+	
+	<!-- 医嘱信息页面，查询病患信息 -->
+	<select id="doctoradvice"  parameterType="page" resultType="com.linkonworks.df.vo.InpatiDiag">
+		  select  
+       		diag.pati_Serial "patiSerial",
+       		diag.inpati_number "inpatiNumber",
+       		diag.name   "name",
+       		diag.inpati_serial_number   "inpatiSerialNumber",
+       		to_char(diag.in_hospital_date,'yyyy-mm-dd') "inHospitalDate",
+       		to_char(diag.out_hospital_date,'yyyy-mm-dd') "outHospitalDate",
+       		F_GET_EMPLOYEE_NAME(diag.attend_doctor) "attendDoctor",
+       		F_GET_DEPT_NAME(diag.out_dept) "department"
+       		from  tb_inpati_diag diag
+       		where 1=1
+ 				and diag.unit_code='2'
+ 			<if test="params.inpatiNumber !=null and  params.inpatiNumber!=''">
+				and diag.inpati_number = #{params.inpatiNumber}
+			</if>
+		   <if test="params.medicalInsuranceCode !=null and  params.medicalInsuranceCode!=''">
+				 and diag.medical_insurance_code =#{params.medicalInsuranceCode}
+			</if>
+ 			 <if test="params.name !=null and  params.name!=''">
+				and diag.name  like '%'||#{params.name}||'%'
+			</if>
+			
+	</select>
+	
+</mapper>

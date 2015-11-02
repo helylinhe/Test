@@ -1,0 +1,363 @@
+package com.linkonworks.df.vo;
+
+public class DoctorAdvice {
+	
+	
+	
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getPatiSerial() {
+		return patiSerial;
+	}
+
+	public void setPatiSerial(String patiSerial) {
+		this.patiSerial = patiSerial;
+	}
+
+	public String getInpatiSerialNumber() {
+		return inpatiSerialNumber;
+	}
+
+	public void setInpatiSerialNumber(String inpatiSerialNumber) {
+		this.inpatiSerialNumber = inpatiSerialNumber;
+	}
+
+	public String getInsuranceType() {
+		return insuranceType;
+	}
+
+	public void setInsuranceType(String insuranceType) {
+		this.insuranceType = insuranceType;
+	}
+
+	public String getInsuranceNo() {
+		return insuranceNo;
+	}
+
+	public void setInsuranceNo(String insuranceNo) {
+		this.insuranceNo = insuranceNo;
+	}
+
+	public String getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+
+	public String getOrderClassName() {
+		return orderClassName;
+	}
+
+	public void setOrderClassName(String orderClassName) {
+		this.orderClassName = orderClassName;
+	}
+
+	public String getStartDateTime() {
+		return startDateTime;
+	}
+
+	public void setStartDateTime(String startDateTime) {
+		this.startDateTime = startDateTime;
+	}
+
+	public String getOrderText() {
+		return orderText;
+	}
+
+	public void setOrderText(String orderText) {
+		this.orderText = orderText;
+	}
+
+	public String getDosage() {
+		return dosage;
+	}
+
+	public void setDosage(String dosage) {
+		this.dosage = dosage;
+	}
+
+	public String getDosageUnits() {
+		return dosageUnits;
+	}
+
+	public void setDosageUnits(String dosageUnits) {
+		this.dosageUnits = dosageUnits;
+	}
+
+	public String getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(String frequency) {
+		this.frequency = frequency;
+	}
+
+	public String getAdministration() {
+		return administration;
+	}
+
+	public void setAdministration(String administration) {
+		this.administration = administration;
+	}
+
+	public String getPerformSchedule() {
+		return performSchedule;
+	}
+
+	public void setPerformSchedule(String performSchedule) {
+		this.performSchedule = performSchedule;
+	}
+
+	public String getEatTime() {
+		return eatTime;
+	}
+
+	public void setEatTime(String eatTime) {
+		this.eatTime = eatTime;
+	}
+
+	public String getStopDateTime() {
+		return stopDateTime;
+	}
+
+	public void setStopDateTime(String stopDateTime) {
+		this.stopDateTime = stopDateTime;
+	}
+
+	public String getStopDoctor() {
+		return stopDoctor;
+	}
+
+	public void setStopDoctor(String stopDoctor) {
+		this.stopDoctor = stopDoctor;
+	}
+
+	public String getDoctor() {
+		return doctor;
+	}
+
+	public void setDoctor(String doctor) {
+		this.doctor = doctor;
+	}
+
+	public String getFreqDetail() {
+		return freqDetail;
+	}
+
+	public void setFreqDetail(String freqDetail) {
+		this.freqDetail = freqDetail;
+	}
+
+	public String getDrugBillingAttr() {
+		return drugBillingAttr;
+	}
+
+	public void setDrugBillingAttr(String drugBillingAttr) {
+		this.drugBillingAttr = drugBillingAttr;
+	}
+
+	public String getPerformResult() {
+		return performResult;
+	}
+
+	public void setPerformResult(String performResult) {
+		this.performResult = performResult;
+	}
+
+	public String getFreqCounter() {
+		return freqCounter;
+	}
+
+	public void setFreqCounter(String freqCounter) {
+		this.freqCounter = freqCounter;
+	}
+
+	public String getStopNurse() {
+		return stopNurse;
+	}
+
+	public void setStopNurse(String stopNurse) {
+		this.stopNurse = stopNurse;
+	}
+
+	public String getBaoxiao() {
+		return baoxiao;
+	}
+
+	public void setBaoxiao(String baoxiao) {
+		this.baoxiao = baoxiao;
+	}
+
+	public String getBackFlag() {
+		return backFlag;
+	}
+
+	public void setBackFlag(String backFlag) {
+		this.backFlag = backFlag;
+	}
+
+	public String getColumn3() {
+		return column3;
+	}
+
+	public void setColumn3(String column3) {
+		this.column3 = column3;
+	}
+
+	public String getStopFlag() {
+		return stopFlag;
+	}
+
+	public void setStopFlag(String stopFlag) {
+		this.stopFlag = stopFlag;
+	}
+
+	public String getBz() {
+		return bz;
+	}
+
+	public void setBz(String bz) {
+		this.bz = bz;
+	}
+
+	public String getUnitCode() {
+		return unitCode;
+	}
+
+	public void setUnitCode(String unitCode) {
+		this.unitCode = unitCode;
+	}
+
+	private String id;
+	
+	private String patiSerial;//病人编号
+	
+	private String inpatiSerialNumber;//住院流水号
+	
+	private String insuranceType;//医保类型
+	
+	private String insuranceNo;//医保编号
+	
+	private String orderNo;//医嘱序号
+	
+	private String orderClassName;//医嘱类型
+	
+	private String startDateTime;//开始医嘱时间
+	
+	private String orderText;//医嘱内容
+	
+	private String dosage;//剂量
+	
+	private String dosageUnits;//剂量单位
+	
+	private String frequency;//执行频率
+	
+	private String administration;//用药方法
+	
+	private String  performSchedule;//执行时间
+	
+	private String eatTime;//服药时间
+	
+	private String stopDateTime;//停止医嘱时间
+	
+	private String stopDoctor;//停止医生
+	
+	private String doctor;//医生
+	
+	private String freqDetail;//医生说明
+	
+	private String drugBillingAttr;//自
+	
+	private String performResult;//阴性/阳性
+	
+	private String freqCounter;//次数
+	
+	private String stopNurse;//停止护士
+	
+	private String baoxiao;//是否报销
+	
+	private String backFlag;//退货标识
+	
+	private String column3;
+	
+	private  String stopFlag;//停止标识
+	
+	private String bz; //备注
+	
+	private String unitCode;//院区代码 
+	
+	private String repeatIndicator;//周期
+
+	public String getRepeatIndicator() {
+		return repeatIndicator;
+	}
+
+	public void setRepeatIndicator(String repeatIndicator) {
+		this.repeatIndicator = repeatIndicator;
+	}
+
+	public DoctorAdvice(String id, String patiSerial,
+			String inpatiSerialNumber, String insuranceType,
+			String insuranceNo, String orderNo, String orderClassName,
+			String startDateTime, String orderText, String dosage,
+			String dosageUnits, String frequency, String administration,
+			String performSchedule, String eatTime, String stopDateTime,
+			String stopDoctor, String doctor, String freqDetail,
+			String drugBillingAttr, String performResult, String freqCounter,
+			String stopNurse, String baoxiao, String backFlag, String column3,
+			String stopFlag, String bz, String unitCode, String repeatIndicator) {
+		super();
+		this.id = id;
+		this.patiSerial = patiSerial;
+		this.inpatiSerialNumber = inpatiSerialNumber;
+		this.insuranceType = insuranceType;
+		this.insuranceNo = insuranceNo;
+		this.orderNo = orderNo;
+		this.orderClassName = orderClassName;
+		this.startDateTime = startDateTime;
+		this.orderText = orderText;
+		this.dosage = dosage;
+		this.dosageUnits = dosageUnits;
+		this.frequency = frequency;
+		this.administration = administration;
+		this.performSchedule = performSchedule;
+		this.eatTime = eatTime;
+		this.stopDateTime = stopDateTime;
+		this.stopDoctor = stopDoctor;
+		this.doctor = doctor;
+		this.freqDetail = freqDetail;
+		this.drugBillingAttr = drugBillingAttr;
+		this.performResult = performResult;
+		this.freqCounter = freqCounter;
+		this.stopNurse = stopNurse;
+		this.baoxiao = baoxiao;
+		this.backFlag = backFlag;
+		this.column3 = column3;
+		this.stopFlag = stopFlag;
+		this.bz = bz;
+		this.unitCode = unitCode;
+		this.repeatIndicator = repeatIndicator;
+	}
+
+	public DoctorAdvice() {
+		super();
+	}
+	
+	
+	
+	
+}
+
+
+
+
+

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.DiseaseNameDictDao">
+
+		<select id="getDiseaseNameDict" parameterType="page" resultType="diseaseNameDict">
+				select
+					disease_name_id "diseaseNameId",
+					disease_name "diseaseName",
+					dept_code   "deptCode",
+					f_get_dept_name(dept_code) "deptName",
+					to_char(operate_date,'yyyy-mm-dd') "operateDate",
+					employee_code "employeeCode",
+					use_state "useState",
+					use_state "useStateBt"
+ 				from tb_disease_name_dict where 1=1
+ 
+				<if test="params.diseaseName!=null and params.diseaseName!=''">
+				   and disease_name like '%${params.diseaseName}%'
+				</if>
+				<if test="params.deptCode!=null and params.deptCode!=''">
+				   and dept_code = #{params.deptCode}
+				</if>
+				<if test="params.operateDate!=null and params.operateDate!=''">
+				   and operate_date = #{params.operateDate}
+				</if>
+				 order by operate_date desc
+			</select>
+			
+			
+			<update id="updateState" parameterType="diseaseNameDict">
+					update tb_disease_name_dict set use_state=#{useState} where disease_name_id=#{diseaseNameId}
+			</update>
+			
+			<update id="updateDiseaseNameDict" parameterType="diseaseNameDict">
+					update tb_disease_name_dict set 
+						disease_name = #{diseaseName},
+						dept_code = #{deptCode},
+						operate_date = sysdate,
+						employee_code = #{employeeCode}
+					where disease_name_id=#{diseaseNameId}
+			</update>
+			
+			<insert id="addDiseaseNameDict" parameterType="diseaseNameDict">
+				insert into tb_disease_name_dict(disease_name_id,disease_name,disease_name_spell,dept_code,operate_date,employee_code,use_state)  values(seq_tb_disease_name_dict.nextval,#{diseaseName},#{diseaseNameSpell},#{deptCode},sysdate,#{employeeCode},0)    
+			</insert>
+			
+</mapper>

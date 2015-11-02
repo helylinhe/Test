@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+				        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+				        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+	
+	<context:annotation-config />
+	
+	
+  	
+	<!-- 数据源 -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">	
+			<property name="jndiName" value="java:comp/env/jta/demoDS" /> 
+		
+		    <!--  在tomcat的context.xml中配置这样的数据源 	
+			<Resource name="jta/demoDS"  auth="Container" 
+				type="javax.sql.DataSource" 
+				username=""  
+				password="" 
+				driverClassName="oracle.jdbc.driver.OracleDriver"  
+				url="jdbc:oracle:thin:@192.168.23.130:1521:linkon"  
+				maxActive="100"  
+				maxIdle="30"  
+				maxWait="-1"
+				minIdle="2"
+				removeAbandonedTimeout="5"
+			    testOnBorrow="true"
+			    testWhileIdle="true"
+			    testOnReturn="true"
+			    removeAbandoned="true"
+			    logAbandoned="true"
+			    validationQuery="select 1 from dual"/>
+			-->
+	</bean>
+	
+	
+
+    <!-- SqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+    	<property name="dataSource" ref="dataSource" />
+    	<property name="configLocation" value="classpath:sqlMapConfig.xml" />  
+  	</bean> 
+
+	<!-- 以下事务管理相关 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" > 
+    	<property name="dataSource" ref="dataSource"/> 
+  	</bean> 
+  	
+  	<!-- 配置事务的传播特性 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager" >
+		<tx:attributes>
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException"/>
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.RuntimeException" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+			<tx:method name="save*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception"/>	<!-- 检查一下代码是否有save开头的 -->
+			<!-- 只是获取数据 -->
+			<tx:method name="find*" read-only="false"/>
+      		<tx:method name="get*" propagation="SUPPORTS"/>
+      		<tx:method name="select*" propagation="SUPPORTS"/>
+			<tx:method name="*"  read-only="false" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- service的所有方法 -->
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="allServiceMethod" expression="execution(* com.linkonworks.df.busi.service.impl.*.*(..))" />
+		<aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice" />
+	</aop:config>
+	
+</beans>

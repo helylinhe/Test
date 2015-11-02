@@ -1,0 +1,808 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkonworks.df.busi.dao.FlupTaskDao">
+	<select id="findPageList" parameterType="page" 
+		resultType="com.linkonworks.df.vo.FlupTask">
+		select F_GET_PATI_AGE(d.pati_serial, d.inpati_number) age,
+       d.medical_insurance_code medicalInsuranceCode,
+       r.flup_table_name_id flupTableNameId,
+       f.flup_name flupName,
+       k.id id,
+       F_GET_DIAG_GROUP_NAME(r.diag_group_code) diagGroupName,
+       r.diag_group_code diagGroupCode,
+       d.inpati_serial_number inpatiSerialNumber,
+       d.pati_serial patiSerial,
+       f_get_dept_name(d.out_dept) deptName,
+       d.inpati_number inpatiNumber,
+       d.name name,
+       d.gender gender,
+       to_char(d.out_hospital_date, 'yyyy-mm-dd') outHospitalDate,
+       r.flup_mobile flupMobile,
+       d.out_dept deptCode,
+       k.flup_doctor_code flupDoctor,
+       F_GET_EMPLOYEE_NAME(k.flup_doctor_code) flupDoctorCode,
+       d.out_hosp_diag outHospitalDiag,
+       d.billing_name billingCode,
+       r.flup_status flupStatus,
+       to_char(k.flup_plan_date, 'yyyy-mm-dd') flupPlanDate,
+       r.flup_object flupObject,
+       r.flup_num flupTimes,
+       r.flup_type flupType,
+       r.flup_way flupWay,
+       r.flup_period flupPeriod,
+       k.flup_complete flupComplete,
+       F_GET_EMPLOYEE_NAME(d.inpati_doctor) chiefDoctor,
+       F_GET_EMPLOYEE_NAME(d.attend_doctor) attendDoctor,
+       F_GET_operate_time(d.pati_serial,
+                          d.inpati_number,
+                          d.inpati_serial_number) operateTime,
+       to_char(k.flup_date, 'yyyy-mm-dd') flupDate,
+       k.actual_doctor_code actualDoctorCode,
+       F_GET_EMPLOYEE_NAME(k.actual_doctor_code) actualDoctorName
+  from tb_inpati_diag d
+  left join  tb_flup_task k on d.inpati_number = k.inpati_number 
+  and  d.inpati_serial_number = k.inpati_serial_number
+  left join tb_employee e
+    on k.flup_doctor_code = e.jobnum
+  left join tb_pati_flup_rule r
+    on r.inpati_number = d.inpati_number
+   and r.inpati_serial_number = d.inpati_serial_number
+ left join tb_flup_name_dict f on f.flup_name_id = r.flup_table_name_id
+ where 1=1
+			   
+		<if test="params.name!=null  and params.name!='' ">
+			and d.name like '%'||#{params.name}||'%'
+	 </if>
+		<if
+			test="params.patiSerial!=null  and params.patiSerial!=''">
+			and d.pati_serial like '%'||#{params.patiSerial}||'%'
+	 </if>
+		<if
+			test="params.inpatiNumber!=null  and params.inpatiNumber!=''">
+			and d.inpati_number like  '%'||#{params.inpatiNumber}||'%'
+	 </if>
+		<if
+			test="params.outHospDiag!=null  and params.outHospDiag!=''">
+			and d.out_hosp_diag_code like '%'||#{params.outHospDiag}||'%'
+	 </if>
+		<!-- 计划随访医生 -->
+	 	<if test="params.flupDoctorCode!=null  and params.flupDoctorCode!='' ">
+	   		and e.name like '%'||#{params.flupDoctorCode}||'%'
+	 	</if>
+
+		<if test="list!=null">
+			and r.dept_code in
+			<foreach item="item" index="index" collection="list"
+				open="(" separator="," close=")">
+				#{item.deptCode, jdbcType=NUMERIC}  
+	 </foreach>
+
+		</if>
+		<if test="params.flupStatus!=null and params.flupStatus!=''">
+			and k.flup_status like '%'||#{params.flupStatus}||'%'
+	 </if>
+		<if
+			test="params.flupComplete!=null and params.flupComplete!=''">
+			and k.flup_complete like '%'||#{params.flupComplete}||'%'
+	 </if>
+		<if
+			test="params.flupWay!=null and params.flupWay!='%%' and params.flupWay!='' and params.flupWay!='%doctor%'  and params.flupWay!='%info%' ">
+			and r.flup_way like #{params.flupWay}
+	 </if>
+		<if test="params.flupWay=='%doctor%'">
+			and r.flup_way in ('1','4','5')
+	 </if>
+		<if test="params.flupWay=='%info%'">
+			and r.flup_way in ('2','3')
+	 </if>
+		<if test="params.flupDateStart!=null and params.flupDateStart!=''">
+			and k.flup_plan_date <![CDATA[>=]]>
+			to_date(#{params.flupDateStart},'yyyy-MM-dd')
+		</if>
+		<if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+			and k.flup_plan_date <![CDATA[<=]]>
+			to_date(#{params.flupDateEnd},'yyyy-MM-dd')
+		</if>
+		<if
+			test="params.outHospitalDateStart!=null and params.outHospitalDateStart!=''">
+			 and to_date(to_char(d.out_hospital_date,'yyyy-MM-dd'),'yyyy-MM-dd') <![CDATA[>=]]>
+			to_date(#{params.outHospitalDateStart},'yyyy-MM-dd')
+		</if>
+		<if
+			test="params.outHospitalDateEnd!=null and params.outHospitalDateEnd!=''">
+			 and to_date(to_char(d.out_hospital_date,'yyyy-MM-dd'),'yyyy-MM-dd') <![CDATA[<=]]>
+			to_date(#{params.outHospitalDateEnd},'yyyy-MM-dd')
+		</if>
+		<if test="params.Yesterday!='' and params.Yesterday!=null">
+	  and  to_char((k.flup_plan_date),'yyyy/MM/dd') <![CDATA[<]]>   to_char((sysdate),'yyyy/MM/dd')
+	  and k.flup_complete ='0'
+	 </if>
+	 <if test="params.History!='' and params.History!=null">
+	  		and k.flup_complete ='1'
+	 </if>
+	 <if test="params.Today!='' and params.Today!=null">
+	  and to_char(k.flup_plan_date,'yyyy/MM/dd') =   to_char((sysdate),'yyyy/MM/dd')
+	  and k.flup_complete = '0'
+	 </if>
+	 <if test="params.Tomorrow!='' and params.Tomorrow!=null">
+	  and  to_char((k.flup_plan_date),'yyyy/MM/dd') <![CDATA[=]]>   to_char((sysdate+1),'yyyy/MM/dd')
+	  and k.flup_complete =  '0'
+	 </if>
+	  <if test="params.diagGroupCode !='' and  params.diagGroupCode != null">
+	  and  r.diag_group_code =#{params.diagGroupCode}
+	 </if>
+		order by k.flup_plan_date,k.flup_way
+	</select>
+
+	<select id="findALlEmployees" resultType="com.linkonworks.df.vo.Employee">
+
+		select e.name name , e.jobnum jobnum , e.dept_code deptCode from
+		tb_employee e where e.status =1 and e.dept_code
+
+		in
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item.deptCode, jdbcType=NUMERIC}  
+		</foreach>
+		order by e.name
+	</select>
+
+
+	<update id="update" parameterType="com.linkonworks.df.vo.FlupTask">
+		update tb_flup_task d set d.flup_status =#{flupStatus},d.flup_way
+		=#{flupWay},d.flup_type =#{flupType},
+		d.flup_plan_date
+		=to_date(#{flupPlanDate},'yyyy-MM-dd'),d.flup_object=#{flupObject},d.flup_mobile
+		=#{flupMobile},
+		d.flup_doctor_code =#{flupDoctorCode}
+		<if test="flupTableNameId!='' and flupTableNameId!=null">
+			, d.flup_table_name_id =#{flupTableNameId}
+		</if>
+		where d.inpati_number = #{inpatiNumber} and d.inpati_serial_number =
+		#{inpatiSerialNumber} and d.id=#{id}
+	</update>
+
+
+
+	<update id="updateProperty" parameterType="com.linkonworks.df.vo.FlupTask">
+		update tb_flup_task d
+		<set>
+			<if test="flupStatus!=null and flupStatus!=''">
+				d.flup_status =#{flupStatus},
+			</if>
+			<if test="flupWay!=null and flupWay!=''">
+				d.flup_way =#{flupWay},
+			</if>
+			<if test="flupType!=null and flupType!=''">
+				d.flup_type =#{flupType},
+			</if>
+			<if test="flupPeriod!=null and flupPeriod!=''">
+				d.flup_period =#{flupPeriod},
+			</if>
+			<if test="flupPlanDate!=null and flupPlanDate!=''">
+				d.flup_plan_date =to_date(#{flupPlanDate},'yyyy-MM-dd'),
+			</if>
+			<if test="flupObject!=null and flupObject!=''">
+				d.flup_object=#{flupObject},
+			</if>
+			<if test="flupMobile!=null and flupMobile!=''">
+				d.flup_mobile =#{flupMobile},
+			</if>
+			<if test="flupDoctorCode!=null and flupDoctorCode!=''">
+				d.flup_doctor_code =#{flupDoctorCode},
+			</if>
+			<if test="flupTableNameId!=null and flupTableNameId!=''">
+				d.flup_table_name_id =#{flupTableNameId}
+			</if>
+			where d.inpati_number = #{inpatiNumber} and d.inpati_serial_number =
+			#{inpatiSerialNumber}
+		</set>
+	</update>
+
+
+	<select id="findInfoById" parameterType="java.lang.String"
+		resultType="fluptask">
+		<!--
+			select p.id, t.flup_type "flupType", t.flup_object "flupObject",
+			t.flup_times "flupTimes", t.flup_mobile "flupMobile", d.flup_name
+			"flupName", t.flup_table_name_id "flupTableNameId" from tb_pati
+			p,tb_flup_task t,tb_flup_name_dict d where
+			t.inpati_number=p.inpati_number and
+			t.flup_table_name_id=d.flup_name_id and p.id=#{_parameter}
+		--><!--
+
+		select t1.id ,t1.flup_way "flupWay", t1.mobile_number
+		"mobileNumber",t1.flup_type "flupType",t1.flup_object "flupObject",
+		t1.flup_times "flupTimes",t1.flup_mobile "flupMobile",t1.dept_code
+		"deptCode",to_char(t2.flup_plan_date,'yyyy-mm-dd') "flupPlanDate",
+		t1.doctor_name "flupDoctor",
+		t1.flup_name "flupName",t1.flup_table_name_id "flupTableNameId"
+		from (
+		select p.id,
+		p.mobile_number,
+		t.dept_code,
+		t.flup_type,
+		t.flup_way ,
+		t.flup_object ,
+		t.flup_times ,
+		t.flup_mobile ,
+		d.flup_name ,
+		t.flup_table_name_id,
+		t.flup_plan_date,
+		F_GET_EMPLOYEE_NAME(t.flup_doctor_code) doctor_name
+		from tb_pati p,tb_flup_task t,tb_flup_name_dict d
+		where t.inpati_number=p.inpati_number and
+		t.flup_table_name_id=d.flup_name_id and p.id=#{_parameter}) t1,
+		(select p.id,
+		max(t.flup_plan_date) flup_plan_date
+		from tb_pati p,tb_flup_task t,tb_flup_name_dict d
+		where t.inpati_number=p.inpati_number and
+		t.flup_table_name_id=d.flup_name_id
+		and p.id=#{_parameter}
+		group by p.id) t2
+		where t1.id=t2.id and t1.flup_plan_date=t2.flup_plan_date and
+		t1.id=#{_parameter}
+	-->
+		select t2.id,
+       t3.medical_insurance_code "medicalInsuranceCode",
+         t2.flup_way "flupWay",
+         t1.mobile_number "mobileNumber",
+         t2.flup_type "flupType",
+         t2.flup_object "flupObject",
+         t2.flup_times "flupTimes",
+         t2.flup_mobile "flupMobile",
+         t2.dept_code "deptCode",
+         to_char(t2.flup_plan_date, 'yyyy-mm-dd') "flupPlanDate",
+         F_GET_EMPLOYEE_NAME(t2.flup_doctor_code) "flupDoctor",
+         d.flup_name "flupName",
+         d.flup_name_id "flupTableNameId",
+         t2.unit_code "unitCode"
+    from tb_pati t1, tb_flup_task t2, tb_flup_name_dict d,tb_inpati_diag t3
+   where t1.inpati_number = t2.inpati_number
+     and t1.pati_serial = t2.pati_serial
+     and t2.FLUP_TABLE_NAME_ID = d.flup_name_id
+     and t3.inpati_number = t2.inpati_number
+     and t3.inpati_serial_number = t2.inpati_serial_number
+	   and t2.id = #{_parameter}
+	
+	</select>
+
+
+	<update id="updateFlupTask" parameterType="fluptask">
+		update tb_flup_task
+		<set>
+			<if test="flupComplete!=null and flupComplete!=''">
+				flup_complete=#{flupComplete},
+			</if>
+			<if test="flupDate!=null and flupDate!=''">
+				flup_date=sysdate,
+			</if>
+			<if test="flupTimes!=null and flupTimes!=''">
+				flup_times=#{flupTimes},
+			</if>
+			<if test="flupDoctorCode!=null and flupDoctorCode!=''">
+				flup_doctor_code=#{flupDoctorCode},
+			</if>
+			<if test="flupEvaluate!=null and flupEvaluate!=''">
+				flup_evaluate=#{flupEvaluate},
+			</if>
+			<if test="actualDoctorCode!=null and actualDoctorCode!=''">
+				actual_doctor_code=#{actualDoctorCode},
+			</if>
+			<if test="returnDate!=null and returnDate!=''">
+				return_date=to_date(#{returnDate},'yyyy-mm-dd hh:mi:ss'),
+			</if>
+			<if test="returnDeptCode!=null and returnDeptCode!=''">
+				return_dept_code=#{returnDeptCode},
+			</if>
+			<if test="flupResult!=null and flupResult!=''">
+				flup_result=#{flupResult},
+			</if>
+			<if test="flupFailre!=null and flupFailre!=''">
+				flup_failre=#{flupFailre},
+			</if>
+
+		</set>
+		
+		where 1=1
+		<if test="patiSerial!=null and patiSerial!=''">
+			and pati_serial=#{patiSerial}
+			</if>
+		<if test="inpatiNumber!=null and inpatiNumber!=''">
+			and inpati_number=#{inpatiNumber}
+			</if>
+		<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+			and inpati_serial_number=#{inpatiSerialNumber}
+			</if>
+		<if test="id!=null and id!=''">
+			and id=#{id}
+			</if>
+
+	</update>
+
+
+	<select id="findFlupTask" parameterType="java.util.Map"
+		resultType="fluptask">
+		select t.id "id",
+		t.pati_serial "patiSerial",
+		t.inpati_number "inpatiNumber",
+		t.flup_date "flupDate",
+		t.flup_times "flupTimes",
+		t.flup_doctor_code "flupDoctorCode",
+		t.flup_evaluate "flupEvaluate"
+		from tb_flup_task t
+		where t.pati_serial=#{patiSerial} and
+		t.inpati_number=#{inpatiNumber}
+		and t.id=#{id}
+ 
+		
+	</select>
+
+
+
+
+	<update id="updatePatiFlup" parameterType="com.linkonworks.df.vo.FlupTask">
+		update tb_pati_flup_rule d set d.flup_status =#{flupStatus},d.flup_way
+		=#{flupWay},d.flup_type =#{flupType},
+		d.flup_object=#{flupObject},d.flup_mobile =#{flupMobile},d.flup_doctor
+		=#{flupDoctorCode}, d.operate_employee_code =#{employeeCode} ,
+		d.operate_date =sysdate where d.inpati_number= #{inpatiNumber} and
+		d.inpati_serial_number = #{inpatiSerialNumber} 
+	</update>
+
+	<update id="updateflupPlan" parameterType="com.linkonworks.df.vo.FlupTask">
+		update tb_flup_plan f set f.flup_stop_state = 1 ,f.flup_stop_reason
+		='病故' where f.inpati_number =#{inpatiNumber} and
+		f.inpati_serial_number =#{inpatiSerialNumber} and f.task_open = 0
+	</update>
+
+
+
+	<select id="findflFlupTasksInfo" resultType="com.linkonworks.df.vo.FlupTask"
+		parameterType="com.linkonworks.df.vo.FlupTask">
+		select d.name name, d.pati_serial patiSerial,
+		to_char(d.flup_date,'yyyy-mm-dd') flupDate, d.flup_way
+		flupWay,d.flup_period flupPeriod ,d.flup_type flupType,
+		F_GET_EMPLOYEE_NAME(d.flup_doctor_code) flupDoctorCode
+		,d.flup_evaluate flupEvaluate from tb_flup_task d where
+		d.inpati_number = #{inpatiNumber} and d.inpati_serial_number =
+		#{inpatiSerialNumber}
+	</select>
+
+
+	<select id="getFlupTask" parameterType="page" resultType="fluptask">
+		select
+		a.id "id",
+		a.pati_serial "patiSerial",
+		a.inpati_number "inpatiNumber",
+		b.name "name",
+		b.gender "gender",
+		b.age "age",
+		b.out_hosp_diag "outHospDiag",
+		c.send_content "sendContent",
+		c.send_way "sendWay",
+		(case when c.send_way is null then '未发送' else '已发送' end) "sendResult",
+		d.operation_date "operationDate",
+		d.operation_name "operationName",
+		b.chief_doctor "chiefDoctor",
+		b.attend_doctor "attendDoctor",
+		a.flup_mobile "flupMobile",
+		a.flup_type "flupType",
+		a.flup_plan_date "flupPlanDate",
+		'' "deptName"
+		from tb_flup_task a left join tb_inpati_diag b on
+		a.pati_serial=b.pati_serial
+		left join tb_flup_detail c on a.pati_serial = c.pati_serial
+		left join tb_pati_operate d on a.pati_serial = d.pati_serial
+	</select>
+	<select id="getFlupModule" resultType="flupmodule"
+		parameterType="java.lang.String">
+		select info_name "infoName",info_content "infoContent"
+		from tb_flup_module where 1=1 and info_belong=#{smsstyle}
+	</select>
+	<insert id="addFlupDetail" parameterType="flupdetail">
+		insert into
+		tb_flup_detail(id,flup_id,pati_serial,inpati_number,send_mobile_number,send_way,info_type,send_content,send_date,name)
+		select
+		seq_tb_blacklist.nextval,id,pati_serial,inpati_number,flup_mobile,#{sendWay},#{infoType},#{sendContent},sysdate,#{name}
+		from tb_flup_task where inpati_serial_number=#{id} and
+		pati_serial=#{patiSerial} and inpati_number=#{inpatiNumber}
+	</insert>
+	<select id="getByIdQuery" resultType="flupdetail" parameterType="java.lang.String">
+		select
+		pati_serial "patiSerial",
+		inpati_number "inpatiNumber",
+		name "name",
+		send_content "sendContent",
+		send_date "sendDate"
+		from
+		(
+		select pati_serial ,inpati_number ,name,send_content ,send_date from
+		tb_flup_detail
+
+		union all
+
+		select pati_serial ,inpati_number ,name ,reply_content ,reply_date from
+		tb_reply_detail
+		)Y where pati_serial=#{id}
+	</select>
+
+
+	<select id="getPhoneByType" resultType="com.linkonworks.df.vo.TeletePhone"
+		parameterType="com.linkonworks.df.vo.TeletePhone">
+
+		select mobile_number mobileNumber,family_number familyNumber,
+		relation_mobile_number relationMobileNumber from tb_pati where
+		inpati_number = #{inpatiNumber}
+		<if test="patiSerial!=null  and  patiSerial!=''">
+			and pati_serial = #{patiSerial}  
+	</if>
+	</select>
+
+
+		<select id="findPageListPlan" parameterType="page" resultType="com.linkonworks.df.vo.FlupTask">
+          select F_GET_PATI_AGE(d.pati_serial, d.inpati_number) age,
+           k.flup_table_name_id flupTableNameId,
+           f.flup_name flupName,
+           k.id id,
+           d.inpati_serial_number inpatiSerialNumber,
+           d.pati_serial patiSerial,
+           f_get_dept_name(k.dept_code) deptName,
+           d.inpati_number inpatiNumber,
+           d.name name,
+           d.gender gender,
+           to_char(d.out_hospital_date, 'yyyy-mm-dd') outHospitalDate,
+           k.flup_mobile flupMobile,
+           k.dept_code deptCode,
+           d.out_hosp_diag outHospitalDiag,
+           d.billing_name billingCode,
+           k.flup_status flupStatus,
+           k.flup_object flupObject,
+           k.flup_type flupType,
+           k.flup_way flupWay,
+           k.flup_period flupPeriod,
+           k.UNIT_CODE unitCode,
+           F_GET_EMPLOYEE_NAME(d.chief_doctor) chiefDoctor,
+           F_GET_EMPLOYEE_NAME(d.attend_doctor) attendDoctor,
+           F_GET_operate_time(d.pati_serial,
+                              d.inpati_number,
+                              d.inpati_serial_number) operateTime
+      from tb_inpati_diag d, tb_pati_flup_rule k, tb_flup_name_dict f
+     where d.inpati_number = k.inpati_number
+       and d.inpati_serial_number = k.inpati_serial_number
+       and f.flup_name_id = k.flup_table_name_id
+	 <if test="params.name!=null  and params.name!='' ">
+	   and d.name like  '%'||#{params.name}||'%'
+	 </if>
+	  <if test="params.patiSerial!=null  and params.patiSerial!=''">
+	   and k.pati_serial like '%'|| #{params.patiSerial}||'%'
+	 </if>
+	  <if test="params.inpatiNumber!=null  and params.inpatiNumber!=''">
+	   and k.inpati_number like '%'|| #{params.inpatiNumber}||'%'
+	 </if>
+	  <if test="params.outHospDiag!=null  and params.outHospDiag!=''">
+	   and d.out_hosp_diag_code like '%'|| #{params.outHospDiag}||'%'
+	 </if>
+	 <if test="list!=null">
+		 and k.dept_code in 
+		 <foreach item="item" index="index" collection="list"
+				open="(" separator="," close=")">
+				 #{item.deptCode}  
+		 </foreach>
+	 
+	 </if>
+	 <if test="params.flupStatus!=null  and params.flupStatus!=''">
+	   and k.flup_status like '%'||  #{params.flupStatus}||'%'
+	 </if>
+	 <if test="params.flupWay!=null and params.flupWay!='%%' and params.flupWay!='' and params.flupWay!='%doctor%'  and params.flupWay!='%info%' ">
+	   and k.flup_way like #{params.flupWay}
+	 </if>
+	 <if test="params.flupWay=='%doctor%'">
+	   and k.flup_way in ('1','4','5')
+	 </if>
+	 <if test="params.flupWay=='%info%'">
+	   and k.flup_way in ('2','3')
+	 </if>
+	 <if test="params.flupDateStart!=null and params.flupDateStart!=''">
+	   and k.flup_plan_date <![CDATA[>=]]> to_date(#{params.flupDateStart},'yyyy-MM-dd') 
+	 </if>
+	 <if test="params.flupDateEnd!=null and params.flupDateEnd!=''">
+	   and k.flup_plan_date <![CDATA[<=]]> to_date(#{params.flupDateEnd},'yyyy-MM-dd') 
+	 </if>
+	 <if test="params.outHospitalDateStart!=null and params.outHospitalDateStart!=''">
+	   and d.out_hospital_date <![CDATA[>=]]> to_date(#{params.outHospitalDateStart},'yyyy-MM-dd') 
+	 </if>
+	 <if test="params.outHospitalDateEnd!=null and params.outHospitalDateEnd!=''">
+	   and d.out_hospital_date <![CDATA[<=]]> to_date(#{params.outHospitalDateEnd},'yyyy-MM-dd') 
+	 </if>
+	 <if test="params.Yesterday!='' and params.Yesterday!=null">
+	  and k.flup_plan_date  <![CDATA[<]]>   sysdate
+	 </if>
+	 <if test="params.Today!='' and params.Today!=null">
+	  and to_char(k.flup_plan_date,'yyyy/MM/dd') =   to_char((sysdate),'yyyy/MM/dd')
+	 </if>
+	 <if test="params.Tomorrow!='' and params.Tomorrow!=null">
+	  and k.flup_plan_date <![CDATA[>]]>  sysdate
+	 </if>
+	 order by d.out_hospital_date desc
+	</select>
+	
+	<!-- 随访任务分配/计划调整 -->
+	<select id="findPlan" parameterType="com.linkonworks.df.vo.FlupTask" resultType="com.linkonworks.df.vo.FlupTask">
+	  select f.name,f.flup_plan_date flupPlanDate, f.flup_num flupTimes,f.task_open taskOpen
+        from  tb_flup_plan f 
+        where f.inpati_number = #{inpatiNumber} and f.inpati_serial_number = #{inpatiSerialNumber}
+        and f.flup_stop_state=0
+        order by f.flup_num
+	</select>
+
+		<select id="findPlan2" parameterType="com.linkonworks.df.vo.FlupTask" resultType="com.linkonworks.df.vo.FlupTask">
+	 	 select p.flup_plan_date flupPlanDate, p.flup_num flupTimes
+        from  tb_flup_plan p where
+         p.inpati_number = #{inpatiNumber}
+        and p.inpati_serial_number = #{inpatiSerialNumber}
+	</select>
+	
+	
+<!-- 修改随访计划 -->
+
+	<update id="updatePlan" parameterType="com.linkonworks.df.vo.FlupTask">
+	  update tb_flup_plan p
+          set p.flup_plan_date = to_date(#{flupPlanDate},'yyyy-MM-dd')  
+        where p.inpati_number = #{inpatiNumber}
+          and p.inpati_serial_number =#{inpatiSerialNumber}
+          and p.flup_num = #{flupTimes}  
+	</update>
+	<update id="updatePlan2" parameterType="com.linkonworks.df.vo.FlupTask">
+	   update tb_flup_task t set
+         t.flup_plan_date =(select p.flup_plan_date
+                  from tb_flup_plan p
+                 where p.pati_serial = t.pati_serial
+                   and p.inpati_number = t.inpati_number
+                   and p.inpati_serial_number = t.inpati_serial_number
+                   and p.flup_num = t.flup_times)
+         where exists
+         (select 1
+                  from tb_flup_plan p
+                 where p.pati_serial = t.pati_serial
+                   and p.inpati_number = t.inpati_number
+                   and p.inpati_serial_number = t.inpati_serial_number
+                   and p.flup_num = t.flup_times)
+           and t.inpati_number = #{inpatiNumber}
+           and t.flup_times = #{flupTimes} 
+	</update>
+	
+	<!-- 停止随访计划 -->
+
+		<update id="stopPlan" parameterType="com.linkonworks.df.vo.FlupTask">    
+        update tb_flup_plan set flup_stop_state=1,flup_stop_reason=#{flupName}        
+         where  tb_flup_plan.id in
+      	( select f.id
+        from  tb_flup_plan f left join tb_flup_task p
+        on  
+         (p.inpati_number = f.inpati_number
+        and f.inpati_serial_number = p.inpati_serial_number) where 
+          f.inpati_number = #{inpatiNumber} and f.inpati_serial_number =  #{inpatiSerialNumber}  
+        and ((f.task_open=1 and p.flup_complete =0) or f.task_open=0)
+        and f.flup_stop_state=0)
+	</update>
+	<!-- 删除未随访的任务 -->
+	<delete id="delteTask" parameterType="com.linkonworks.df.vo.FlupTask">
+	     delete tb_flup_task t where t.inpati_number = #{inpatiNumber} 
+	     and t.inpati_serial_number = #{inpatiSerialNumber}
+	     and t.flup_complete ='0'
+	</delete>
+	<!-- 修改随访规则 -->
+	<update id="updateRuleGz" parameterType="com.linkonworks.df.vo.FlupTask">
+	update tb_pati_flup_rule r
+	   set r.flup_status        = #{flupStatus},
+	       r.flup_way           = #{flupWay},
+	       r.flup_type          = #{flupType},
+	       r.flup_object        = #{flupObject},
+	       r.flup_mobile        = #{flupMobile},
+	       r.flup_table_name_id = #{flupTableNameId}
+	 where r.inpati_number = #{inpatiNumber}
+	   and r.inpati_serial_number = #{inpatiSerialNumber}
+	</update>
+		<!-- 修改随访计划 -->
+	<update id="updatePlanJh" parameterType="com.linkonworks.df.vo.FlupTask">
+	 update tb_pati_flup_rule r set r.flup_status =#{flupStatus} , r.flup_way = #{flupWay}
+	 ,r.flup_type =#{flupType} , r.flup_period = #{flupPeriod} ,r.flup_object =#{flupObject}
+	 ,r.flup_mobile = #{flupMobile} 
+	 where r.inpati_number = #{inpatiNumber} and  r.inpati_serial_number = #{inpatiSerialNumber}
+	</update>
+		<!-- 修改随访任务 -->
+	<update id="updateTaskRw" parameterType="com.linkonworks.df.vo.FlupTask">
+	update tb_flup_task r
+	   set r.flup_status        = #{flupStatus},
+	       r.flup_way           = #{flupWay},
+	       r.flup_type          = #{flupType},
+	       r.flup_object        = #{flupObject},
+	       r.flup_mobile        = #{flupMobile},
+	       r.flup_table_name_id = #{flupTableNameId},
+	       r.flup_plan_date = #{flupPlanDate}
+	 where r.inpati_number = #{inpatiNumber}
+	   and r.inpati_serial_number = #{inpatiSerialNumber}
+	   and r.flup_complete = '0'
+	</update>
+	
+	<insert id="addPlanJh" parameterType="java.util.List">
+		insert into tb_flup_plan
+        select seq_tb_flup_plan.nextval,A.* from(
+        <foreach collection="list" item="item" index="index"
+            separator="UNION">
+            SELECT
+            #{item.patiSerial, jdbcType=NUMERIC},
+	 	 	#{item.inpatiNumber, jdbcType=NUMERIC},
+	 	 	'' d,
+	   		#{item.inpatiSerialNumber, jdbcType=NUMERIC},
+	   		#{item.name, jdbcType=NUMERIC},
+	   		#{item.deptCode, jdbcType=NUMERIC},
+	   		#{item.unitCode, jdbcType=NUMERIC},
+ 	   		to_date(#{item.flupPlanDate},'yyyy-MM-dd')  ,
+	   		'0' a ,
+	   		#{item.flupTimes, jdbcType=NUMERIC},
+	   		sysdate,
+	   		#{item.actualDoctorCode, jdbcType=NUMERIC},
+	   		'0' b,
+	   		'' c
+            from dual 
+             </foreach>
+        ) A
+	  </insert>
+	
+	
+	
+	<update id="updateFTask" parameterType="com.linkonworks.df.vo.FlupTask">
+	    update tb_flup_task f set f.flup_mobile =#{flupMobile} where 1=1 and f.flup_complete = 0
+	    <if test="patiSerial!=null and patiSerial!=''">
+				and f.pati_serial=#{patiSerial}
+			</if>
+			<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and f.inpati_number=#{inpatiNumber}
+			</if>
+			<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+				and f.inpati_serial_number=#{inpatiSerialNumber}
+			</if>
+	</update>
+	
+	<update id="updatePFTask" parameterType="com.linkonworks.df.vo.FlupTask">
+	  update tb_pati_flup_rule f set f.flup_mobile =#{flupMobile} where 1=1 
+	    <if test="patiSerial!=null and patiSerial!=''">
+				and f.pati_serial=#{patiSerial}
+			</if>
+			<if test="inpatiNumber!=null and inpatiNumber!=''">
+				and f.inpati_number=#{inpatiNumber}
+			</if>
+			<if test="inpatiSerialNumber!=null and inpatiSerialNumber!=''">
+				and f.inpati_serial_number=#{inpatiSerialNumber}
+			</if>
+	</update>
+	
+	<update id="updatePati" parameterType="com.linkonworks.df.vo.TeletePhone">
+		<if test="familyNumber!=null">
+		update tb_pati p set  p.family_number =#{familyNumber}
+		</if>
+		<if test="mobileNumber!=null">
+		update tb_pati p set  p.mobile_number =#{mobileNumber}
+		</if>
+		<if test="relationMobileNumber!=null">
+		update tb_pati p set  p.relation_mobile_number =#{relationMobileNumber}
+		</if>
+	    where p.inpati_number = #{inpatiNumber} 
+		<if test="patiSerial!=null  and  patiSerial!=''">
+			and p.pati_serial = #{patiSerial}  
+		</if>
+	</update>
+
+<!-- 停止随访任务 -->
+	<update id="stoptask" parameterType="com.linkonworks.df.vo.FlupTask">
+	 update tb_flup_task r set r.flup_complete =#{flupComplete} , r.flup_date = sysdate
+	 ,r.actual_doctor_code =#{actualDoctorCode}
+	 where r.id = #{id}
+	</update>
+
+<!-- 根据日期查询院区随访率 -->
+<select id="findHospital" parameterType="page" resultType="com.linkonworks.df.vo.FlupTask">
+select 
+  B.unit_code unitCode,
+  decode(A.flup_complete,'','0%',A.flup_complete) flupComplete
+ from (
+SELECT unit_code,
+       round(sum(decode(flup_complete, 1, 1, 0)) /  count(*),4)*100||'%' flup_complete
+  FROM tb_flup_task
+ where to_char(flup_plan_date, 'yyyy-mm') =#{params.flupDate}
+   and decode(flup_date, '', #{params.flupDate}, to_char(flup_date, 'yyyy-mm')) =#{params.flupDate}
+ group by to_char(flup_plan_date,'yyyy-mm'),unit_code) A
+ right join tb_hospital_config B on a.unit_code=b.unit_code
+</select>
+<!-- 根据院区编码和日期查询科室随访率 -->
+<select id="findDepatByUnit" parameterType="page" resultType="com.linkonworks.df.vo.FlupTask">
+select A.unit_code      unitCode,
+       A.flup_plan_date flupPlanDate,
+       A.dept_code deptCode,
+       A.dept_name      deptName,
+       A.flup_rate      flupComplete
+  from (select unit_code,
+               flup_plan_date,
+               dept_code,
+               F_GET_DEPT_NAME(dept_code) dept_name,
+               decode(round(flup_count / flup_sum, 4) * 100,
+                      0,
+                      '0',
+                      round(flup_count / flup_sum, 4) * 100 || '%') flup_rate
+          from (select unit_code,
+                       to_char(flup_plan_date, 'YYYYMM') flup_plan_date,
+                       dept_code,
+                       count(*) flup_sum,
+                       sum(decode(flup_complete, 1, 1, 0)) flup_count
+                  from tb_flup_task
+                 where decode(flup_date,
+                              '',
+                              to_char(flup_plan_date, 'yyyymm'),
+                              to_char(flup_date, 'yyyymm')) =
+                       to_char(flup_plan_date, 'yyyymm')
+                   and to_char(flup_plan_date, 'yyyy-mm')= #{params.flupDate}
+               	   and unit_code= #{params.unitCode}
+                 group by dept_code,
+                          to_char(flup_plan_date, 'YYYYMM'),
+                          unit_code)
+         order by flup_plan_date) A
+</select>
+
+<!-- 根据院区、科室、日期查询随访详细信息 -->
+<select id="findInfo" parameterType="page" resultType="map">
+	select 
+        A.id "id",
+        A.flup_table_name_id   "flupTableNameId",
+        A.flup_plan_date "flupPlanDate",
+        A.name "name",
+        A.age "age",
+        A.gender "gender",
+        A.inpati_number "inpatiNumber",
+        A.inpati_serial_number "inpatiSerialNumber",
+        A.pati_serial "patiSerial",
+        A.out_hosp_diag "outHospDiag",
+        A.total_money "totalMoney",
+        A.charity_aid_money "charityAidMoney",
+        o.operation_name "operationName",
+        o.operation_doctor_code
+        "operationDoctorCode",
+        A.doctorName "doctorName",
+        A.flup_result "flupResult",
+            A.flup_failre "flupFailre",
+        o.operation_prognosis "operationPrognosis"
+        from (select
+        to_char(t.flup_plan_date,'yyyy-mm-dd') flup_plan_date,
+        p.name,
+        p.gender,
+        F_GET_PATI_AGE(p.pati_serial, p.inpati_number)  age,
+        diag.out_hosp_diag,
+        diag.total_money,
+        diag.charity_aid_money,
+        diag.inpati_serial_number,
+        diag.inpati_number,
+        diag.pati_serial,
+        t.id,
+        t.flup_table_name_id,
+        t.flup_result,
+            t.flup_failre,
+        F_GET_EMPLOYEE_NAME(t.flup_doctor_code) doctorName
+        from tb_pati p,
+        tb_flup_task t, tb_inpati_diag diag
+        where p.inpati_number =t.inpati_number
+        and p.pati_serial = t.pati_serial
+        and diag.pati_serial = t.pati_serial
+        and diag.inpati_serial_number = t.inpati_serial_number
+        and t.flup_complete = 1
+        and to_char(flup_plan_date, 'yyyymm') = #{params.flupPlanDate}
+        and t.dept_code=#{params.deptCode}
+        and t.unit_code=#{params.unitCode}
+        ) A
+        left join tb_pati_operate o
+        on o.inpati_number = A.inpati_number
+        and
+        o.inpati_serial_number = A.inpati_serial_number
+</select>
+</mapper>
+

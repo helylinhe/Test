@@ -1,0 +1,88 @@
+$(function (){
+	
+	
+	$("#report_list_tab").datagrid( {
+		method:'get',
+		fitColumns:true,
+		collapsible : false,
+		remoteSort : false,
+		idField : 'id',
+		rownumbers : true,
+		queryParams : '',
+		singleSelect : true,
+	    title:'平台接入表',
+		pagination : true,
+		pageSize:30,
+        pageList:[30,60],
+		columns : [[  
+				{
+					field : 'id',
+					title : '业务id',
+					width : 100,
+					align : 'center',
+					hidden:true
+				},
+				{
+					field : 'TABLENAME',
+					title : '表名称',
+					width : 200,
+					align : 'left',
+					formatter : function(val,row,index) {
+					  
+						return "<a href='#' onclick=\"showDeital('"+val+"','"+row.UNITCODE+"')\">"+val+"</a>";
+					}
+					
+				},{
+					field : 'TABLESUMMARY',
+					title : '表概要',
+					width : 200,
+					align : 'left',
+					
+				},{
+				field : 'DATATOTAL',
+				title : '数据总量',
+				width : 100,
+				align : 'right',
+				formatter : function(val, rec) {
+					return val;
+				}
+			}, {
+				field : 'IMPORTFREQUENCY',
+				title : '更新频率',
+			    width : 100,
+				align : 'center',
+				formatter : function(value,row,index) {
+					return value;
+				}
+			}, {
+				field : 'DATARESOURCE',
+				title : '数据来源',
+			    width : 100,
+				align : 'center',
+				formatter : function(value,row,index) {
+					return value;
+				}
+			},{
+			field : 'UNITCODE',
+			title : '所属院区',
+		    width : 100,
+			align : 'center',
+			formatter : function(val, rec) {
+				return val;
+			}
+		}
+		]],
+ }); 
+	
+	/****
+	 * 加载数据
+	 */
+	loadData(path+'/platformTradelogaction!pageImportTables.action','report_list_tab',{'page.pageSize':30});
+	
+});
+
+
+function showDeital(val,unitCode){
+	var value=unitCode == "南院" ? "2" : "1";
+	parent.loadTableDetail(val,value);
+}

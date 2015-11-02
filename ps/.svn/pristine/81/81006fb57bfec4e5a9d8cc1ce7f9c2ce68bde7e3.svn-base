@@ -1,0 +1,394 @@
+  $(function(){
+	  
+	  $("#flupItems").window('close');
+	
+	  $('#flupTables').combobox({    
+		  panelWidth:200,    
+		  valueField:'flupNameId',    
+  	      textField:'flupName'
+	  });
+	  
+
+	      	$.post(path+'/flupnamedictaction!loadCombobox.action',function (data){
+	      	  /****
+	             * 加载所属科室
+	             */
+	      	  $('#deptCode').combogrid({    
+	      		  panelWidth:200,    
+	        	     idField:'deptCode',    
+	        	     textField:'deptName',
+	        	     data:data[0].department,
+	       		 columns:[[    
+	       		           {field:'deptCode',title:'科室编码',width:60,hidden:true},    
+	       		           {field:'deptName',title:'科室名称',width:120},    
+	       		           {field:'unitCode',title:'院区',width:50,
+	       		        	   formatter : function(value,row,index) {
+	       		   				if(value=='1'){return '北院';}
+	       		   				if(value=='2'){return '南院';}
+	       		   			     }
+	       		        	 },    
+	       		       ]] ,
+	      	  });
+	        	searchData();
+	        	
+	     	},'json');
+	      	
+	      	$.post(path+'/reportdataaction!loadFlupNameDict.action',function (data){
+	      		$('#flupTables').combobox('loadData', data[0].rows);
+	      		$('#flupTables').combobox('select',data[0].rows[0].flupName);
+	      	},'json');
+	      	
+	  
+	  
+	  $('#startDate').val("");
+		$('#startDate').click(function() {
+			WdatePicker( {
+				minDate : '{%y-80}-%M-%d',
+				readOnly : true
+			});
+		});
+
+		$('#endDate').val("");
+		$('#endDate').click(function() {
+			WdatePicker( {
+				minDate : '{%y-80}-%M-%d',
+				readOnly : true
+			});
+		});
+	  
+	  
+	  
+	        
+			 $('#ketiTable').datagrid( {
+					method:'get',
+					collapsible : false,
+					remoteSort : false,
+					idField : 'id',
+					rownumbers : true,
+					queryParams : '',
+					singleSelect : true,
+				    title:'随访结果统计',
+					pagination : true,
+					pageSize:10,
+                    pageList:[10,20],
+                    hideColumn:[[
+                        {
+	        				field : 'id',
+	        				title : '任务编号',
+	        				width : 150,
+	        				align : 'left',
+	        				formatter : function(val, rec) {
+	        					return val;
+	        				}
+                        },{
+	        				field : 'flupTableNameId',
+	        				title : '随访表编号',
+	        				width : 150,
+	        				align : 'left',
+	        				formatter : function(val, rec) {
+	        					return val;
+	        				}
+                        },{
+	        				field : 'inpatiSerialNumber',
+	        				title : '住院流水号',
+	        				width : 150,
+	        				align : 'left',
+	        				formatter : function(val, rec) {
+	        					return val;
+	        				}
+                        },{
+	        				field : 'patiSerial',
+	        				title : '病人编号',
+	        				width : 150,
+	        				align : 'left',
+	        				formatter : function(val, rec) {
+	        					return val;
+	        				}
+                        }
+                        ]],
+					frozenColumns:[[
+						{
+	        				field : 'inpatiNumber',
+	        				title : '住院号',
+	        				width : 100,
+	        				align : 'left',
+	        				formatter : function(val, rec) {
+	        					return val;
+						}
+					}, {
+						field : 'name',
+						title : '姓名',
+					    width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					}, {
+						field : 'gender',
+						title : '性别',
+					    width : 40,
+						align : 'center',
+						formatter : function(val, rec) {
+							 return val == '1' ? '男' : '女';
+						}
+					}
+					]],
+					columns : [[ {
+						field : 'age',
+						title : '年龄',
+					    width : 50,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					}, {
+						field : 'inHospitalDate',
+						title : '入院日期',
+						width : 160,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'outHospitalDate',
+						title : '出院日期',
+						width : 160,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					}, {
+						field : 'column1',
+						title : 'ALT',
+						width : 160,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column2',
+						title : 'AST',
+						width : 70,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column3',
+						title : 'r-GT',
+						width : 70,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column4',
+						title : 'ALP',
+						width : 70,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column5',
+						title : '白蛋白',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column6',
+						title : '前白蛋白',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column7',
+						title : '肌酐',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column8',
+						title : '尿素氮',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column9',
+						title : '尿酸',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column10',
+						title : '尿酸',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column11',
+						title : '视黄醇蛋白',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column12',
+						title : '胱抑素C',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column13',
+						title : '甘油三脂',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column14',
+						title : '总胆固醇',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column15',
+						title : 'LDL',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column16',
+						title : 'HDL',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column17',
+						title : '脂蛋白a',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column18',
+						title : '钾',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column19',
+						title : '钠',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column20',
+						title : '钙',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column21',
+						title : '磷',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					},{
+						field : 'column22',
+						title : '镁',
+						width : 80,
+						align : 'center',
+						formatter : function(val, rec) {
+							return val;
+						}
+					}
+					]],
+					onClickRow: function(rowIndex, rowData){
+					
+				}
+
+			 });  
+			 
+  });
+  
+  /******
+   * 随访项信息调阅
+   */
+  function showFlupItems(){
+	  $("#flupItems").window('open');
+	  var row = $('#ketiTable').datagrid('getSelected');
+	  alert(row);
+	  
+  }
+  
+  
+  /******
+   * 查询
+   */
+  function searchData(){
+	  var reportInpatiNumberValue=$("#reportInpatiNumber").val();
+	  var startDateValue=$("#startDate").val();
+	  var endDateValue=$("#endDate").val();
+	  var nameValue=$("#name").val();
+	 /* var flupDeptCode=$('#deptCode').combogrid('getValue');
+	  if(flupDeptCode!="" &&flupDeptCode!="不限"){
+		  flupDeptCode=$('#deptCode').combogrid('getValue');
+	  }else{
+		  flupDeptCode="";
+	  }*/
+	  var param={"map.inpatiNumber":reportInpatiNumberValue,"map.startDate":startDateValue,
+			    "map.endDate":endDateValue,"map.name":nameValue};
+	 loadData(path+'/ketiReportaction!pageList.action','ketiTable',param); 
+	
+  }
+  
+  
+  /*****
+   * 报表导出JS
+   */
+  function reportDate(){
+	  $('#reportStartDate').val($("#startDate").val());
+	  $('#reportEndDate').val($("#endDate").val());
+	  $("#patiName").val($("#name").val());
+	  $("#reportDataInpatiNumber").val($("#reportInpatiNumber").val());
+	  var url=path+"/ketiReportaction!exportData.action";
+	  var downloadForm = $('#downloadForm');
+  		downloadForm.attr('action',url);
+		downloadForm.submit();
+ 
+	  
+  }
+
+             
